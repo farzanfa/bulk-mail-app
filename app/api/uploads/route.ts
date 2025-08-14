@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { ensureUserIdFromSession } from '@/lib/user';
 
-const schema = z.object({ blob_key: z.string(), filename: z.string(), columns: z.array(z.string()), row_count: z.number() });
+const schema = z.object({ blob_key: z.string(), filename: z.string(), columns: z.array(z.string()).default([]), row_count: z.number().default(0) });
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);

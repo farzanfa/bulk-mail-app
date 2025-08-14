@@ -28,16 +28,29 @@ export async function POST(req: Request) {
   if (!res.ok || !res.body) return NextResponse.json({ error: 'Failed to fetch blob' }, { status: 400 });
 
   const text = await res.text();
-  const rows = parseSync(text, { columns: true, bom: true, skip_empty_lines: true }) as Array<Record<string, unknown>>;
+  const rows = parseSync(text, {
+    columns: true,
+    bom: true,
+    skip_empty_lines: true,
+    trim: true,
+    relax_column_count: true,
+    delimiter: [',', ';', '\t']
+  }) as Array<Record<string, unknown>>;
   const batch: Array<{ email: string; fields: Record<string, unknown> }> = [];
   let total = 0;
   let columns: string[] | null = null;
+  // Detect email column name case-insensitively and with loose match
+  const headerKeys = rows.length > 0 ? Object.keys(rows[0]) : [];
+  const normalizedKeys = headerKeys.map(k => ({ raw: k, norm: String(k).trim().toLowerCase() }));
+  const emailKey = (normalizedKeys.find(k => k.norm === 'email')
+    || normalizedKeys.find(k => k.norm.includes('email')))?.raw;
   for (const record of rows) {
     const rec: Record<string, unknown> = { ...record };
-    const email = String((rec.email || rec.Email || rec.EMAIL) ?? '').trim();
+    const email = String((emailKey ? rec[emailKey] : (rec.email || rec.Email || rec.EMAIL)) ?? '').trim();
     if (!email) continue;
     if (!columns) columns = Object.keys(rec);
-    delete rec.email; delete rec.Email; delete rec.EMAIL;
+    delete (rec as any).email; delete (rec as any).Email; delete (rec as any).EMAIL;
+    if (emailKey) delete (rec as any)[emailKey as string];
     batch.push({ email, fields: rec });
     if (batch.length >= 500) {
       await prisma.contacts.createMany({ data: batch.map(r => ({ user_id: upload.user_id, upload_id, email: r.email, fields: r.fields as any })) });
