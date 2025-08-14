@@ -23,8 +23,8 @@ export default function Header() {
     <header className="border-b bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
         <a href="/" className="font-semibold inline-flex items-center gap-2">
-          <img src="/icon.svg" alt="MailApp" className="h-6 w-6"/>
-          <span className="hidden sm:inline">MailApp</span>
+          <img src="/icon.svg" alt="MailWeaver" className="h-6 w-6"/>
+          <span className="hidden sm:inline">MailWeaver</span>
         </a>
         <nav className="hidden md:flex items-center gap-4 text-sm">
           {links.map((l) => (

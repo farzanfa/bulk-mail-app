@@ -5,9 +5,9 @@ export default function AboutPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
       <Card className="p-6 space-y-4">
-        <h1 className="text-2xl font-semibold">About</h1>
+        <h1 className="text-2xl font-semibold">About MailWeaver</h1>
         <p className="text-gray-700">
-          MailApp is a modern bulk email platform designed to help you create, upload, and send campaigns reliably at
+          MailWeaver is a modern bulk email platform designed to help you create, upload, and send campaigns reliably at
           scale. It focuses on clear workflows, responsive UI, and sensible defaults so you can move from idea to inbox
           quickly.
         </p>

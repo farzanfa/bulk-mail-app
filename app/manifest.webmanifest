@@ -1,6 +1,6 @@
 {
-  "name": "MailApp",
-  "short_name": "MailApp",
+  "name": "MailWeaver",
+  "short_name": "MailWeaver",
   "icons": [
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ],
