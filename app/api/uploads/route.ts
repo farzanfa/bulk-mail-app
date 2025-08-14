@@ -25,4 +25,20 @@ export async function GET() {
   return NextResponse.json({ uploads });
 }
 
+const delSchema = z.object({ ids: z.array(z.string()).min(1) });
+
+export async function DELETE(req: Request) {
+  const session = await getServerSession(authOptions);
+  const userId = await ensureUserIdFromSession(session).catch(() => '');
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const body = await req.json().catch(() => null);
+  const { ids } = delSchema.parse(body || {});
+
+  // First delete contacts belonging to these uploads and user
+  await prisma.contacts.deleteMany({ where: { upload_id: { in: ids }, user_id: userId } });
+  // Then delete uploads rows
+  const result = await prisma.uploads.deleteMany({ where: { id: { in: ids }, user_id: userId } });
+  return NextResponse.json({ deleted: result.count });
+}
+
 

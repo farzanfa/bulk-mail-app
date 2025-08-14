@@ -42,26 +42,41 @@ export default function UploadsPage() {
     }
   }
 
+  const [selected, setSelected] = useState<string[]>([]);
+
+  async function bulkDelete() {
+    if (selected.length === 0) return;
+    if (!confirm(`Delete ${selected.length} uploads and their contacts?`)) return;
+    const res = await fetch('/api/uploads', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: selected }) });
+    const json = await res.json();
+    if (!res.ok) return toast.error(json.error || 'Delete failed');
+    toast.success(`Deleted ${json.deleted} uploads`);
+    setSelected([]);
+    await refresh();
+  }
+
   return (
     <div className="max-w-5xl mx-auto p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Uploads</h1>
-        <label className="inline-flex items-center gap-2 text-sm bg-black text-white px-3 py-2 rounded cursor-pointer">
-          <input type="file" accept=".csv" className="hidden" onChange={onFileChange} disabled={busy} />
-          {busy ? 'Uploading…' : 'Upload CSV'}
-        </label>
+        <div className="flex items-center gap-2">
+          <button onClick={bulkDelete} disabled={selected.length===0} className="text-sm border rounded px-3 py-2 disabled:opacity-50">Delete Selected</button>
+          <label className="inline-flex items-center gap-2 text-sm bg-black text-white px-3 py-2 rounded cursor-pointer">
+            <input type="file" accept=".csv" className="hidden" onChange={onFileChange} disabled={busy} />
+            {busy ? 'Uploading…' : 'Upload CSV'}
+          </label>
+        </div>
       </div>
       <div className="mt-4 bg-white rounded shadow divide-y">
         {uploads.map(u => (
-          <a key={u.id} href={`/uploads/${u.id}`} className="block p-3 hover:bg-gray-50">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-medium">{u.filename}</div>
-                <div className="text-sm text-gray-500">{new Date(u.created_at).toLocaleString()}</div>
-              </div>
-              <div className="text-sm text-gray-600">{u.row_count} rows</div>
+          <div key={u.id} className="p-3 hover:bg-gray-50 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <input type="checkbox" checked={selected.includes(u.id)} onChange={(e) => setSelected(e.target.checked ? [...selected, u.id] : selected.filter(x => x !== u.id))} />
+              <a href={`/uploads/${u.id}`} className="font-medium hover:underline">{u.filename}</a>
+              <div className="text-sm text-gray-500">{new Date(u.created_at).toLocaleString()}</div>
             </div>
-          </a>
+            <div className="text-sm text-gray-600">{u.row_count} rows</div>
+          </div>
         ))}
         {uploads.length === 0 && <div className="p-3 text-sm text-gray-500">No uploads yet.</div>}
       </div>
