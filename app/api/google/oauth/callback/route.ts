@@ -14,14 +14,17 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const code = searchParams.get('code');
     if (!code) return NextResponse.json({ error: 'Missing code' }, { status: 400 });
+    console.log('oauth: start', { hasCode: !!code });
 
     const tokens = await exchangeCodeForTokens(code);
+    console.log('oauth: tokens', { hasRefresh: !!tokens.refresh_token, hasAccess: !!tokens.access_token });
     const oauth2 = createOAuthClient();
     oauth2.setCredentials(tokens);
     const oauth2api = google.oauth2({ version: 'v2', auth: oauth2 });
     const me = await oauth2api.userinfo.get();
     const email = me.data.email as string;
     const google_user_id = me.data.id as string;
+    console.log('oauth: userinfo', { hasEmail: !!email, hasId: !!google_user_id });
 
     // Determine the app user to link: prefer session user; otherwise by email
     const session = await getServerSession(authOptions);
@@ -30,13 +33,14 @@ export async function GET(req: Request) {
       const existingUser = await prisma.users.findUnique({ where: { email }, select: { id: true } });
       userId = existingUser?.id ?? null;
     }
+    console.log('oauth: resolved userId', { hasUserId: !!userId });
     if (!userId) {
       return NextResponse.json({ error: 'No authenticated user to link this Google account' }, { status: 401 });
     }
 
     const refresh = tokens.refresh_token;
     if (!refresh) return NextResponse.json({ error: 'No refresh token (ensure prompt=consent)' }, { status: 400 });
-
+    console.log('oauth: will upsert google account');
     await prisma.google_accounts.upsert({
       where: { user_id_google_user_id: { user_id: userId, google_user_id } },
       update: {
@@ -54,8 +58,10 @@ export async function GET(req: Request) {
         token_expiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null
       }
     });
+    console.log('oauth: success, redirecting to dashboard');
     return NextResponse.redirect(new URL('/dashboard', req.url));
   } catch (err: any) {
+    console.error('oauth: error', err?.message || err);
     return NextResponse.json({ error: 'OAuth callback failed' }, { status: 500 });
   }
 }
