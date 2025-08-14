@@ -1,11 +1,13 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { ConfirmButton } from '@/components/confirm';
 import { Section, Input, Button } from '@/components/ui';
 
 export default function UploadDetail({ params }: { params: { id: string } }) {
   const id = params.id;
+  const router = useRouter();
   const [upload, setUpload] = useState<any | null>(null);
   const [items, setItems] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
@@ -41,7 +43,7 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
                 window.location.href = '/uploads';
               }}
             >Delete</ConfirmButton>
-            <a href="/uploads" className="text-sm text-blue-600">Back</a>
+            <Button onClick={() => router.back()} className="text-sm">Back</Button>
           </div>
         }
       >
