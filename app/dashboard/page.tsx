@@ -1,5 +1,10 @@
+import { headers } from 'next/headers';
+
 async function fetchJSON(path: string) {
-  const res = await fetch(path, { cache: 'no-store' });
+  const h = headers();
+  const host = h.get('host');
+  const base = process.env.NEXTAUTH_URL || (host ? `https://${host}` : 'http://localhost:3000');
+  const res = await fetch(`${base}${path}`, { cache: 'no-store' });
   if (!res.ok) return null;
   return res.json();
 }
