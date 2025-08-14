@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { Section, Card, Input, PrimaryButton } from '@/components/ui';
+import { Section, Card, Input, PrimaryButton, Button } from '@/components/ui';
 
 function extractVars(s: string): string[] {
   const re = /\{\{\s*([a-zA-Z0-9_\.]+)\s*\}\}/g;
@@ -17,6 +17,7 @@ export default function TemplatesPage() {
   const [html, setHtml] = useState('<p>Hello {{ first_name }}</p>');
   const [text, setText] = useState('Hello {{ first_name }}');
   const [sample, setSample] = useState('{"first_name":"Ada"}');
+  const [openCreate, setOpenCreate] = useState(false);
   const vars = useMemo(() => Array.from(new Set([...extractVars(subject), ...extractVars(html), ...extractVars(text)])), [subject, html, text]);
 
   async function refresh() {
@@ -32,8 +33,13 @@ export default function TemplatesPage() {
     const json = await res.json();
     if (!res.ok) { toast.error(json.error || 'Failed'); return; }
     setName('');
+    setSubject('');
+    setHtml('<p>Hello {{ first_name }}</p>');
+    setText('Hello {{ first_name }}');
+    setSample('{"first_name":"Ada"}');
     await refresh();
     toast.success('Template saved');
+    setOpenCreate(false);
   }
 
   let sampleObj: Record<string, unknown> = {};
@@ -43,38 +49,12 @@ export default function TemplatesPage() {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Templates</h1>
-      <Section title="Create template">
-        <form onSubmit={onCreate} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm text-gray-500">Name</label>
-            <Input className="w-full mb-2" value={name} onChange={(e) => setName(e.target.value)} required />
-            <label className="text-sm text-gray-500">Subject</label>
-            <Input className="w-full mb-2" value={subject} onChange={(e) => setSubject(e.target.value)} required />
-            <label className="text-sm text-gray-500">HTML</label>
-            <textarea className="border rounded w-full p-2 h-40 sm:h-48 mb-2" value={html} onChange={(e) => setHtml(e.target.value)} />
-            <label className="text-sm text-gray-500">Text</label>
-            <textarea className="border rounded w-full p-2 h-28 sm:h-32" value={text} onChange={(e) => setText(e.target.value)} />
-            <PrimaryButton className="mt-3">Save Template</PrimaryButton>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Variables detected</div>
-            <div className="text-sm mb-3">{vars.join(', ') || 'None'}</div>
-            <label className="text-sm text-gray-500">Sample data (JSON)</label>
-            <textarea className="border rounded w-full p-2 h-28 sm:h-32 mb-3" value={sample} onChange={(e) => setSample(e.target.value)} />
-            <div className="text-sm text-gray-500 mb-1">Preview</div>
-            <Card className="p-3 overflow-x-auto">
-              <div className="text-sm text-gray-500">Subject</div>
-              <div className="mb-2">{render(subject)}</div>
-              <div className="text-sm text-gray-500">HTML</div>
-              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: render(html) }} />
-              <div className="text-sm text-gray-500 mt-2">Text</div>
-              <pre className="text-xs bg-gray-50 p-2 rounded whitespace-pre-wrap">{render(text)}</pre>
-            </Card>
-          </div>
-        </form>
-      </Section>
+      {/* Create New Template button opens modal */}
 
-      <Section title="Your templates">
+      <Section
+        title="Your templates"
+        actions={<PrimaryButton onClick={() => setOpenCreate(true)}>New Template</PrimaryButton>}
+      >
         <div className="divide-y">
           {items.map(t => (
             <a key={t.id} href={`/templates/${t.id}`} className="block p-3 hover:bg-gray-50">
@@ -90,6 +70,50 @@ export default function TemplatesPage() {
           {items.length === 0 && <div className="p-3 text-sm text-gray-500">No templates yet.</div>}
         </div>
       </Section>
+
+      {openCreate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-lg shadow-card w-full max-w-4xl max-h-[85vh] overflow-y-auto">
+            <div className="p-4 border-b flex items-center justify-between">
+              <div className="font-semibold">Create template</div>
+              <button aria-label="Close" className="p-2" onClick={() => setOpenCreate(false)}>✕</button>
+            </div>
+            <div className="p-4">
+              <form onSubmit={onCreate} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-gray-500">Name</label>
+                  <Input className="w-full mb-2" value={name} onChange={(e) => setName(e.target.value)} required />
+                  <label className="text-sm text-gray-500">Subject</label>
+                  <Input className="w-full mb-2" value={subject} onChange={(e) => setSubject(e.target.value)} required />
+                  <label className="text-sm text-gray-500">HTML</label>
+                  <textarea className="border rounded w-full p-2 h-40 sm:h-48 mb-2" value={html} onChange={(e) => setHtml(e.target.value)} />
+                  <label className="text-sm text-gray-500">Text</label>
+                  <textarea className="border rounded w-full p-2 h-28 sm:h-32" value={text} onChange={(e) => setText(e.target.value)} />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">Variables detected</div>
+                  <div className="text-sm mb-3">{vars.join(', ') || 'None'}</div>
+                  <label className="text-sm text-gray-500">Sample data (JSON)</label>
+                  <textarea className="border rounded w-full p-2 h-28 sm:h-32 mb-3" value={sample} onChange={(e) => setSample(e.target.value)} />
+                  <div className="text-sm text-gray-500 mb-1">Preview</div>
+                  <Card className="p-3 overflow-x-auto">
+                    <div className="text-sm text-gray-500">Subject</div>
+                    <div className="mb-2">{render(subject)}</div>
+                    <div className="text-sm text-gray-500">HTML</div>
+                    <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: render(html) }} />
+                    <div className="text-sm text-gray-500 mt-2">Text</div>
+                    <pre className="text-xs bg-gray-50 p-2 rounded whitespace-pre-wrap">{render(text)}</pre>
+                  </Card>
+                </div>
+                <div className="lg:col-span-2 flex items-center justify-end gap-2">
+                  <Button type="button" onClick={() => setOpenCreate(false)}>Cancel</Button>
+                  <PrimaryButton type="submit">Save Template</PrimaryButton>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
