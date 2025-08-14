@@ -6,4 +6,13 @@ html, body {
   height: 100%;
 }
 
+/* Responsive fixes */
+table {
+  width: 100%;
+}
+.prose {
+  max-width: 100%;
+}
+
+
 
