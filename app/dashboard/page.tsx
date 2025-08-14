@@ -1,10 +1,14 @@
 import { headers } from 'next/headers';
 
+export const dynamic = 'force-dynamic';
+
 async function fetchJSON(path: string) {
   const h = headers();
   const host = h.get('host');
-  const base = process.env.NEXTAUTH_URL || (host ? `https://${host}` : 'http://localhost:3000');
-  const res = await fetch(`${base}${path}`, { cache: 'no-store' });
+  const proto = h.get('x-forwarded-proto') || 'https';
+  const base = process.env.NEXTAUTH_URL || (host ? `${proto}://${host}` : 'http://localhost:3000');
+  const cookie = h.get('cookie') || '';
+  const res = await fetch(`${base}${path}`, { cache: 'no-store', headers: { cookie } });
   if (!res.ok) return null;
   return res.json();
 }
