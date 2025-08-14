@@ -44,29 +44,29 @@ export default function TemplatesPage() {
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Templates</h1>
       <Section title="Create template">
-        <form onSubmit={onCreate} className="grid md:grid-cols-2 gap-4">
+        <form onSubmit={onCreate} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
             <label className="text-sm text-gray-500">Name</label>
             <Input className="w-full mb-2" value={name} onChange={(e) => setName(e.target.value)} required />
             <label className="text-sm text-gray-500">Subject</label>
             <Input className="w-full mb-2" value={subject} onChange={(e) => setSubject(e.target.value)} required />
             <label className="text-sm text-gray-500">HTML</label>
-            <textarea className="border rounded w-full p-2 h-32 mb-2" value={html} onChange={(e) => setHtml(e.target.value)} />
+            <textarea className="border rounded w-full p-2 h-40 sm:h-48 mb-2" value={html} onChange={(e) => setHtml(e.target.value)} />
             <label className="text-sm text-gray-500">Text</label>
-            <textarea className="border rounded w-full p-2 h-24" value={text} onChange={(e) => setText(e.target.value)} />
+            <textarea className="border rounded w-full p-2 h-28 sm:h-32" value={text} onChange={(e) => setText(e.target.value)} />
             <PrimaryButton className="mt-3">Save Template</PrimaryButton>
           </div>
           <div>
             <div className="text-sm text-gray-500">Variables detected</div>
             <div className="text-sm mb-3">{vars.join(', ') || 'None'}</div>
             <label className="text-sm text-gray-500">Sample data (JSON)</label>
-            <textarea className="border rounded w-full p-2 h-24 mb-3" value={sample} onChange={(e) => setSample(e.target.value)} />
+            <textarea className="border rounded w-full p-2 h-28 sm:h-32 mb-3" value={sample} onChange={(e) => setSample(e.target.value)} />
             <div className="text-sm text-gray-500 mb-1">Preview</div>
-            <Card className="p-3">
+            <Card className="p-3 overflow-x-auto">
               <div className="text-sm text-gray-500">Subject</div>
               <div className="mb-2">{render(subject)}</div>
               <div className="text-sm text-gray-500">HTML</div>
-              <div className="prose" dangerouslySetInnerHTML={{ __html: render(html) }} />
+              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: render(html) }} />
               <div className="text-sm text-gray-500 mt-2">Text</div>
               <pre className="text-xs bg-gray-50 p-2 rounded whitespace-pre-wrap">{render(text)}</pre>
             </Card>
@@ -78,7 +78,7 @@ export default function TemplatesPage() {
         <div className="divide-y">
           {items.map(t => (
             <a key={t.id} href={`/templates/${t.id}`} className="block p-3 hover:bg-gray-50">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
                   <div className="font-medium">{t.name}</div>
                   <div className="text-sm text-gray-500">v{t.version} • {new Date(t.updated_at).toLocaleString()}</div>
