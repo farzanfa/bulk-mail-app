@@ -111,6 +111,7 @@ model campaigns {
   id               String   @id @default(cuid())
   user_id          String
   user             users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  name             String
   google_account_id String
   google_account   google_accounts @relation(fields: [google_account_id], references: [id])
   template_id      String

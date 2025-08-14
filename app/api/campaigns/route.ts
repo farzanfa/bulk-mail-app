@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 const schema = z.object({
+  name: z.string().min(1),
   google_account_id: z.string(),
   template_id: z.string(),
   upload_id: z.string(),
@@ -30,6 +31,7 @@ export async function POST(req: Request) {
   const created = await prisma.campaigns.create({
     data: {
       user_id: userId,
+      name: data.name,
       google_account_id: data.google_account_id,
       template_id: data.template_id,
       upload_id: data.upload_id,
@@ -37,7 +39,7 @@ export async function POST(req: Request) {
       status: 'draft',
       batch_size: data.batch_size,
       per_minute_limit: data.per_minute_limit
-    }
+    } as any
   });
   return NextResponse.json({ campaign: created });
 }

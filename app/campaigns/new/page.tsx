@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useMemo, useState } from 'react';
-import { toast } from 'sonner';
 import { Section, Input, Button, PrimaryButton, Card } from '@/components/ui';
 
 export default function CampaignNewPage() {
@@ -12,6 +11,7 @@ export default function CampaignNewPage() {
   const [templateId, setTemplateId] = useState('');
   const [uploadId, setUploadId] = useState('');
   const [googleId, setGoogleId] = useState('');
+  const [name, setName] = useState('');
   const [batchSize, setBatchSize] = useState(40);
   const [perMinute, setPerMinute] = useState(80);
   const [dry, setDry] = useState<any[]>([]);
@@ -33,17 +33,17 @@ export default function CampaignNewPage() {
   async function doDryRun() {
     const res = await fetch('/api/campaigns/dry-run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ template_id: templateId, upload_id: uploadId, limit: 10 }) });
     const json = await res.json();
-    if (!res.ok) return toast.error(json.error || 'Dry run failed');
+    if (!res.ok) { alert(json.error || 'Dry run failed'); return; }
     setDry(json.renders || []);
   }
 
   async function createAndLaunch() {
-    const res = await fetch('/api/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ google_account_id: googleId, template_id: templateId, upload_id: uploadId, filters: {}, batch_size: batchSize, per_minute_limit: perMinute }) });
+    const res = await fetch('/api/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, google_account_id: googleId, template_id: templateId, upload_id: uploadId, filters: {}, batch_size: batchSize, per_minute_limit: perMinute }) });
     const json = await res.json();
-    if (!res.ok) return toast.error(json.error || 'Failed');
+    if (!res.ok) { alert(json.error || 'Failed'); return; }
     const id = json.campaign.id;
     const r = await fetch(`/api/campaigns/${id}/launch`, { method: 'POST' });
-    if (!r.ok) return toast.error('Launch failed');
+    if (!r.ok) { alert('Launch failed'); return; }
     window.location.href = `/campaigns/${id}`;
   }
 
@@ -51,6 +51,10 @@ export default function CampaignNewPage() {
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-semibold mb-4">New Campaign</h1>
       <div className="grid md:grid-cols-2 gap-4">
+        <Card className="p-4">
+          <div className="text-sm text-gray-500 mb-1">Campaign name</div>
+          <input className="border rounded w-full p-2" placeholder="Spring promo" value={name} onChange={(e)=>setName(e.target.value)} />
+        </Card>
         <Card className="p-4">
           <div className="text-sm text-gray-500 mb-1">1) Google Account</div>
           {google.length === 0 ? (
