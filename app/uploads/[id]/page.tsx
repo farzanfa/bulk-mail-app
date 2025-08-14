@@ -43,23 +43,24 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
                 toast.success('Upload deleted');
                 window.location.href = '/uploads';
               }}
-            >Delete</ConfirmButton>
+            >Delete upload</ConfirmButton>
             <Button onClick={() => router.back()} className="text-sm">Back</Button>
           </div>
         }
       >
-        <div className="flex flex-wrap items-center gap-2 mb-3">
+        <div className="flex flex-wrap items-center gap-2 mb-3 justify-between">
+          <div className="flex flex-wrap items-center gap-2">
           <Input placeholder="Search email" value={search} onChange={(e) => setSearch(e.target.value)} />
           <Button onClick={() => { setPage(1); load(); }}>Search</Button>
           <Button onClick={async () => {
             if (items.length === 0) return toast.error('No contacts to delete on this page');
             const ids = items.map((c: any) => c.id);
-            if (!confirm(`Delete or unsubscribe ${ids.length} contacts from this upload page?`)) return;
+              if (!confirm(`Delete or unsubscribe ${ids.length} contacts from this page?`)) return;
             const res = await fetch('/api/contacts', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids }) });
             const json = await res.json();
             toast.success(`Deleted: ${json.deleted}, Unsubscribed: ${json.unsubscribed}`);
             await load();
-          }}>Delete page</Button>
+            }}>Delete page contacts</Button>
           <Button onClick={async () => {
             if (selected.length === 0) return toast.error('Select contacts to delete');
             if (!confirm(`Delete or unsubscribe ${selected.length} selected contacts?`)) return;
@@ -69,6 +70,10 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
             setSelected([]);
             await load();
           }}>Delete selected</Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <a href={`/api/uploads/${id}/export`} className="px-3 py-2 border rounded">Export CSV</a>
+          </div>
         </div>
         {upload && (
           <div className="text-sm text-gray-500 mb-3">{new Date(upload.created_at).toLocaleString()} • {upload.row_count} rows</div>
@@ -80,7 +85,7 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
                 <th className="p-2"><input type="checkbox" aria-label="Select all" checked={selected.length>0 && selected.length===items.length} onChange={(e)=> setSelected(e.target.checked ? items.map((c:any)=>c.id) : [])} /></th>
                 <th className="p-2 text-left cursor-pointer" onClick={() => setSort(s => ({ key: 'email', dir: s.dir === 'asc' ? 'desc' : 'asc' }))}>Email</th>
                 <th className="p-2 text-left">first_name</th>
-                <th className="p-2 text-left cursor-pointer" onClick={() => setSort(s => ({ key: 'created', dir: s.dir === 'asc' ? 'desc' : 'asc' }))}>created</th>
+                <th className="p-2 text-left cursor-pointer" onClick={() => setSort(s => ({ key: 'created', dir: s.dir === 'asc' ? 'desc' : 'asc' }))}>Created</th>
               </tr>
             </thead>
             <tbody>
@@ -105,7 +110,6 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
         </div>
         <div className="mt-3 flex justify-between text-sm text-gray-600">
           <div className="flex items-center gap-3 flex-wrap">
-            <a href={`/api/uploads/${id}/export`} className="px-3 py-2 border rounded">Export CSV</a>
             <button disabled={page<=1} onClick={()=>setPage(p=>Math.max(1,p-1))}>Prev</button>
           </div>
           <div>Page {page} / {Math.max(1, Math.ceil(total / pageSize))}</div>
