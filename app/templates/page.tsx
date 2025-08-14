@@ -55,20 +55,32 @@ export default function TemplatesPage() {
         title="Your templates"
         actions={<PrimaryButton onClick={() => setOpenCreate(true)}>New Template</PrimaryButton>}
       >
-        <div className="divide-y">
-          {items.map(t => (
-            <a key={t.id} href={`/templates/${t.id}`} className="block p-3 hover:bg-gray-50">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <div>
-                  <div className="font-medium">{t.name}</div>
-                  <div className="text-sm text-gray-500">v{t.version} • {new Date(t.updated_at).toLocaleString()}</div>
-                </div>
-                <div className="text-sm text-gray-600">{t.variables.length} vars</div>
-              </div>
-            </a>
-          ))}
-          {items.length === 0 && <div className="p-3 text-sm text-gray-500">No templates yet.</div>}
-        </div>
+        {items.length === 0 ? (
+          <div className="p-3 text-sm text-gray-500">No templates yet.</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {items.map((t) => (
+              <a key={t.id} href={`/templates/${t.id}`} className="block">
+                <Card className="p-4 h-full hover:shadow-md transition">
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div>
+                      <div className="font-medium">{t.name}</div>
+                      <div className="text-xs text-gray-500">v{t.version} • {new Date(t.updated_at).toLocaleString()}</div>
+                    </div>
+                    <div className="text-xs text-gray-600 whitespace-nowrap">{t.variables.length} vars</div>
+                  </div>
+                  <div className="text-xs text-gray-500 mb-1">Preview</div>
+                  <div className="rounded border bg-white">
+                    <div className="px-3 py-2 border-b text-sm font-medium truncate">{render(t.subject || '')}</div>
+                    <div className="p-3">
+                      <div className="prose max-w-none line-clamp-4 overflow-hidden" dangerouslySetInnerHTML={{ __html: render(t.html || '') }} />
+                    </div>
+                  </div>
+                </Card>
+              </a>
+            ))}
+          </div>
+        )}
       </Section>
 
       {openCreate && (
