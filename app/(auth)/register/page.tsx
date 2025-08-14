@@ -1,5 +1,6 @@
 "use client";
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -14,8 +15,8 @@ export default function RegisterPage() {
         setError(null);
         const res = await fetch('/api/auth/register', { method: 'POST', body: JSON.stringify({ email, password }), headers: { 'Content-Type': 'application/json' } });
         const json = await res.json();
-        if (!res.ok) setError(json.error || 'Failed');
-        else setToken(json.verify_token);
+        if (!res.ok) { setError(json.error || 'Failed'); toast.error('Registration failed'); }
+        else { setToken(json.verify_token); toast.success('Account created. Verify your email.'); }
       }}>
         <input className="border rounded w-full p-2 mb-3" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <input className="border rounded w-full p-2 mb-3" placeholder="Password (min 8)" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />

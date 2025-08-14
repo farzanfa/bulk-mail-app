@@ -1,6 +1,7 @@
 "use client";
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,8 +13,8 @@ export default function LoginPage() {
       <form className="mt-4" onSubmit={async (e) => {
         e.preventDefault();
         const res = await signIn('credentials', { email, password, redirect: false });
-        if (res?.error) setError('Invalid credentials or unverified email');
-        else window.location.href = '/dashboard';
+        if (res?.error) { setError('Invalid credentials or unverified email'); toast.error('Sign in failed'); }
+        else { toast.success('Signed in'); window.location.href = '/dashboard'; }
       }}>
         <input className="border rounded w-full p-2 mb-3" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <input className="border rounded w-full p-2 mb-3" placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />

@@ -53,7 +53,8 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
           ))}
           {rec.length === 0 && <div className="p-3 text-sm text-gray-500">No recipients.</div>}
         </div>
-        <div className="p-3 flex justify-between text-sm text-gray-600">
+        <div className="p-3 flex justify-between items-center text-sm text-gray-600">
+          <a href={`/api/campaigns/${id}/export`} className="px-3 py-2 border rounded">Export CSV</a>
           <button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</button>
           <div>Page {page} / {Math.max(1, Math.ceil(total / pageSize))}</div>
           <button disabled={page >= Math.ceil(total / pageSize)} onClick={() => setPage(p => p + 1)}>Next</button>
@@ -62,5 +63,6 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
     </div>
   );
 }
+
 
 

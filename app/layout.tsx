@@ -1,5 +1,6 @@
 import './globals.css';
 import type { ReactNode } from 'react';
+import { Toaster } from 'sonner';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
         {children}
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );

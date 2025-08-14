@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 function extractVars(s: string): string[] {
   const re = /\{\{\s*([a-zA-Z0-9_\.]+)\s*\}\}/g;
@@ -28,9 +29,10 @@ export default function TemplatesPage() {
     e.preventDefault();
     const res = await fetch('/api/templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, subject, html, text }) });
     const json = await res.json();
-    if (!res.ok) return alert(json.error || 'Failed');
+    if (!res.ok) { toast.error(json.error || 'Failed'); return; }
     setName('');
     await refresh();
+    toast.success('Template saved');
   }
 
   let sampleObj: Record<string, unknown> = {};
@@ -86,5 +88,6 @@ export default function TemplatesPage() {
     </div>
   );
 }
+
 
 

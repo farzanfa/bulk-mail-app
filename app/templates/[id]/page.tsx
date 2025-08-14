@@ -82,3 +82,4 @@ export default function TemplateDetail({ params }: { params: { id: string } }) {
 }
 
 
+

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 export default function CampaignNewPage() {
   const [google, setGoogle] = useState<any[]>([]);
@@ -27,16 +28,17 @@ export default function CampaignNewPage() {
   async function doDryRun() {
     const res = await fetch('/api/campaigns/dry-run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ template_id: templateId, upload_id: uploadId, limit: 10 }) });
     const json = await res.json();
+    if (!res.ok) return toast.error(json.error || 'Dry run failed');
     setDry(json.renders || []);
   }
 
   async function createAndLaunch() {
     const res = await fetch('/api/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ google_account_id: googleId, template_id: templateId, upload_id: uploadId, filters: {}, batch_size: batchSize, per_minute_limit: perMinute }) });
     const json = await res.json();
-    if (!res.ok) return alert(json.error || 'Failed');
+    if (!res.ok) return toast.error(json.error || 'Failed');
     const id = json.campaign.id;
     const r = await fetch(`/api/campaigns/${id}/launch`, { method: 'POST' });
-    if (!r.ok) return alert('Launch failed');
+    if (!r.ok) return toast.error('Launch failed');
     window.location.href = `/campaigns/${id}`;
   }
 
@@ -95,5 +97,6 @@ export default function CampaignNewPage() {
     </div>
   );
 }
+
 
 

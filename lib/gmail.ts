@@ -67,6 +67,9 @@ export async function sendGmailMessage(args: {
   html?: string;
   text?: string;
 }) {
+  if (process.env.MOCK_GMAIL === '1') {
+    return 'mock-' + Math.random().toString(36).slice(2);
+  }
   const oauth2Client = createOAuthClient();
   const refreshToken = decrypt(args.refreshTokenEncrypted);
   oauth2Client.setCredentials({ refresh_token: refreshToken });

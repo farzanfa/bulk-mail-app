@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export default function UploadsPage() {
   const [uploads, setUploads] = useState<any[]>([]);
@@ -33,9 +34,9 @@ export default function UploadsPage() {
       const parsed = await parse.json();
       if (!parse.ok) throw new Error(parsed.error || 'parse failed');
       await refresh();
-      alert(`Parsed ${parsed.total} contacts`);
+      toast.success(`Parsed ${parsed.total} contacts`);
     } catch (e: any) {
-      alert(e.message || 'Upload failed');
+      toast.error(e.message || 'Upload failed');
     } finally {
       setBusy(false);
       e.target.value = '';
@@ -68,5 +69,6 @@ export default function UploadsPage() {
     </div>
   );
 }
+
 
 
