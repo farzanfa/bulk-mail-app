@@ -59,7 +59,7 @@ export default function UploadsPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl font-semibold">Uploads</h1>
         <div className="flex items-center gap-2">
           <ConfirmButton
@@ -77,17 +77,24 @@ export default function UploadsPage() {
         </div>
       </div>
       <Section title="Recent uploads">
-        {uploads.map(u => (
-          <div key={u.id} className="p-3 hover:bg-gray-50 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <input type="checkbox" checked={selected.includes(u.id)} onChange={(e) => setSelected(e.target.checked ? [...selected, u.id] : selected.filter(x => x !== u.id))} />
-              <a href={`/uploads/${u.id}`} className="font-medium hover:underline">{u.filename}</a>
-              <div className="text-sm text-gray-500">{new Date(u.created_at).toLocaleString()}</div>
-            </div>
-            <div className="text-sm text-gray-600">{u.row_count} rows</div>
+        {uploads.length === 0 ? (
+          <div className="p-3 text-sm text-gray-500">No uploads yet.</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {uploads.map(u => (
+              <div key={u.id} className="p-4 rounded-lg border bg-white hover:shadow transition">
+                <div className="flex items-start justify-between gap-2">
+                  <label className="inline-flex items-center gap-2 text-sm">
+                    <input type="checkbox" checked={selected.includes(u.id)} onChange={(e) => setSelected(e.target.checked ? [...selected, u.id] : selected.filter(x => x !== u.id))} />
+                    <a href={`/uploads/${u.id}`} className="font-medium hover:underline break-all">{u.filename}</a>
+                  </label>
+                  <div className="text-xs text-gray-600 whitespace-nowrap">{u.row_count} rows</div>
+                </div>
+                <div className="text-xs text-gray-500 mt-1">{new Date(u.created_at).toLocaleString()}</div>
+              </div>
+            ))}
           </div>
-        ))}
-        {uploads.length === 0 && <div className="p-3 text-sm text-gray-500">No uploads yet.</div>}
+        )}
       </Section>
     </div>
   );
