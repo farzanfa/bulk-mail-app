@@ -5,6 +5,7 @@ import { Section, Input, Button, PrimaryButton, Card } from '@/components/ui';
 
 export default function CampaignNewPage() {
   const [google, setGoogle] = useState<any[]>([]);
+  const [fromEmail, setFromEmail] = useState('');
   const [templates, setTemplates] = useState<any[]>([]);
   const [uploads, setUploads] = useState<any[]>([]);
   const [templateId, setTemplateId] = useState('');
@@ -19,6 +20,7 @@ export default function CampaignNewPage() {
     (async () => {
       const me = await fetch('/api/me', { cache: 'no-store' }).then(r => r.json());
       setGoogle(me.googleAccounts || []);
+      setFromEmail(me.user?.email || '');
       const t = await fetch('/api/templates', { cache: 'no-store' }).then(r => r.json());
       setTemplates(t.templates || []);
       const u = await fetch('/api/uploads', { cache: 'no-store' }).then(r => r.json());
@@ -48,12 +50,15 @@ export default function CampaignNewPage() {
       <h1 className="text-2xl font-semibold mb-4">New Campaign</h1>
       <div className="grid md:grid-cols-2 gap-4">
         <Card className="p-4">
-          <div className="text-sm text-gray-500 mb-1">1) Google Account</div>
+          <div className="text-sm text-gray-500 mb-1">1) Sender</div>
+          <div className="text-xs text-gray-500 mb-1">Use SMTP (recommended) or a connected Google account.</div>
+          <input className="border rounded w-full p-2 mb-2" placeholder="From email (SMTP)" value={fromEmail} onChange={e=>setFromEmail(e.target.value)} />
+          <div className="text-xs text-gray-500 my-2 text-center">— or —</div>
           <select className="border rounded w-full p-2" value={googleId} onChange={(e) => setGoogleId(e.target.value)}>
-            <option value="">Select</option>
+            <option value="">Select Google account</option>
             {google.map((g: any) => (<option key={g.id} value={g.id}>{g.email}</option>))}
           </select>
-          <a href="/api/google/oauth/url?redirect=1" className="text-xs text-blue-600 inline-block mt-2">Connect another</a>
+          <a href="/api/google/oauth/url?redirect=1" className="text-xs text-blue-600 inline-block mt-2">Connect Google</a>
         </Card>
         <Card className="p-4">
           <div className="text-sm text-gray-500 mb-1">2) Template</div>

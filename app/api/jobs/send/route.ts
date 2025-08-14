@@ -18,8 +18,8 @@ export async function POST(req: Request) {
   if (!campaign || campaign.status !== 'running') return NextResponse.json({ ok: true });
 
   const template = await prisma.templates.findUnique({ where: { id: campaign.template_id } });
-  const google = await prisma.google_accounts.findUnique({ where: { id: campaign.google_account_id } });
-  if (!template || !google) return NextResponse.json({ error: 'Missing template/google account' }, { status: 400 });
+  const account = await prisma.google_accounts.findUnique({ where: { id: campaign.google_account_id } });
+  if (!template || !account) return NextResponse.json({ error: 'Missing template/google account' }, { status: 400 });
 
   const cursorKey = `camp:${campaignId}:cursor`;
   const cursor = await kv.get<{ lastId: string | null }>(cursorKey);
@@ -71,8 +71,8 @@ export async function POST(req: Request) {
     while (attempts < 5) {
       try {
         sentId = await sendGmailMessage({
-          refreshTokenEncrypted: google.refresh_token_encrypted,
-          fromEmail: google.email,
+          refreshTokenEncrypted: account.refresh_token_encrypted,
+          fromEmail: account.email,
           toEmail: contact.email,
           subject,
           html,
