@@ -25,12 +25,11 @@ export default function UploadsPage() {
       const u = await up.json();
       if (!up.ok) throw new Error(u.error || 'blob upload failed');
       // 2) create upload row
-      const cols = [] as string[]; // let parse endpoint infer
-      const create = await fetch('/api/uploads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ blob_key: u.key, filename: file.name, columns: cols, row_count: 0 }) });
+      const create = await fetch('/api/uploads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ blob_key: u.url, filename: file.name, columns: [], row_count: 0 }) });
       const created = await create.json();
       if (!create.ok) throw new Error(created.error || 'upload create failed');
       // 3) parse to contacts
-      const parse = await fetch('/api/uploads/parse', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ blob_key: u.key, upload_id: created.upload.id }) });
+      const parse = await fetch('/api/uploads/parse', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ blob_key: u.url, upload_id: created.upload.id }) });
       const parsed = await parse.json();
       if (!parse.ok) throw new Error(parsed.error || 'parse failed');
       await refresh();

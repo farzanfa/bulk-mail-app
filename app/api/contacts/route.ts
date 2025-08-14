@@ -17,8 +17,8 @@ export async function GET(req: Request) {
   const pageSize = 50;
   const where = {
     user_id: userId,
-    ...(search ? { OR: [ { email: { contains: search, mode: 'insensitive' as const } }, { fields: { path: ['first_name'], string_contains: search } as any } ] } : {})
-  };
+    ...(search ? { email: { contains: search, mode: 'insensitive' as const } } : {})
+  } as const;
   const [total, items] = await Promise.all([
     prisma.contacts.count({ where }),
     prisma.contacts.findMany({ where, orderBy: { created_at: 'desc' }, skip: (page - 1) * pageSize, take: pageSize })
