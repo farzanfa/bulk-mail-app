@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   }
   const name = (form.get('filename') as string) || 'upload.csv';
   const uploaded = await put(name, file, { access: 'public' });
-  return NextResponse.json({ key: uploaded.pathname, url: uploaded.url, size: uploaded.size });
+  return NextResponse.json({ key: uploaded.pathname, url: uploaded.url });
 }
 
 
