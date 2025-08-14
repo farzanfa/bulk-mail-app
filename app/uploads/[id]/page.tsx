@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export default function UploadDetail({ params }: { params: { id: string } }) {
   const id = params.id;
@@ -23,7 +24,16 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
     <div className="max-w-5xl mx-auto p-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Upload</h1>
-        <a href="/uploads" className="text-sm text-blue-600">Back</a>
+        <div className="flex gap-2">
+          <button onClick={async () => {
+            if (!confirm('Delete this upload and its contacts?')) return;
+            const res = await fetch(`/api/uploads/${id}`, { method: 'DELETE' });
+            if (!res.ok) { toast.error('Delete failed'); return; }
+            toast.success('Upload deleted');
+            window.location.href = '/uploads';
+          }} className="text-sm border rounded px-3 py-2">Delete</button>
+          <a href="/uploads" className="text-sm text-blue-600">Back</a>
+        </div>
       </div>
       {upload && (
         <div className="bg-white rounded shadow p-4 mb-4">
