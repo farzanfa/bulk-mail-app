@@ -4,7 +4,14 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb'
     }
-  }
+  },
+  redirects: async () => ([
+    {
+      source: '/contacts',
+      destination: '/uploads',
+      permanent: true
+    }
+  ])
 };
 
 export default nextConfig;

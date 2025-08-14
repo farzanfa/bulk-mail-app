@@ -7,7 +7,7 @@ export default function Header() {
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/templates', label: 'Templates' },
     { href: '/uploads', label: 'Uploads' },
-    { href: '/contacts', label: 'Contacts' },
+    // Contacts moved into each upload detail page
     { href: '/campaigns', label: 'Campaigns' }
   ];
   return (

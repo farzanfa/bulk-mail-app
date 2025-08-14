@@ -5,8 +5,11 @@ export const metadata = {
   title: 'MailApp',
   description: 'Vercel-native bulk mailing platform',
   icons: { icon: '/icon.svg', shortcut: '/icon.svg', apple: '/icon.svg' },
-  themeColor: '#ffe01b',
   manifest: '/manifest.webmanifest'
+};
+
+export const viewport = {
+  themeColor: '#ffe01b'
 };
 import { Toaster } from 'sonner';
 

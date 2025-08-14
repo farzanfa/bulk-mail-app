@@ -5,6 +5,7 @@ import { Section, Input, Button, PrimaryButton, Card } from '@/components/ui';
 
 export default function CampaignNewPage() {
   const [google, setGoogle] = useState<any[]>([]);
+  // kept for future but not used in strict Google mode
   const [fromEmail, setFromEmail] = useState('');
   const [templates, setTemplates] = useState<any[]>([]);
   const [uploads, setUploads] = useState<any[]>([]);
@@ -21,6 +22,7 @@ export default function CampaignNewPage() {
       const me = await fetch('/api/me', { cache: 'no-store' }).then(r => r.json());
       setGoogle(me.googleAccounts || []);
       setFromEmail(me.user?.email || '');
+      if (me.googleAccounts && me.googleAccounts.length > 0) setGoogleId(me.googleAccounts[0].id);
       const t = await fetch('/api/templates', { cache: 'no-store' }).then(r => r.json());
       setTemplates(t.templates || []);
       const u = await fetch('/api/uploads', { cache: 'no-store' }).then(r => r.json());
@@ -50,15 +52,23 @@ export default function CampaignNewPage() {
       <h1 className="text-2xl font-semibold mb-4">New Campaign</h1>
       <div className="grid md:grid-cols-2 gap-4">
         <Card className="p-4">
-          <div className="text-sm text-gray-500 mb-1">1) Sender</div>
-          <div className="text-xs text-gray-500 mb-1">Use SMTP (recommended) or a connected Google account.</div>
-          <input className="border rounded w-full p-2 mb-2" placeholder="From email (SMTP)" value={fromEmail} onChange={e=>setFromEmail(e.target.value)} />
-          <div className="text-xs text-gray-500 my-2 text-center">— or —</div>
-          <select className="border rounded w-full p-2" value={googleId} onChange={(e) => setGoogleId(e.target.value)}>
-            <option value="">Select Google account</option>
-            {google.map((g: any) => (<option key={g.id} value={g.id}>{g.email}</option>))}
-          </select>
-          <a href="/api/google/oauth/url?redirect=1" className="text-xs text-blue-600 inline-block mt-2">Connect Google</a>
+          <div className="text-sm text-gray-500 mb-1">1) Google Account</div>
+          {google.length === 0 ? (
+            <div className="text-sm text-gray-600">
+              No Google account connected.{' '}
+              <a href="/api/google/oauth/url?redirect=1" className="text-blue-600">Connect Google</a>
+              {' '}then return here.
+            </div>
+          ) : google.length === 1 ? (
+            <div className="text-sm text-gray-700">Using: {google[0].email}</div>
+          ) : (
+            <select className="border rounded w-full p-2" value={googleId} onChange={(e) => setGoogleId(e.target.value)}>
+              {google.map((g: any) => (<option key={g.id} value={g.id}>{g.email}</option>))}
+            </select>
+          )}
+          {google.length > 0 && (
+            <a href="/api/google/oauth/url?redirect=1" className="text-xs text-blue-600 inline-block mt-2">Connect another</a>
+          )}
         </Card>
         <Card className="p-4">
           <div className="text-sm text-gray-500 mb-1">2) Template</div>

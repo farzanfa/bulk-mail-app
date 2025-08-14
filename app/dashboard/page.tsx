@@ -58,7 +58,11 @@ export default async function DashboardPage() {
         <Card className="p-4">
           <div className="text-sm text-gray-500">Google Accounts</div>
           <div className="text-2xl">{googleCount}</div>
-          <a href="/api/google/oauth/url?redirect=1" className="text-blue-600 text-sm">Connect Google</a>
+          {googleCount > 0 ? (
+            <div className="mt-1 text-xs inline-flex rounded-full bg-green-100 text-green-700 px-2 py-0.5">Connected</div>
+          ) : (
+            <a href="/api/google/oauth/url?redirect=1" className="text-blue-600 text-sm">Connect Google</a>
+          )}
         </Card>
         <Card className="p-4">
           <div className="text-sm text-gray-500">Campaigns</div>
