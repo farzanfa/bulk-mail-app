@@ -19,8 +19,12 @@ export async function POST(req: Request) {
   if (!upload) return NextResponse.json({ error: 'Upload not found' }, { status: 404 });
   if (upload.user_id !== sessionUserId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  const { url } = await head(blob_key);
-  const res = await fetch(url);
+  let src = blob_key as string;
+  if (!/^https?:\/\//i.test(src)) {
+    const { url } = await head(blob_key);
+    src = url;
+  }
+  const res = await fetch(src);
   if (!res.ok || !res.body) return NextResponse.json({ error: 'Failed to fetch blob' }, { status: 400 });
 
   const text = await res.text();
