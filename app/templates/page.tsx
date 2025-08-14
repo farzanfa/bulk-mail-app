@@ -61,18 +61,18 @@ export default function TemplatesPage() {
             {items.map((t) => (
               <a key={t.id} href={`/templates/${t.id}`} className="block">
                 <Card className="p-4 h-full hover:shadow-md transition">
-                  <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
-                      <div className="font-medium">{t.name}</div>
+                      <div className="font-medium truncate max-w-[16rem] sm:max-w-[10rem]">{t.name}</div>
                       <div className="text-xs text-gray-500">v{t.version} • {new Date(t.updated_at).toLocaleString()}</div>
                     </div>
-                    <div className="text-xs text-gray-600 whitespace-nowrap">{t.variables.length} vars</div>
+                    <div className="text-xs text-gray-600 whitespace-nowrap flex-shrink-0">{t.variables.length} vars</div>
                   </div>
                   <div className="text-xs text-gray-500 mb-1">Preview</div>
                   <div className="rounded border bg-white">
                     <div className="px-3 py-2 border-b text-sm font-medium truncate">{render(t.subject || '')}</div>
                     <div className="p-3">
-                      <div className="prose max-w-none line-clamp-4 overflow-hidden" dangerouslySetInnerHTML={{ __html: render(t.html || '') }} />
+                      <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: render(t.html || '') }} />
                     </div>
                   </div>
                 </Card>
