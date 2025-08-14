@@ -1,8 +1,11 @@
 "use client";
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 
 export default function Header() {
+  const pathname = usePathname();
+  const isLogin = pathname === '/login';
   const [open, setOpen] = useState(false);
   const links = [
     { href: '/dashboard', label: 'Dashboard' },
@@ -25,7 +28,9 @@ export default function Header() {
         </nav>
         <div className="flex items-center gap-2">
           <a href="/campaigns/new" className="hidden sm:inline-flex items-center gap-2 bg-brand px-3 py-2 rounded text-sm hover:bg-brand-dark">New Campaign</a>
-          <button onClick={() => signOut({ callbackUrl: '/login' })} className="hidden sm:inline-flex items-center gap-2 border px-3 py-2 rounded text-sm">Logout</button>
+          {!isLogin && (
+            <button onClick={() => signOut({ callbackUrl: '/login' })} className="hidden sm:inline-flex items-center gap-2 border px-3 py-2 rounded text-sm">Logout</button>
+          )}
           <button aria-label="Open menu" className="md:hidden inline-flex items-center justify-center p-2 rounded border" onClick={() => setOpen(true)}>
             <span className="sr-only">Open menu</span>
             ☰
@@ -44,7 +49,9 @@ export default function Header() {
                 <a key={l.href} href={l.href} className="text-gray-700 hover:text-black" onClick={() => setOpen(false)}>{l.label}</a>
               ))}
               <a href="/campaigns/new" className="mt-2 inline-flex items-center gap-2 bg-brand px-3 py-2 rounded text-sm hover:bg-brand-dark" onClick={() => setOpen(false)}>New Campaign</a>
-              <button onClick={() => { setOpen(false); signOut({ callbackUrl: '/login' }); }} className="inline-flex items-center gap-2 border px-3 py-2 rounded text-sm mt-2">Logout</button>
+              {!isLogin && (
+                <button onClick={() => { setOpen(false); signOut({ callbackUrl: '/login' }); }} className="inline-flex items-center gap-2 border px-3 py-2 rounded text-sm mt-2">Logout</button>
+              )}
             </nav>
           </div>
         </div>
