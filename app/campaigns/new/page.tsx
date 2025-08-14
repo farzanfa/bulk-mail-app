@@ -12,8 +12,6 @@ export default function CampaignNewPage() {
   const [uploadId, setUploadId] = useState('');
   const [googleId, setGoogleId] = useState('');
   const [name, setName] = useState('');
-  const [batchSize, setBatchSize] = useState(40);
-  const [perMinute, setPerMinute] = useState(80);
   const [dry, setDry] = useState<any[]>([]);
   const canDryRun = useMemo(() => templateId && uploadId, [templateId, uploadId]);
 
@@ -38,7 +36,7 @@ export default function CampaignNewPage() {
   }
 
   async function createAndLaunch() {
-    const res = await fetch('/api/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, google_account_id: googleId, template_id: templateId, upload_id: uploadId, filters: {}, batch_size: batchSize, per_minute_limit: perMinute }) });
+    const res = await fetch('/api/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, google_account_id: googleId, template_id: templateId, upload_id: uploadId, filters: {} }) });
     const json = await res.json();
     if (!res.ok) { alert(json.error || 'Failed'); return; }
     const id = json.campaign.id;
@@ -88,13 +86,7 @@ export default function CampaignNewPage() {
             {uploads.map((u: any) => (<option key={u.id} value={u.id}>{u.filename} ({u.row_count})</option>))}
           </select>
         </Card>
-        <Card className="p-4">
-          <div className="text-sm text-gray-500 mb-1">4) Limits</div>
-          <div className="flex gap-2">
-            <input type="number" min={1} className="border rounded p-2 w-1/2" value={batchSize} onChange={(e) => setBatchSize(parseInt(e.target.value || '0'))} />
-            <input type="number" min={1} className="border rounded p-2 w-1/2" value={perMinute} onChange={(e) => setPerMinute(parseInt(e.target.value || '0'))} />
-          </div>
-        </Card>
+        {/* Limits are hidden and use safe defaults on the server */}
       </div>
       <div className="mt-4 flex gap-2">
         <Button disabled={!canDryRun} onClick={doDryRun} className="disabled:opacity-50">Dry run</Button>

@@ -9,9 +9,7 @@ const schema = z.object({
   google_account_id: z.string(),
   template_id: z.string(),
   upload_id: z.string(),
-  filters: z.any().default({}),
-  batch_size: z.number().int().min(1).max(200).default(40),
-  per_minute_limit: z.number().int().min(1).max(200).default(80)
+  filters: z.any().default({})
 });
 
 export async function GET() {
@@ -36,9 +34,7 @@ export async function POST(req: Request) {
       template_id: data.template_id,
       upload_id: data.upload_id,
       filters: data.filters as any,
-      status: 'draft',
-      batch_size: data.batch_size,
-      per_minute_limit: data.per_minute_limit
+      status: 'draft'
     } as any
   });
   return NextResponse.json({ campaign: created });
