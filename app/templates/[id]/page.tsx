@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { Card, Section, Input, PrimaryButton, Button } from '@/components/ui';
+import { Card, Section, Input, PrimaryButton } from '@/components/ui';
 import { ConfirmButton } from '@/components/confirm';
 
 export default function TemplateDetail({ params }: { params: { id: string } }) {
@@ -20,7 +20,7 @@ export default function TemplateDetail({ params }: { params: { id: string } }) {
       setName(json.template.name);
       setSubject(json.template.subject);
       setHtml(json.template.html);
-      setText(json.template.text);
+      setText(json.template.text || '');
     })();
   }, [id]);
 
@@ -28,7 +28,7 @@ export default function TemplateDetail({ params }: { params: { id: string } }) {
     e.preventDefault();
     setBusy(true);
     try {
-      const res = await fetch(`/api/templates/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, subject, html, text }) });
+      const res = await fetch(`/api/templates/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, subject, html, text: '' }) });
       if (!res.ok) throw new Error('Save failed');
       const json = await res.json();
       setT(json.template);
@@ -60,27 +60,23 @@ export default function TemplateDetail({ params }: { params: { id: string } }) {
         >Delete</ConfirmButton>
       </div>
       <Section title={`Template v${t.version}`}>
-        <form onSubmit={onSave} className="grid md:grid-cols-2 gap-4">
+        <form onSubmit={onSave} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
-            <label className="text-sm text-gray-500">Name</label>
+            <label className="text-sm text-gray-500">Template name</label>
             <Input className="w-full mb-2" value={name} onChange={(e) => setName(e.target.value)} required />
             <label className="text-sm text-gray-500">Subject</label>
             <Input className="w-full mb-2" value={subject} onChange={(e) => setSubject(e.target.value)} required />
-            <label className="text-sm text-gray-500">HTML</label>
-            <textarea className="border rounded w-full p-2 h-32 mb-2" value={html} onChange={(e) => setHtml(e.target.value)} />
-            <label className="text-sm text-gray-500">Text</label>
-            <textarea className="border rounded w-full p-2 h-24" value={text} onChange={(e) => setText(e.target.value)} />
+            <label className="text-sm text-gray-500">Body HTML</label>
+            <textarea className="border rounded w-full p-2 h-40 sm:h-48 mb-2" value={html} onChange={(e) => setHtml(e.target.value)} />
             <PrimaryButton disabled={busy} className="mt-3">{busy ? 'Saving…' : 'Save (new version)'}</PrimaryButton>
           </div>
           <div>
             <div className="text-sm text-gray-500 mb-1">Preview</div>
-            <Card className="p-3">
+            <Card className="p-3 overflow-x-auto">
               <div className="text-sm text-gray-500">Subject</div>
               <div className="mb-2">{subject}</div>
               <div className="text-sm text-gray-500">HTML</div>
-              <div className="prose" dangerouslySetInnerHTML={{ __html: html }} />
-              <div className="text-sm text-gray-500 mt-2">Text</div>
-              <pre className="text-xs bg-gray-50 p-2 rounded whitespace-pre-wrap">{text}</pre>
+              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
             </Card>
           </div>
         </form>
