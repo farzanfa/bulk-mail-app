@@ -54,7 +54,7 @@ export default async function DashboardPage() {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="text-sm text-gray-500">Google Accounts</div>
           <div className="text-2xl">{googleCount}</div>
@@ -78,18 +78,18 @@ export default async function DashboardPage() {
         </Card>
       </div>
       <Section title="Sent (last 7 days)">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
           <div className="text-xs text-gray-500">Daily totals</div>
           <div className="text-xs text-gray-500">max {max}</div>
         </div>
-        <svg viewBox="0 0 100 100" className="w-full h-24">
+        <svg viewBox="0 0 100 100" className="w-full h-40 sm:h-28">
           <polyline fill="none" stroke="#3b82f6" strokeWidth="2" points={points} />
         </svg>
       </Section>
       <Section title="Recent Campaigns">
         <div className="divide-y">
           {recentCampaigns.map((c: any) => (
-            <div key={c.id} className="p-3 flex items-center justify-between">
+            <div key={c.id} className="p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div>
                 <div className="font-medium">{c.id}</div>
                 <div className="text-sm text-gray-500">{new Date(c.created_at).toLocaleString()}</div>
