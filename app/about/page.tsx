@@ -4,9 +4,8 @@ export default function AboutPage() {
     <main className="max-w-3xl mx-auto px-4 py-12 prose">
       <h1>About</h1>
       <p>
-        MailApp is a modern, Vercel‑native bulk email platform designed to help you create, upload, and send campaigns
-        reliably at scale. It focuses on clear workflows, responsive UI, and sensible defaults so you can move from idea
-        to inbox quickly.
+        MailApp is a modern bulk email platform designed to help you create, upload, and send campaigns reliably at scale.
+        It focuses on clear workflows, responsive UI, and sensible defaults so you can move from idea to inbox quickly.
       </p>
       <h2>What you can do</h2>
       <ul>

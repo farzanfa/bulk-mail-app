@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 export const metadata = {
   title: 'MailApp',
-  description: 'Vercel-native bulk mailing platform',
+  description: 'Modern bulk mailing platform',
   icons: { icon: '/icon.svg', shortcut: '/icon.svg', apple: '/icon.svg' },
   manifest: '/manifest.webmanifest'
 };
