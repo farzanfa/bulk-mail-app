@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Next.js build output
+.next/
+.next/cache/
+out/
+dist/
+
+# Vercel
+.vercel/
+
+# Caches
+.cache/
+.turbo/
+.eslintcache
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+.envrc
+.envrc.local
+
+# Editors/IDE
+.vscode/
+.idea/
+
+# Tests/Reports
+coverage/
+.vitest/
+playwright-report/
+test-results/
+
+# Prisma (local dbs only; keep migrations and schema)
+prisma/*.db
+prisma/*.sqlite
+*.sqlite
+*.db
+
+# Misc
+*.swp
+*.swo

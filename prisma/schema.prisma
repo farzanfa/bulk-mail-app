@@ -1,0 +1,179 @@
+// Datasource
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+// Generator
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enums
+enum CampaignStatus {
+  draft
+  running
+  paused
+  completed
+  failed
+}
+
+enum RecipientStatus {
+  pending
+  sent
+  failed
+  skipped
+}
+
+// Models
+model users {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  password_hash    String
+  email_verified_at DateTime? 
+  created_at       DateTime  @default(now())
+  google_accounts  google_accounts[]
+  templates        templates[]
+  uploads          uploads[]
+  contacts         contacts[]
+  campaigns        campaigns[]
+  audit_logs       audit_logs[]
+  email_verifications email_verifications[]
+}
+
+model google_accounts {
+  id                     String   @id @default(cuid())
+  user_id                String
+  user                   users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  google_user_id         String
+  email                  String
+  refresh_token_encrypted String
+  access_token           String?
+  token_expiry           DateTime?
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+  campaigns              campaigns[]
+
+  @@index([user_id])
+  @@unique([user_id, google_user_id])
+}
+
+model templates {
+  id         String   @id @default(cuid())
+  user_id    String
+  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  name       String
+  subject    String
+  html       String
+  text       String
+  variables  Json
+  version    Int      @default(1)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  campaigns  campaigns[]
+
+  @@index([user_id])
+}
+
+model uploads {
+  id         String   @id @default(cuid())
+  user_id    String
+  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  blob_key   String
+  filename   String
+  columns    Json
+  row_count  Int
+  created_at DateTime @default(now())
+  contacts   contacts[]
+  campaigns  campaigns[]
+
+  @@index([user_id])
+}
+
+model contacts {
+  id            String   @id @default(cuid())
+  user_id       String
+  user          users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  upload_id     String?
+  upload        uploads? @relation(fields: [upload_id], references: [id])
+  email         String
+  fields        Json
+  unsubscribed  Boolean  @default(false)
+  created_at    DateTime @default(now())
+  recipients    campaign_recipients[]
+
+  @@index([user_id])
+  @@index([upload_id])
+  @@unique([user_id, email])
+}
+
+model campaigns {
+  id               String   @id @default(cuid())
+  user_id          String
+  user             users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  google_account_id String
+  google_account   google_accounts @relation(fields: [google_account_id], references: [id])
+  template_id      String
+  template         templates @relation(fields: [template_id], references: [id])
+  upload_id        String
+  upload           uploads   @relation(fields: [upload_id], references: [id])
+  filters          Json
+  status           CampaignStatus
+  batch_size       Int       @default(40)
+  per_minute_limit Int       @default(80)
+  created_at       DateTime  @default(now())
+  started_at       DateTime?
+  completed_at     DateTime?
+  recipients       campaign_recipients[]
+
+  @@index([user_id])
+  @@index([status])
+}
+
+model campaign_recipients {
+  id               String   @id @default(cuid())
+  campaign_id      String
+  campaign         campaigns @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  contact_id       String
+  contact          contacts  @relation(fields: [contact_id], references: [id])
+  rendered_subject String?
+  rendered_html    String?
+  rendered_text    String?
+  status           RecipientStatus @default(pending)
+  gmail_message_id String?
+  error            String?
+  attempts         Int      @default(0)
+  last_attempt_at  DateTime?
+  created_at       DateTime @default(now())
+
+  @@index([campaign_id])
+  @@index([contact_id])
+  @@index([campaign_id, status])
+  @@unique([campaign_id, contact_id])
+}
+
+model audit_logs {
+  id          String   @id @default(cuid())
+  user_id     String
+  user        users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  action      String
+  entity_type String
+  entity_id   String
+  metadata    Json
+  created_at  DateTime @default(now())
+
+  @@index([user_id])
+}
+
+model email_verifications {
+  id         String   @id @default(cuid())
+  user_id    String
+  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  token      String   @unique
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  @@index([user_id])
+}
+
+
