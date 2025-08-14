@@ -13,7 +13,7 @@ export default function CampaignNewPage() {
   const [googleId, setGoogleId] = useState('');
   const [name, setName] = useState('');
   const [dry, setDry] = useState<any[]>([]);
-  const canDryRun = useMemo(() => templateId && uploadId, [templateId, uploadId]);
+  const canDryRun = useMemo(() => Boolean(templateId && uploadId), [templateId, uploadId]);
 
   useEffect(() => {
     (async () => {
@@ -29,6 +29,8 @@ export default function CampaignNewPage() {
   }, []);
 
   async function doDryRun() {
+    if (!templateId) { alert('Select a template'); return; }
+    if (!uploadId) { alert('Select an upload'); return; }
     const res = await fetch('/api/campaigns/dry-run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ template_id: templateId, upload_id: uploadId, limit: 10 }) });
     const json = await res.json();
     if (!res.ok) { alert(json.error || 'Dry run failed'); return; }

@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { renderTemplateString } from '@/lib/render';
 import { z } from 'zod';
+import { ensureUserIdFromSession } from '@/lib/user';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,8 +17,8 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || !(session as any).user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const userId = (session as any).user.id as string;
+  const userId = await ensureUserIdFromSession(session).catch(() => '');
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
   const { template_id, upload_id, limit } = schema.parse(body);
   const [template] = await Promise.all([
