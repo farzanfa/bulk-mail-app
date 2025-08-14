@@ -87,10 +87,10 @@ export default function TemplatesPage() {
                   <div className="text-[11px] text-gray-500 mb-1">Preview</div>
                   <div className="rounded border bg-white">
                     <div className="px-2 py-1 border-b text-xs font-medium truncate">{render(t.subject || '')}</div>
-                    <div className="p-2">
-                      <div style={{ width: 160, height: 120, overflow: 'hidden' }}>
+                    <div className="p-2 flex items-center justify-center">
+                      <div style={{ width: 140, height: 200, overflow: 'hidden', borderRadius: 6 }}>
                         <div
-                          style={{ width: 600, transform: 'scale(0.26)', transformOrigin: 'top left' }}
+                          style={{ width: 600, transform: 'scale(0.22)', transformOrigin: 'top left' }}
                           dangerouslySetInnerHTML={{ __html: render(t.html || '') }}
                         />
                       </div>
