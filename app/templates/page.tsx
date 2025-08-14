@@ -15,10 +15,10 @@ export default function TemplatesPage() {
   const [name, setName] = useState('');
   const [subject, setSubject] = useState('');
   const [html, setHtml] = useState('<p>Hello {{ first_name }}</p>');
-  const [text, setText] = useState('Hello {{ first_name }}');
-  const [sample, setSample] = useState('{"first_name":"Ada"}');
+  const [text, setText] = useState('');
+  const [sample] = useState('{"first_name":"Ada"}');
   const [openCreate, setOpenCreate] = useState(false);
-  const vars = useMemo(() => Array.from(new Set([...extractVars(subject), ...extractVars(html), ...extractVars(text)])), [subject, html, text]);
+  const vars = useMemo(() => Array.from(new Set([...extractVars(subject), ...extractVars(html)])), [subject, html]);
 
   async function refresh() {
     const res = await fetch('/api/templates', { cache: 'no-store' });
@@ -35,8 +35,7 @@ export default function TemplatesPage() {
     setName('');
     setSubject('');
     setHtml('<p>Hello {{ first_name }}</p>');
-    setText('Hello {{ first_name }}');
-    setSample('{"first_name":"Ada"}');
+    setText('');
     await refresh();
     toast.success('Template saved');
     setOpenCreate(false);
@@ -93,28 +92,22 @@ export default function TemplatesPage() {
             <div className="p-4">
               <form onSubmit={onCreate} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-gray-500">Name</label>
+                  <label className="text-sm text-gray-500">Template name</label>
                   <Input className="w-full mb-2" value={name} onChange={(e) => setName(e.target.value)} required />
                   <label className="text-sm text-gray-500">Subject</label>
                   <Input className="w-full mb-2" value={subject} onChange={(e) => setSubject(e.target.value)} required />
-                  <label className="text-sm text-gray-500">HTML</label>
+                  <label className="text-sm text-gray-500">Body HTML</label>
                   <textarea className="border rounded w-full p-2 h-40 sm:h-48 mb-2" value={html} onChange={(e) => setHtml(e.target.value)} />
-                  <label className="text-sm text-gray-500">Text</label>
-                  <textarea className="border rounded w-full p-2 h-28 sm:h-32" value={text} onChange={(e) => setText(e.target.value)} />
                 </div>
                 <div>
                   <div className="text-sm text-gray-500">Variables detected</div>
                   <div className="text-sm mb-3">{vars.join(', ') || 'None'}</div>
-                  <label className="text-sm text-gray-500">Sample data (JSON)</label>
-                  <textarea className="border rounded w-full p-2 h-28 sm:h-32 mb-3" value={sample} onChange={(e) => setSample(e.target.value)} />
                   <div className="text-sm text-gray-500 mb-1">Preview</div>
                   <Card className="p-3 overflow-x-auto">
                     <div className="text-sm text-gray-500">Subject</div>
                     <div className="mb-2">{render(subject)}</div>
                     <div className="text-sm text-gray-500">HTML</div>
                     <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: render(html) }} />
-                    <div className="text-sm text-gray-500 mt-2">Text</div>
-                    <pre className="text-xs bg-gray-50 p-2 rounded whitespace-pre-wrap">{render(text)}</pre>
                   </Card>
                 </div>
                 <div className="lg:col-span-2 flex items-center justify-end gap-2">

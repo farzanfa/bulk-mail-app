@@ -9,7 +9,7 @@ const createSchema = z.object({
   name: z.string().min(1),
   subject: z.string().min(1),
   html: z.string().default(''),
-  text: z.string().default('')
+  text: z.string().optional().default('')
 });
 
 export async function GET() {
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   const userId = (session as any).user.id as string;
   const body = await req.json();
   const { name, subject, html, text } = createSchema.parse(body);
-  const variables = Array.from(new Set([...extractVariables(subject), ...extractVariables(html), ...extractVariables(text)]));
+  const variables = Array.from(new Set([...extractVariables(subject), ...extractVariables(html), ...extractVariables(text || '')]));
   const created = await prisma.templates.create({ data: { user_id: userId, name, subject, html, text, variables: variables as any } });
   return NextResponse.json({ template: created });
 }
