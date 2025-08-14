@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     email: c.email,
     subject: renderTemplateString(template.subject, c.fields as any),
     html: renderTemplateString(template.html, c.fields as any),
-    text: renderTemplateString(template.text, c.fields as any)
+    text: renderTemplateString(template.text || '', c.fields as any)
   }));
   return NextResponse.json({ renders });
 }

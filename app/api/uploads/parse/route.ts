@@ -39,6 +39,12 @@ export async function POST(req: Request) {
   const batch: Array<{ email: string; fields: Record<string, unknown> }> = [];
   let totalProcessed = 0;
   let columns: string[] | null = null;
+  const normalizeKey = (k: string) => String(k)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/__+/g, '_');
   // Detect email column name case-insensitively and with loose match
   const headerKeys = rows.length > 0 ? Object.keys(rows[0]) : [];
   const normalizedKeys = headerKeys.map(k => ({ raw: k, norm: String(k).trim().toLowerCase() }));
@@ -51,10 +57,14 @@ export async function POST(req: Request) {
     if (!email) continue;
     if (seenEmails.has(email)) continue;
     seenEmails.add(email);
-    if (!columns) columns = Object.keys(rec);
+    if (!columns) columns = Object.keys(rec).filter(k => !['email', 'Email', 'EMAIL', emailKey as string].includes(k)).map(normalizeKey);
     delete (rec as any).email; delete (rec as any).Email; delete (rec as any).EMAIL;
     if (emailKey) delete (rec as any)[emailKey as string];
-    batch.push({ email, fields: rec });
+    const normalized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(rec)) {
+      normalized[normalizeKey(key)] = value;
+    }
+    batch.push({ email, fields: normalized });
     if (batch.length >= 500) {
       // Upsert-like behavior: attach existing contacts to this upload, insert new ones
       const chunk = batch.splice(0, batch.length);
