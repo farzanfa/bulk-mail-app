@@ -5,6 +5,7 @@ import { encrypt } from '@/lib/crypto';
 import { google } from 'googleapis';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import bcrypt from 'bcryptjs';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -29,9 +30,20 @@ export async function GET(req: Request) {
     // Determine the app user to link: prefer session user; otherwise by email
     const session = await getServerSession(authOptions);
     let userId: string | null = (session as any)?.user?.id ?? null;
+    // If session user id provided, ensure it exists; otherwise try by email; otherwise auto-create
+    if (userId) {
+      const exists = await prisma.users.findUnique({ where: { id: userId }, select: { id: true } });
+      if (!exists) userId = null;
+    }
     if (!userId && email) {
-      const existingUser = await prisma.users.findUnique({ where: { email }, select: { id: true } });
-      userId = existingUser?.id ?? null;
+      const byEmail = await prisma.users.findUnique({ where: { email }, select: { id: true } });
+      if (byEmail) userId = byEmail.id;
+    }
+    if (!userId && email) {
+      // Auto-create a user to attach this Google account
+      const randomPass = await bcrypt.hash(`google-link-${Date.now()}-${Math.random()}`, 10);
+      const created = await prisma.users.create({ data: { email, password_hash: randomPass, email_verified_at: new Date() } });
+      userId = created.id;
     }
     console.log('oauth: resolved userId', { hasUserId: !!userId });
     if (!userId) {
