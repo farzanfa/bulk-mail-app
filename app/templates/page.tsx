@@ -17,6 +17,7 @@ export default function TemplatesPage() {
   const [html, setHtml] = useState('<p>Hello {{ first_name }}</p>');
   const [text, setText] = useState('');
   const [openCreate, setOpenCreate] = useState(false);
+  const [savingCreate, setSavingCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [editId, setEditId] = useState<string>('');
   const [editName, setEditName] = useState('');
@@ -35,16 +36,24 @@ export default function TemplatesPage() {
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
-    const res = await fetch('/api/templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, subject, html, text }) });
-    const json = await res.json();
-    if (!res.ok) { toast.error(json.error || 'Failed'); return; }
-    setName('');
-    setSubject('');
-    setHtml('<p>Hello {{ first_name }}</p>');
-    setText('');
-    await refresh();
-    toast.success('Template saved');
-    setOpenCreate(false);
+    if (!name.trim() || !subject.trim()) { toast.error('Name and subject are required'); return; }
+    setSavingCreate(true);
+    try {
+      const res = await fetch('/api/templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, subject, html, text }) });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) { toast.error(json.error || 'Failed to save'); return; }
+      setName('');
+      setSubject('');
+      setHtml('<p>Hello {{ first_name }}</p>');
+      setText('');
+      await refresh();
+      toast.success('Template saved');
+      setOpenCreate(false);
+    } catch (err: any) {
+      toast.error(err?.message || 'Network error');
+    } finally {
+      setSavingCreate(false);
+    }
   }
 
   let sampleObj: Record<string, unknown> = {};
@@ -133,7 +142,7 @@ export default function TemplatesPage() {
                 </div>
                 <div className="lg:col-span-2 flex items-center justify-end gap-2">
                   <Button type="button" onClick={() => setOpenCreate(false)}>Cancel</Button>
-                  <PrimaryButton type="submit">Save Template</PrimaryButton>
+                  <PrimaryButton type="submit" disabled={savingCreate}>{savingCreate ? 'Saving…' : 'Save Template'}</PrimaryButton>
                 </div>
               </form>
             </div>
