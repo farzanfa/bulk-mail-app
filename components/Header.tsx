@@ -6,6 +6,7 @@ import { signOut } from 'next-auth/react';
 export default function Header() {
   const pathname = usePathname();
   const isPublic = pathname === '/login' || pathname === '/about' || pathname === '/privacy' || pathname === '/terms';
+  const isLogin = pathname === '/login';
   const [open, setOpen] = useState(false);
   const links = isPublic
     ? [
@@ -32,6 +33,16 @@ export default function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          {isLogin && (
+            <a
+              href="https://github.com/farzanfa"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-2 border px-3 py-2 rounded text-sm"
+            >
+              GitHub
+            </a>
+          )}
           {!isPublic && (
             <a href="/campaigns/new" className="hidden sm:inline-flex items-center gap-2 bg-brand px-3 py-2 rounded text-sm hover:bg-brand-dark">New Campaign</a>
           )}
@@ -55,6 +66,9 @@ export default function Header() {
               {links.map((l) => (
                 <a key={l.href} href={l.href} className="text-gray-700 hover:text-black" onClick={() => setOpen(false)}>{l.label}</a>
               ))}
+              {isLogin && (
+                <a href="https://github.com/farzanfa" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 border px-3 py-2 rounded text-sm mt-2" onClick={() => setOpen(false)}>GitHub</a>
+              )}
               {!isPublic && (
                 <a href="/campaigns/new" className="mt-2 inline-flex items-center gap-2 bg-brand px-3 py-2 rounded text-sm hover:bg-brand-dark" onClick={() => setOpen(false)}>New Campaign</a>
               )}
