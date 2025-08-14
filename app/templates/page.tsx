@@ -16,9 +16,6 @@ export default function TemplatesPage() {
   const [subject, setSubject] = useState('');
   const [html, setHtml] = useState('<p>Hello {{ first_name }}</p>');
   const [text, setText] = useState('');
-  const [uploads, setUploads] = useState<any[]>([]);
-  const [selectedUploadId, setSelectedUploadId] = useState<string | ''>('');
-  const [sampleJson, setSampleJson] = useState<string>('{}');
   const [openCreate, setOpenCreate] = useState(false);
   const vars = useMemo(() => Array.from(new Set([...extractVars(subject), ...extractVars(html)])), [subject, html]);
 
@@ -27,29 +24,7 @@ export default function TemplatesPage() {
     const json = await res.json();
     setItems(json.templates || []);
   }
-  async function loadUploads() {
-    const res = await fetch('/api/uploads', { cache: 'no-store' });
-    const json = await res.json();
-    const list = json.uploads || [];
-    setUploads(list);
-    if (list.length > 0) {
-      const firstId = list[0].id as string;
-      setSelectedUploadId(firstId);
-      await loadSampleFromUpload(firstId);
-    }
-  }
-  useEffect(() => { refresh(); loadUploads(); }, []);
-
-  async function loadSampleFromUpload(uploadId: string) {
-    if (!uploadId) { setSampleJson('{}'); return; }
-    try {
-      const res = await fetch(`/api/uploads/${uploadId}/contacts?search=&page=1`, { cache: 'no-store' });
-      const json = await res.json();
-      const first = (json.items || [])[0];
-      const fields = first?.fields || {};
-      setSampleJson(JSON.stringify(fields));
-    } catch {}
-  }
+  useEffect(() => { refresh(); }, []);
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -66,7 +41,6 @@ export default function TemplatesPage() {
   }
 
   let sampleObj: Record<string, unknown> = {};
-  try { sampleObj = JSON.parse(sampleJson); } catch {}
   const render = (tpl: string) => tpl.replace(/\{\{\s*([a-zA-Z0-9_\.]+)\s*\}\}/g, (_, k) => String((sampleObj as any)[k] ?? ''));
 
   return (
@@ -78,19 +52,7 @@ export default function TemplatesPage() {
         title="Your templates"
         actions={<PrimaryButton onClick={() => setOpenCreate(true)}>New Template</PrimaryButton>}
       >
-        <div className="mb-3 flex items-center gap-2 text-sm">
-          <label className="text-gray-600">Preview with upload:</label>
-          <select
-            className="border rounded px-2 py-1"
-            value={selectedUploadId}
-            onChange={async (e) => { const id = e.target.value; setSelectedUploadId(id); await loadSampleFromUpload(id); }}
-          >
-            {uploads.map((u:any) => (
-              <option key={u.id} value={u.id}>{u.filename}</option>
-            ))}
-            {uploads.length === 0 && <option value="">No uploads</option>}
-          </select>
-        </div>
+        
         {items.length === 0 ? (
           <div className="p-3 text-sm text-gray-500">No templates yet.</div>
         ) : (
@@ -139,17 +101,6 @@ export default function TemplatesPage() {
                 <div>
                   <div className="text-sm text-gray-500">Variables detected</div>
                   <div className="text-sm mb-3">{vars.join(', ') || 'None'}</div>
-                  <div className="text-sm text-gray-500 mb-1">Preview with upload</div>
-                  <select
-                    className="border rounded px-2 py-1 mb-3"
-                    value={selectedUploadId}
-                    onChange={async (e) => { const id = e.target.value; setSelectedUploadId(id); await loadSampleFromUpload(id); }}
-                  >
-                    {uploads.map((u:any) => (
-                      <option key={u.id} value={u.id}>{u.filename}</option>
-                    ))}
-                    {uploads.length === 0 && <option value="">No uploads</option>}
-                  </select>
                   <div className="text-sm text-gray-500 mb-1">Preview</div>
                   <Card className="p-3 overflow-x-auto">
                     <div className="text-sm text-gray-500">Subject</div>
