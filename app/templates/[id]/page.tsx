@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { Card, Section, Input, PrimaryButton, Button } from '@/components/ui';
+import { ConfirmButton } from '@/components/confirm';
 
 export default function TemplateDetail({ params }: { params: { id: string } }) {
   const id = params.id;
@@ -46,37 +48,43 @@ export default function TemplateDetail({ params }: { params: { id: string } }) {
   if (!t) return <div className="max-w-3xl mx-auto p-6">Loading…</div>;
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-4">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Edit Template</h1>
-        <button onClick={onDelete} className="text-sm text-red-600">Delete</button>
+        <ConfirmButton
+          title="Delete template?"
+          description="This cannot be undone. Campaigns referencing this template keep their own copy."
+          confirmText="Delete"
+          onConfirm={onDelete}
+          className="text-sm"
+        >Delete</ConfirmButton>
       </div>
-      <form onSubmit={onSave} className="grid md:grid-cols-2 gap-4 bg-white p-4 rounded shadow">
-        <div>
-          <label className="text-sm text-gray-500">Name</label>
-          <input className="border rounded w-full p-2 mb-2" value={name} onChange={(e) => setName(e.target.value)} required />
-          <label className="text-sm text-gray-500">Subject</label>
-          <input className="border rounded w-full p-2 mb-2" value={subject} onChange={(e) => setSubject(e.target.value)} required />
-          <label className="text-sm text-gray-500">HTML</label>
-          <textarea className="border rounded w-full p-2 h-32 mb-2" value={html} onChange={(e) => setHtml(e.target.value)} />
-          <label className="text-sm text-gray-500">Text</label>
-          <textarea className="border rounded w-full p-2 h-24" value={text} onChange={(e) => setText(e.target.value)} />
-          <button disabled={busy} className="mt-3 bg-black text-white px-3 py-2 rounded">{busy ? 'Saving…' : 'Save (new version)'}</button>
-        </div>
-        <div>
-          <div className="text-sm text-gray-500">Current version</div>
-          <div className="text-sm mb-3">v{t.version}</div>
-          <div className="text-sm text-gray-500 mb-1">Preview</div>
-          <div className="border rounded p-3">
-            <div className="text-sm text-gray-500">Subject</div>
-            <div className="mb-2">{subject}</div>
-            <div className="text-sm text-gray-500">HTML</div>
-            <div className="prose" dangerouslySetInnerHTML={{ __html: html }} />
-            <div className="text-sm text-gray-500 mt-2">Text</div>
-            <pre className="text-xs bg-gray-50 p-2 rounded whitespace-pre-wrap">{text}</pre>
+      <Section title={`Template v${t.version}`}>
+        <form onSubmit={onSave} className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm text-gray-500">Name</label>
+            <Input className="w-full mb-2" value={name} onChange={(e) => setName(e.target.value)} required />
+            <label className="text-sm text-gray-500">Subject</label>
+            <Input className="w-full mb-2" value={subject} onChange={(e) => setSubject(e.target.value)} required />
+            <label className="text-sm text-gray-500">HTML</label>
+            <textarea className="border rounded w-full p-2 h-32 mb-2" value={html} onChange={(e) => setHtml(e.target.value)} />
+            <label className="text-sm text-gray-500">Text</label>
+            <textarea className="border rounded w-full p-2 h-24" value={text} onChange={(e) => setText(e.target.value)} />
+            <PrimaryButton disabled={busy} className="mt-3">{busy ? 'Saving…' : 'Save (new version)'}</PrimaryButton>
           </div>
-        </div>
-      </form>
+          <div>
+            <div className="text-sm text-gray-500 mb-1">Preview</div>
+            <Card className="p-3">
+              <div className="text-sm text-gray-500">Subject</div>
+              <div className="mb-2">{subject}</div>
+              <div className="text-sm text-gray-500">HTML</div>
+              <div className="prose" dangerouslySetInnerHTML={{ __html: html }} />
+              <div className="text-sm text-gray-500 mt-2">Text</div>
+              <pre className="text-xs bg-gray-50 p-2 rounded whitespace-pre-wrap">{text}</pre>
+            </Card>
+          </div>
+        </form>
+      </Section>
     </div>
   );
 }

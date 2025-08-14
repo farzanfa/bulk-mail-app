@@ -1,0 +1,12 @@
+{
+  "name": "MailApp",
+  "short_name": "MailApp",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "theme_color": "#ffe01b",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}
+
+

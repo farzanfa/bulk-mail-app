@@ -1,5 +1,12 @@
 import './globals.css';
 import type { ReactNode } from 'react';
+export const metadata = {
+  title: 'MailApp',
+  description: 'Vercel-native bulk mailing platform',
+  icons: { icon: '/icon.svg', shortcut: '/icon.svg', apple: '/icon.svg' },
+  themeColor: '#ffe01b',
+  manifest: '/manifest.webmanifest'
+};
 import { Toaster } from 'sonner';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -9,7 +16,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <header className="border-b bg-white">
           <div className="max-w-6xl mx-auto p-4 flex items-center justify-between text-sm">
             <div className="flex items-center gap-4">
-              <a href="/" className="font-semibold">MailApp</a>
+              <a href="/" className="font-semibold inline-flex items-center gap-2">
+                <img src="/icon.svg" alt="MailApp" className="h-6 w-6"/>
+                MailApp
+              </a>
               <nav className="hidden md:flex items-center gap-3">
                 <a href="/dashboard" className="text-gray-600 hover:text-black">Dashboard</a>
                 <a href="/templates" className="text-gray-600 hover:text-black">Templates</a>
