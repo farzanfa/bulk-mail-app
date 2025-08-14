@@ -30,7 +30,7 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
           <div className="font-medium">{upload.filename}</div>
           <div className="text-sm text-gray-500">{new Date(upload.created_at).toLocaleString()} • {upload.row_count} rows</div>
           <div className="text-sm text-gray-500 mt-1">Columns: {Array.isArray(upload.columns) ? upload.columns.join(', ') : ''}</div>
-          <div className="text-xs text-gray-500 mt-1">Note: The CSV must have an 'email' column. Other columns are available as variables (e.g., {{ first_name }}).</div>
+          <div className="text-xs text-gray-500 mt-1">Note: The CSV must have an 'email' column. Other columns are available as variables (e.g., <code>{'{{ first_name }}'}</code>).</div>
         </div>
       )}
       <div className="flex items-center gap-2 mb-2">
