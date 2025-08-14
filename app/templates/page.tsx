@@ -69,9 +69,9 @@ export default function TemplatesPage() {
                   </div>
                   <div className="text-[11px] text-gray-500 mb-1">Preview</div>
                   <div className="rounded border bg-white">
-                    <div className="px-2 py-1.5 border-b text-xs font-medium truncate">{render(t.subject || '')}</div>
+                    <div className="px-2 py-1 border-b text-xs font-medium truncate">{render(t.subject || '')}</div>
                     <div className="p-2">
-                      <div className="prose max-w-none text-xs max-h-24 overflow-hidden" dangerouslySetInnerHTML={{ __html: render(t.html || '') }} />
+                      <div className="max-w-none text-[10px] leading-snug max-h-16 overflow-hidden" dangerouslySetInnerHTML={{ __html: render(t.html || '') }} />
                     </div>
                   </div>
                 </Card>
