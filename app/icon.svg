@@ -1,9 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-labelledby="title">
+  <title>MailWeaver</title>
   <rect width="64" height="64" rx="12" fill="#ffe01b"/>
   <g fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="12" y="18" width="40" height="28" rx="4"/>
-    <path d="M14 20l18 14 18-14"/>
+    <!-- Weave motif -->
+    <path d="M16 38 C24 28, 40 28, 48 38"/>
+    <path d="M16 30 C24 40, 40 40, 48 30"/>
+    <!-- Subtle mail chevron -->
+    <path d="M16 26 L32 38 L48 26"/>
   </g>
+  
 </svg>
 
 
