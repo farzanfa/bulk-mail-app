@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { extractVariables } from '@/lib/render';
+import { ensureUserIdFromSession } from '@/lib/user';
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -14,8 +15,8 @@ const updateSchema = z.object({
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session || !(session as any).user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const userId = (session as any).user.id as string;
+  const userId = await ensureUserIdFromSession(session).catch(() => '');
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const t = await prisma.templates.findFirst({ where: { id: params.id, user_id: userId } });
   if (!t) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json({ template: t });
@@ -23,8 +24,8 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session || !(session as any).user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const userId = (session as any).user.id as string;
+  const userId = await ensureUserIdFromSession(session).catch(() => '');
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
   const data = updateSchema.parse(body);
   const existing = await prisma.templates.findFirst({ where: { id: params.id, user_id: userId } });
@@ -49,8 +50,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session || !(session as any).user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const userId = (session as any).user.id as string;
+  const userId = await ensureUserIdFromSession(session).catch(() => '');
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const existing = await prisma.templates.findFirst({ where: { id: params.id, user_id: userId } });
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   await prisma.templates.delete({ where: { id: existing.id } });
