@@ -4,15 +4,20 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { head } from '@vercel/blob';
 import { parse as parseSync } from 'csv-parse/sync';
+import { ensureUserIdFromSession } from '@/lib/user';
 
 export const runtime = 'nodejs';
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || !(session as any).user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const userId = (session as any).user.id as string;
+  const sessionUserId = await ensureUserIdFromSession(session).catch(() => '');
+  if (!sessionUserId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { blob_key, upload_id } = await req.json();
   if (!blob_key || !upload_id) return NextResponse.json({ error: 'blob_key and upload_id required' }, { status: 400 });
+
+  const upload = await prisma.uploads.findUnique({ where: { id: upload_id } });
+  if (!upload) return NextResponse.json({ error: 'Upload not found' }, { status: 404 });
+  if (upload.user_id !== sessionUserId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { url } = await head(blob_key);
   const res = await fetch(url);
@@ -22,24 +27,26 @@ export async function POST(req: Request) {
   const rows = parseSync(text, { columns: true, bom: true, skip_empty_lines: true }) as Array<Record<string, unknown>>;
   const batch: Array<{ email: string; fields: Record<string, unknown> }> = [];
   let total = 0;
+  let columns: string[] | null = null;
   for (const record of rows) {
     const rec: Record<string, unknown> = { ...record };
     const email = String((rec.email || rec.Email || rec.EMAIL) ?? '').trim();
     if (!email) continue;
+    if (!columns) columns = Object.keys(rec);
     delete rec.email; delete rec.Email; delete rec.EMAIL;
     batch.push({ email, fields: rec });
     if (batch.length >= 500) {
-      await prisma.contacts.createMany({ data: batch.map(r => ({ user_id: userId, upload_id, email: r.email, fields: r.fields as any })) });
+      await prisma.contacts.createMany({ data: batch.map(r => ({ user_id: upload.user_id, upload_id, email: r.email, fields: r.fields as any })) });
       total += batch.length;
       batch.length = 0;
     }
   }
   if (batch.length) {
-    await prisma.contacts.createMany({ data: batch.map(r => ({ user_id: userId, upload_id, email: r.email, fields: r.fields as any })) });
+    await prisma.contacts.createMany({ data: batch.map(r => ({ user_id: upload.user_id, upload_id, email: r.email, fields: r.fields as any })) });
     total += batch.length;
   }
 
-  await prisma.uploads.update({ where: { id: upload_id }, data: { row_count: total } });
+  await prisma.uploads.update({ where: { id: upload_id }, data: { row_count: total, ...(columns ? { columns: columns as any } : {}) } });
   return NextResponse.json({ ok: true, total });
 }
 
