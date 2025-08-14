@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { extractVariables } from '@/lib/render';
+import { ensureUserIdFromSession } from '@/lib/user';
 
 const createSchema = z.object({
   name: z.string().min(1),
@@ -14,16 +15,16 @@ const createSchema = z.object({
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session || !(session as any).user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const userId = (session as any).user.id as string;
+  const userId = await ensureUserIdFromSession(session).catch(() => '');
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const templates = await prisma.templates.findMany({ where: { user_id: userId }, orderBy: { updated_at: 'desc' } });
   return NextResponse.json({ templates });
 }
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || !(session as any).user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const userId = (session as any).user.id as string;
+  const userId = await ensureUserIdFromSession(session).catch(() => '');
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
   const { name, subject, html, text } = createSchema.parse(body);
   const variables = Array.from(new Set([...extractVariables(subject), ...extractVariables(html), ...extractVariables(text || '')]));
