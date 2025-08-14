@@ -25,11 +25,6 @@ export default function LoginClient() {
         >
           Continue with Google
         </button>
-        <div className="mt-4 flex items-center justify-center gap-4 text-sm">
-          <a href="/about" className="text-gray-600 hover:text-black">About</a>
-          <a href="/privacy" className="text-gray-600 hover:text-black">Privacy Policy</a>
-          <a href="/terms" className="text-gray-600 hover:text-black">Terms & Conditions</a>
-        </div>
       </Card>
     </div>
   );
