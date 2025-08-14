@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { Section, Input, PrimaryButton, Button } from '@/components/ui';
+import { ConfirmButton } from '@/components/confirm';
 
 export default function UploadsPage() {
   const [uploads, setUploads] = useState<any[]>([]);
@@ -56,18 +58,18 @@ export default function UploadsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Uploads</h1>
         <div className="flex items-center gap-2">
-          <button onClick={bulkDelete} disabled={selected.length===0} className="text-sm border rounded px-3 py-2 disabled:opacity-50">Delete Selected</button>
+          <ConfirmButton onConfirm={bulkDelete} disabled={selected.length===0} className="disabled:opacity-50">Delete Selected</ConfirmButton>
           <label className="inline-flex items-center gap-2 text-sm bg-black text-white px-3 py-2 rounded cursor-pointer">
             <input type="file" accept=".csv" className="hidden" onChange={onFileChange} disabled={busy} />
             {busy ? 'Uploading…' : 'Upload CSV'}
           </label>
         </div>
       </div>
-      <div className="mt-4 bg-white rounded shadow divide-y">
+      <Section title="Recent uploads">
         {uploads.map(u => (
           <div key={u.id} className="p-3 hover:bg-gray-50 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -79,7 +81,7 @@ export default function UploadsPage() {
           </div>
         ))}
         {uploads.length === 0 && <div className="p-3 text-sm text-gray-500">No uploads yet.</div>}
-      </div>
+      </Section>
     </div>
   );
 }

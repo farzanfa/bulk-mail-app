@@ -1,5 +1,8 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { Section, Button } from '@/components/ui';
+import { ConfirmButton } from '@/components/confirm';
+import { StatusBadge } from '@/components/status';
 
 export default function CampaignDetail({ params }: { params: { id: string } }) {
   const id = params.id;
@@ -28,38 +31,36 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
   const progress = c ? Math.round((completed / Math.max(1, c.recipients.length)) * 100) : 0;
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Campaign {id}</h1>
         <div className="flex gap-2">
-          <button onClick={pause} className="px-3 py-2 border rounded">Pause</button>
+          <ConfirmButton onConfirm={pause}>Pause</ConfirmButton>
         </div>
       </div>
-      <div className="mt-4 bg-white p-4 rounded shadow">
+      <Section title="Progress">
         <div className="text-sm text-gray-500 mb-1">Progress</div>
         <div className="h-3 bg-gray-100 rounded">
           <div className="h-3 bg-green-500 rounded" style={{ width: `${progress}%` }} />
         </div>
         <div className="text-sm text-gray-600 mt-1">{completed} / {c?.recipients.length || 0}</div>
-      </div>
-      <div className="mt-4 bg-white rounded shadow">
-        <div className="p-3 font-medium">Recipients</div>
+      </Section>
+      <Section title="Recipients" actions={<a href={`/api/campaigns/${id}/export`} className="px-3 py-2 border rounded text-sm">Export CSV</a>}>
         <div className="divide-y">
           {rec.map((r) => (
             <div key={r.id} className="p-3 flex items-center justify-between text-sm">
               <div className="truncate max-w-md">{r.rendered_subject || '(pending)'} </div>
-              <span className="px-2 py-1 rounded bg-gray-100">{r.status}</span>
+              <StatusBadge value={r.status} />
             </div>
           ))}
           {rec.length === 0 && <div className="p-3 text-sm text-gray-500">No recipients.</div>}
         </div>
         <div className="p-3 flex justify-between items-center text-sm text-gray-600">
-          <a href={`/api/campaigns/${id}/export`} className="px-3 py-2 border rounded">Export CSV</a>
           <button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</button>
           <div>Page {page} / {Math.max(1, Math.ceil(total / pageSize))}</div>
           <button disabled={page >= Math.ceil(total / pageSize)} onClick={() => setPage(p => p + 1)}>Next</button>
         </div>
-      </div>
+      </Section>
     </div>
   );
 }

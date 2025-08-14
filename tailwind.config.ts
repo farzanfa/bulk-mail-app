@@ -8,7 +8,21 @@ const config: Config = {
     './app/**/*.{ts,tsx}'
   ],
   theme: {
-    extend: {}
+    extend: {
+      colors: {
+        brand: {
+          DEFAULT: '#ffe01b',
+          dark: '#f6d006'
+        }
+      },
+      borderRadius: {
+        lg: '12px',
+        xl: '16px'
+      },
+      boxShadow: {
+        card: '0 2px 10px rgba(0,0,0,0.06)'
+      }
+    }
   },
   plugins: []
 };

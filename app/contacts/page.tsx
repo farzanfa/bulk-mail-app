@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { Section, Input, Button } from '@/components/ui';
+import { ConfirmButton } from '@/components/confirm';
 
 type Contact = { id: string; email: string; fields: Record<string, any>; unsubscribed: boolean; created_at: string };
 
@@ -21,22 +23,28 @@ export default function ContactsPage() {
   useEffect(() => { load(); }, [page]);
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Contacts</h1>
         <div className="flex gap-2">
-          <input placeholder="Search email/name" className="border rounded p-2 text-sm" value={search} onChange={(e) => setSearch(e.target.value)} />
-          <button onClick={() => { setPage(1); load(); }} className="px-3 py-2 border rounded text-sm">Search</button>
-          <button disabled={selected.length === 0} onClick={async () => {
-            if (!confirm(`Delete or unsubscribe ${selected.length} contacts?`)) return;
-            const res = await fetch('/api/contacts', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: selected }) });
-            const json = await res.json();
-            alert(`Deleted: ${json.deleted}, Unsubscribed: ${json.unsubscribed}`);
-            await load();
-          }} className="px-3 py-2 bg-red-600 text-white rounded text-sm disabled:opacity-50">Bulk delete</button>
+          <Input placeholder="Search email" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Button onClick={() => { setPage(1); load(); }}>Search</Button>
+          <ConfirmButton
+            disabled={selected.length === 0}
+            title="Delete or unsubscribe contacts?"
+            description={`Selected: ${selected.length}. Contacts with campaign history will be unsubscribed; others deleted.`}
+            confirmText="Proceed"
+            onConfirm={async () => {
+              const res = await fetch('/api/contacts', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: selected }) });
+              const json = await res.json();
+              alert(`Deleted: ${json.deleted}, Unsubscribed: ${json.unsubscribed}`);
+              await load();
+            }}
+            className="bg-red-600 text-white"
+          >Bulk delete</ConfirmButton>
         </div>
       </div>
-      <div className="bg-white rounded shadow overflow-x-auto">
+      <Section title="All contacts">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-50">
             <tr>
@@ -49,7 +57,7 @@ export default function ContactsPage() {
           </thead>
           <tbody>
             {items.map(c => (
-              <tr key={c.id} className="border-t">
+              <tr key={c.id} className="border-t odd:bg-gray-50/40">
                 <td className="p-2"><input type="checkbox" checked={selected.includes(c.id)} onChange={(e)=> setSelected(e.target.checked ? [...selected, c.id] : selected.filter(x=>x!==c.id))} /></td>
                 <td className="p-2">{c.email}</td>
                 <td className="p-2">{c.fields?.first_name || ''}</td>
@@ -62,7 +70,7 @@ export default function ContactsPage() {
             )}
           </tbody>
         </table>
-      </div>
+      </Section>
       <div className="mt-3 flex justify-between text-sm text-gray-600">
         <button disabled={page<=1} onClick={()=>setPage(p=>Math.max(1,p-1))}>Prev</button>
         <div>Page {page} / {Math.max(1, Math.ceil(total / pageSize))}</div>
