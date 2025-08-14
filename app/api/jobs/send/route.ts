@@ -12,6 +12,10 @@ export const runtime = 'nodejs';
 export async function POST(req: Request) {
   const { searchParams } = new URL(req.url);
   const campaignId = searchParams.get('campaignId');
+  const token = searchParams.get('token');
+  if (!process.env.CRON_SECRET || token !== process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   if (!campaignId) return NextResponse.json({ error: 'campaignId required' }, { status: 400 });
 
   const campaign = await prisma.campaigns.findUnique({ where: { id: campaignId } });
