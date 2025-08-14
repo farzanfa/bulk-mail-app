@@ -1,6 +1,6 @@
-# Bulk Mail App (Vercel-native)
+# MailWeaver
 
-End-to-end bulk email platform built on Next.js 14, Vercel Postgres, KV, Blob, Cron/Background Functions, and Gmail API.
+MailWeaver is a modern bulk email platform built on Next.js 14 with Google Sign‑In and Gmail send. It handles templates, CSV uploads, campaigns, rate limiting, background sending, unsubscribe links, and more.
 
 ## Quick Start
 - Copy `.env.example` to `.env.local` and fill values
@@ -13,21 +13,32 @@ End-to-end bulk email platform built on Next.js 14, Vercel Postgres, KV, Blob, C
 - POSTGRES_URL
 - KV_REST_API_URL, KV_REST_API_TOKEN
 - BLOB_READ_WRITE_TOKEN
-- GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI
-- ENCRYPTION_KEY (32-byte hex/base64)
+- GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+- CRON_SECRET (protects cron/worker endpoints)
+- ENCRYPTION_KEY (32‑byte)
 
 ## Features
-- Auth (register, verify, login), link Gmail via OAuth
-- Templates: liquid-style variables, versioning, preview
-- Uploads: CSV to Blob, parse to contacts
-- Contacts: search, paginate, bulk delete/unsubscribe
-- Campaigns: wizard, dry run, launch, progress, export CSV
-- Workers: cron every minute, background batch sender
-- Rate limiting + exponential backoff, idempotency
-- Unsubscribe link per user
+- Google Sign‑In with Gmail send (scopes: gmail.send, openid, email, profile)
+- Templates with variables ({{ first_name }}), versioning, preview; edit/create in modals
+- Uploads: CSV → contacts; robust parsing with header normalization
+- Campaigns: wizard with name, template, upload, Google account; dry run; Run now; progress
+- Background sending with token‑bucket rate limiting and retries
+- Daily cron trigger (compatible with Vercel Hobby); token‑secured worker endpoints
+- Unsubscribe token and footer
+- Responsive UI; PWA meta for mobile add‑to‑home
 
 ## Production
-- Add Vercel Cron to call `/api/jobs/cron` every minute
-- Ensure DB/KV/Blob are created and env vars set in Vercel (Production scope)
+- Set env vars in Vercel (Production): all above + NEXTAUTH_URL
+- Create Neon Postgres, Upstash Redis (KV), and Vercel Blob storage; paste credentials
+- Cron (Hobby): schedule daily; we added a Run now button for manual trigger
+- After schema changes: `npx prisma migrate deploy`
+
+## Security & Privacy
+- Google tokens are encrypted at rest; HTTPS enforced
+- Google user data usage follows the Google API Services User Data Policy (Limited Use)
+
+## Developer
+- Brand: MailWeaver
+- Author: Farzan Arshad (`https://www.farzanfa.com`)
 
 
