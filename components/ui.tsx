@@ -33,7 +33,7 @@ export function Card({ className = '', children, ...props }: HTMLAttributes<HTML
 export function Section({ title, actions, children }: { title: string; actions?: ReactNode; children?: ReactNode }) {
   return (
     <Card className="p-4">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
         <h2 className="font-semibold">{title}</h2>
         {actions}
       </div>
@@ -45,6 +45,7 @@ export function Section({ title, actions, children }: { title: string; actions?:
 export function Badge({ children }: { children: ReactNode }) {
   return <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs">{children}</span>;
 }
+
 
 
 

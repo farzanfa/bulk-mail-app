@@ -21,7 +21,7 @@ export default function Header() {
       ];
   return (
     <header className="border-b bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
         <a href="/" className="font-semibold inline-flex items-center gap-2">
           <img src="/icon.svg" alt="MailApp" className="h-6 w-6"/>
           <span className="hidden sm:inline">MailApp</span>
@@ -46,7 +46,7 @@ export default function Header() {
       </div>
       {open && (
         <div className="md:hidden fixed inset-0 z-50 bg-black/40" onClick={() => setOpen(false)}>
-          <div className="absolute left-0 top-0 h-full w-72 max-w-[85%] bg-white p-4 shadow">
+          <div className="absolute left-0 top-0 h-full w-80 max-w-[85%] bg-white p-4 shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="font-semibold">Menu</div>
               <button aria-label="Close menu" className="p-2" onClick={() => setOpen(false)}>✕</button>

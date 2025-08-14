@@ -13,6 +13,10 @@ table {
 .prose {
   max-width: 100%;
 }
+/* Ensure wide tables scroll on small screens */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
 
 
 
