@@ -26,6 +26,10 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
     await fetch(`/api/campaigns/${id}/pause`, { method: 'POST' });
     await load();
   }
+  async function runNow() {
+    await fetch(`/api/campaigns/${id}/run`, { method: 'POST' });
+    await load();
+  }
 
   const completed = c ? c.recipients.filter((r: any) => r.status !== 'pending').length : 0;
   const progress = c ? Math.round((completed / Math.max(1, c.recipients.length)) * 100) : 0;
@@ -36,6 +40,7 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
         <h1 className="text-2xl font-semibold">Campaign {id}</h1>
         <div className="flex gap-2">
           <ConfirmButton onConfirm={pause}>Pause</ConfirmButton>
+          <Button onClick={runNow}>Run now</Button>
         </div>
       </div>
       <Section title="Progress">
