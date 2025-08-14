@@ -51,7 +51,7 @@ export default function UploadsPage() {
     if (!confirm(`Delete ${selected.length} uploads and their contacts?`)) return;
     const res = await fetch('/api/uploads', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: selected }) });
     const json = await res.json();
-    if (!res.ok) return toast.error(json.error || 'Delete failed');
+    if (!res.ok) { toast.error(json.error || 'Delete failed'); return; }
     toast.success(`Deleted ${json.deleted} uploads`);
     setSelected([]);
     await refresh();
@@ -62,7 +62,14 @@ export default function UploadsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Uploads</h1>
         <div className="flex items-center gap-2">
-          <ConfirmButton onConfirm={bulkDelete} disabled={selected.length===0} className="disabled:opacity-50">Delete Selected</ConfirmButton>
+          <ConfirmButton
+            onConfirm={async () => { await bulkDelete(); }}
+            disabled={selected.length===0}
+            className="disabled:opacity-50"
+            title="Delete selected uploads?"
+            description={`This will remove ${selected.length} uploads and their contacts.`}
+            confirmText="Delete"
+          >Delete Selected</ConfirmButton>
           <label className="inline-flex items-center gap-2 text-sm bg-black text-white px-3 py-2 rounded cursor-pointer">
             <input type="file" accept=".csv" className="hidden" onChange={onFileChange} disabled={busy} />
             {busy ? 'Uploading…' : 'Upload CSV'}
