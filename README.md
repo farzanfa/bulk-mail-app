@@ -30,3 +30,4 @@ End-to-end bulk email platform built on Next.js 14, Vercel Postgres, KV, Blob, C
 - Add Vercel Cron to call `/api/jobs/cron` every minute
 - Ensure DB/KV/Blob are created and env vars set in Vercel (Production scope)
 
+
