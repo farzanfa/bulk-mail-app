@@ -11,9 +11,9 @@ try {
   const svg = readFileSync(svgPath, 'utf8');
   const configuration = {
     path: '/',
-    appName: 'MailApp',
-    appShortName: 'MailApp',
-    appDescription: 'Vercel-native bulk mailing platform',
+    appName: 'MailWeaver',
+    appShortName: 'MailWeaver',
+    appDescription: 'Modern bulk mailing platform',
     theme_color: '#ffe01b',
     background: '#ffffff',
     icons: {
