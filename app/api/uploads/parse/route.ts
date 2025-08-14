@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     delimiter: [',', ';', '\t']
   }) as Array<Record<string, unknown>>;
   const batch: Array<{ email: string; fields: Record<string, unknown> }> = [];
-  let total = 0;
+  let totalProcessed = 0;
   let columns: string[] | null = null;
   // Detect email column name case-insensitively and with loose match
   const headerKeys = rows.length > 0 ? Object.keys(rows[0]) : [];
@@ -56,24 +56,41 @@ export async function POST(req: Request) {
     if (emailKey) delete (rec as any)[emailKey as string];
     batch.push({ email, fields: rec });
     if (batch.length >= 500) {
-      const resIns = await prisma.contacts.createMany({
-        data: batch.map(r => ({ user_id: upload.user_id, upload_id, email: r.email, fields: r.fields as any })),
-        skipDuplicates: true
-      });
-      total += resIns.count;
-      batch.length = 0;
+      // Upsert-like behavior: attach existing contacts to this upload, insert new ones
+      const chunk = batch.splice(0, batch.length);
+      const emails = chunk.map(c => c.email);
+      const existing = await prisma.contacts.findMany({ where: { user_id: upload.user_id, email: { in: emails } }, select: { id: true, email: true } });
+      const existingSet = new Set(existing.map(e => e.email));
+      const toInsert = chunk.filter(c => !existingSet.has(c.email));
+      const toAttach = existing;
+      if (toInsert.length) {
+        await prisma.contacts.createMany({ data: toInsert.map(r => ({ user_id: upload.user_id, upload_id, email: r.email, fields: r.fields as any })) });
+      }
+      // Attach existing to this upload_id
+      for (const ex of toAttach) {
+        await prisma.contacts.update({ where: { id: ex.id }, data: { upload_id } });
+      }
+      totalProcessed += chunk.length;
     }
   }
   if (batch.length) {
-    const resIns = await prisma.contacts.createMany({
-      data: batch.map(r => ({ user_id: upload.user_id, upload_id, email: r.email, fields: r.fields as any })),
-      skipDuplicates: true
-    });
-    total += resIns.count;
+    const chunk = batch.splice(0, batch.length);
+    const emails = chunk.map(c => c.email);
+    const existing = await prisma.contacts.findMany({ where: { user_id: upload.user_id, email: { in: emails } }, select: { id: true, email: true } });
+    const existingSet = new Set(existing.map(e => e.email));
+    const toInsert = chunk.filter(c => !existingSet.has(c.email));
+    const toAttach = existing;
+    if (toInsert.length) {
+      await prisma.contacts.createMany({ data: toInsert.map(r => ({ user_id: upload.user_id, upload_id, email: r.email, fields: r.fields as any })) });
+    }
+    for (const ex of toAttach) {
+      await prisma.contacts.update({ where: { id: ex.id }, data: { upload_id } });
+    }
+    totalProcessed += chunk.length;
   }
 
-  await prisma.uploads.update({ where: { id: upload_id }, data: { row_count: total, ...(columns ? { columns: columns as any } : {}) } });
-  return NextResponse.json({ ok: true, total });
+  await prisma.uploads.update({ where: { id: upload_id }, data: { row_count: totalProcessed, ...(columns ? { columns: columns as any } : {}) } });
+  return NextResponse.json({ ok: true, total: totalProcessed });
 }
 
 
