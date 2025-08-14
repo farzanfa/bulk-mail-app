@@ -11,8 +11,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'No file' }, { status: 400 });
   }
   const name = (form.get('filename') as string) || 'upload.csv';
-  const uploaded = await put(name, file, { access: 'private' });
+  const uploaded = await put(name, file, { access: 'public' });
   return NextResponse.json({ key: uploaded.pathname, url: uploaded.url, size: uploaded.size });
 }
+
 
 
