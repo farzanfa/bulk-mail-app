@@ -44,23 +44,32 @@ export async function POST(req: Request) {
   const normalizedKeys = headerKeys.map(k => ({ raw: k, norm: String(k).trim().toLowerCase() }));
   const emailKey = (normalizedKeys.find(k => k.norm === 'email')
     || normalizedKeys.find(k => k.norm.includes('email')))?.raw;
+  const seenEmails = new Set<string>();
   for (const record of rows) {
     const rec: Record<string, unknown> = { ...record };
-    const email = String((emailKey ? rec[emailKey] : (rec.email || rec.Email || rec.EMAIL)) ?? '').trim();
+    const email = String((emailKey ? rec[emailKey] : (rec.email || rec.Email || rec.EMAIL)) ?? '').trim().toLowerCase();
     if (!email) continue;
+    if (seenEmails.has(email)) continue;
+    seenEmails.add(email);
     if (!columns) columns = Object.keys(rec);
     delete (rec as any).email; delete (rec as any).Email; delete (rec as any).EMAIL;
     if (emailKey) delete (rec as any)[emailKey as string];
     batch.push({ email, fields: rec });
     if (batch.length >= 500) {
-      await prisma.contacts.createMany({ data: batch.map(r => ({ user_id: upload.user_id, upload_id, email: r.email, fields: r.fields as any })) });
-      total += batch.length;
+      const resIns = await prisma.contacts.createMany({
+        data: batch.map(r => ({ user_id: upload.user_id, upload_id, email: r.email, fields: r.fields as any })),
+        skipDuplicates: true
+      });
+      total += resIns.count;
       batch.length = 0;
     }
   }
   if (batch.length) {
-    await prisma.contacts.createMany({ data: batch.map(r => ({ user_id: upload.user_id, upload_id, email: r.email, fields: r.fields as any })) });
-    total += batch.length;
+    const resIns = await prisma.contacts.createMany({
+      data: batch.map(r => ({ user_id: upload.user_id, upload_id, email: r.email, fields: r.fields as any })),
+      skipDuplicates: true
+    });
+    total += resIns.count;
   }
 
   await prisma.uploads.update({ where: { id: upload_id }, data: { row_count: total, ...(columns ? { columns: columns as any } : {}) } });
