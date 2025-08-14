@@ -1,8 +1,19 @@
 "use client";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { Card } from '@/components/ui';
 
 export default function LoginClient() {
+  const router = useRouter();
+
+  // Strip callbackUrl from the address bar immediately
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('callbackUrl=')) {
+      router.replace('/login');
+    }
+  }, [router]);
+
   return (
     <div className="max-w-sm mx-auto mt-24">
       <Card className="p-6 text-center space-y-4">
