@@ -26,39 +26,171 @@ export default function TemplatesPage() {
   const [editHtml, setEditHtml] = useState('');
   const [editVersion, setEditVersion] = useState<number | undefined>(undefined);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [loading, setLoading] = useState(true);
   const vars = useMemo(() => Array.from(new Set([...extractVars(subject), ...extractVars(html)])), [subject, html]);
 
   async function refresh() {
-    const res = await fetch('/api/templates', { cache: 'no-store' });
-    const json = await res.json();
-    setItems(json.templates || []);
+    try {
+      setLoading(true);
+      const res = await fetch('/api/templates', { cache: 'no-store' });
+      if (!res.ok) {
+        throw new Error(`Failed to fetch templates: ${res.status}`);
+      }
+      const json = await res.json();
+      setItems(json.templates || []);
+    } catch (err: any) {
+      console.error('Failed to refresh templates:', err);
+      toast.error('Failed to load templates');
+    } finally {
+      setLoading(false);
+    }
   }
+
   useEffect(() => { refresh(); }, []);
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !subject.trim()) { toast.error('Name and subject are required'); return; }
+    if (!name.trim() || !subject.trim()) { 
+      toast.error('Name and subject are required'); 
+      return; 
+    }
+    
     setSavingCreate(true);
     try {
-      const res = await fetch('/api/templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, subject, html, text }) });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) { toast.error(json.error || 'Failed to save'); return; }
-      setName('');
-      setSubject('');
-      setHtml('<p>Hello {{ first_name }}</p>');
-      setText('');
-      await refresh();
-      toast.success('Template saved');
-      setOpenCreate(false);
+      const res = await fetch('/api/templates', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ name: name.trim(), subject: subject.trim(), html: html.trim(), text: text.trim() }) 
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to save template: ${res.status}`);
+      }
+      
+      const json = await res.json();
+      if (json.template) {
+        toast.success('Template saved successfully');
+        setName('');
+        setSubject('');
+        setHtml('<p>Hello {{ first_name }}</p>');
+        setText('');
+        setOpenCreate(false);
+        await refresh();
+      } else {
+        throw new Error('Invalid response from server');
+      }
     } catch (err: any) {
-      toast.error(err?.message || 'Network error');
+      console.error('Failed to create template:', err);
+      toast.error(err?.message || 'Failed to save template');
     } finally {
       setSavingCreate(false);
     }
   }
 
-  let sampleObj: Record<string, unknown> = {};
-  const render = (tpl: string) => sanitizeHtml(tpl.replace(/\{\{\s*([a-zA-Z0-9_\.]+)\s*\}\}/g, (_, k) => String((sampleObj as any)[k] ?? '')));
+  async function onEditTemplate(templateId: string) {
+    try {
+      const res = await fetch(`/api/templates/${templateId}`, { cache: 'no-store' });
+      if (!res.ok) {
+        throw new Error(`Failed to load template: ${res.status}`);
+      }
+      
+      const json = await res.json();
+      if (json.template) {
+        setEditId(json.template.id);
+        setEditName(json.template.name || '');
+        setEditSubject(json.template.subject || '');
+        setEditHtml(json.template.html || '');
+        setEditVersion(json.template.version);
+        setOpenEdit(true);
+      } else {
+        throw new Error('Invalid template data received');
+      }
+    } catch (err: any) {
+      console.error('Failed to load template for editing:', err);
+      toast.error(err?.message || 'Failed to load template');
+    }
+  }
+
+  async function onUpdateTemplate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editId || !editName.trim() || !editSubject.trim()) { 
+      toast.error('Name and subject are required'); 
+      return; 
+    }
+    
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/templates/${editId}`, { 
+        method: 'PUT', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ 
+          name: editName.trim(), 
+          subject: editSubject.trim(), 
+          html: editHtml.trim(), 
+          text: '' 
+        }) 
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to update template: ${res.status}`);
+      }
+      
+      const json = await res.json();
+      if (json.template) {
+        toast.success('Template updated successfully');
+        setOpenEdit(false);
+        await refresh();
+      } else {
+        throw new Error('Invalid response from server');
+      }
+    } catch (err: any) {
+      console.error('Failed to update template:', err);
+      toast.error(err?.message || 'Failed to update template');
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
+  async function onDeleteTemplate(templateId: string) {
+    if (!confirm('Are you sure you want to delete this template? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/templates/${templateId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to delete template: ${res.status}`);
+      }
+      
+      toast.success('Template deleted successfully');
+      setOpenEdit(false);
+      await refresh();
+    } catch (err: any) {
+      console.error('Failed to delete template:', err);
+      toast.error(err?.message || 'Failed to delete template');
+    }
+  }
+
+  // Sample data for preview rendering
+  const sampleObj: Record<string, unknown> = {
+    first_name: 'John',
+    last_name: 'Doe',
+    company: 'Acme Corp',
+    email: 'john@example.com'
+  };
+
+  const render = (tpl: string) => {
+    if (!tpl) return '';
+    try {
+      return sanitizeHtml(tpl.replace(/\{\{\s*([a-zA-Z0-9_\.]+)\s*\}\}/g, (_, k) => String(sampleObj[k] ?? '')));
+    } catch (err) {
+      console.error('Error rendering template:', err);
+      return tpl;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -86,7 +218,12 @@ export default function TemplatesPage() {
 
         {/* Templates Grid */}
         <Section title="Your Templates">
-          {items.length === 0 ? (
+          {loading ? (
+            <Card className="p-16 text-center">
+              <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading templates...</p>
+            </Card>
+          ) : items.length === 0 ? (
             <Card className="p-16 text-center bg-gradient-to-br from-white to-purple-50 border-purple-200">
               <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,8 +232,8 @@ export default function TemplatesPage() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">No templates yet</h3>
               <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                                 Create your first email template to start building personalized campaigns. 
-                 Templates support variables like {'{{ first_name }}'} for dynamic content.
+                Create your first email template to start building personalized campaigns. 
+                Templates support variables like {'{{ first_name }}'} for dynamic content.
               </p>
               <PrimaryButton 
                 onClick={() => setOpenCreate(true)}
@@ -114,17 +251,7 @@ export default function TemplatesPage() {
                 <button 
                   key={t.id} 
                   type="button" 
-                  onClick={async () => {
-                    // load template detail for edit
-                    const res = await fetch(`/api/templates/${t.id}`, { cache: 'no-store' });
-                    const json = await res.json();
-                    setEditId(json.template.id);
-                    setEditName(json.template.name);
-                    setEditSubject(json.template.subject);
-                    setEditHtml(json.template.html);
-                    setEditVersion(json.template.version);
-                    setOpenEdit(true);
-                  }} 
+                  onClick={() => onEditTemplate(t.id)}
                   className="block text-left group"
                 >
                   <Card className="p-6 h-full hover:shadow-xl transition-all duration-300 group-hover:scale-105 border-2 border-transparent group-hover:border-purple-200">
@@ -132,10 +259,10 @@ export default function TemplatesPage() {
                     <div className="flex items-start justify-between gap-3 mb-4">
                       <div className="flex-1 min-w-0">
                         <div className="text-lg font-semibold text-gray-900 truncate mb-1 group-hover:text-purple-600 transition-colors">
-                          {t.name}
+                          {t.name || 'Untitled Template'}
                         </div>
                         <div className="text-sm text-gray-500">
-                          v{t.version} • {new Date(t.updated_at).toLocaleDateString('en-US', { 
+                          v{t.version || 1} • {new Date(t.updated_at || t.created_at).toLocaleDateString('en-US', { 
                             month: 'short', 
                             day: 'numeric', 
                             hour: '2-digit', 
@@ -148,7 +275,7 @@ export default function TemplatesPage() {
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                           </svg>
-                          {t.variables.length} vars
+                          {Array.isArray(t.variables) ? t.variables.length : 0} vars
                         </span>
                       </div>
                     </div>
@@ -157,7 +284,7 @@ export default function TemplatesPage() {
                     <div className="mb-4">
                       <div className="text-xs text-gray-500 mb-2 uppercase tracking-wide font-medium">Subject</div>
                       <div className="text-sm text-gray-700 bg-gray-50 rounded px-3 py-2 border truncate">
-                        {render(t.subject || '')}
+                        {render(t.subject || '') || 'No subject'}
                       </div>
                     </div>
 
@@ -169,7 +296,7 @@ export default function TemplatesPage() {
                           <div className="p-3 h-full overflow-hidden">
                             <div
                               className="w-full h-full transform scale-75 origin-top-left"
-                              dangerouslySetInnerHTML={{ __html: render(t.html || '') }}
+                              dangerouslySetInnerHTML={{ __html: render(t.html || '') || '<p class="text-gray-400">No content</p>' }}
                             />
                           </div>
                         </div>
@@ -249,9 +376,9 @@ export default function TemplatesPage() {
                         onChange={(e) => setHtml(e.target.value)}
                         placeholder="<p>Hello {{ first_name }}, welcome to our service!</p>"
                       />
-                                             <p className="text-xs text-gray-500 mt-1">
-                         Use variables like {'{{ first_name }}'}, {'{{ company }}'}, etc. for personalization
-                       </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Use variables like {'{{ first_name }}'}, {'{{ company }}'}, etc. for personalization
+                      </p>
                     </div>
                   </div>
 
@@ -352,22 +479,7 @@ export default function TemplatesPage() {
 
               {/* Modal Content */}
               <div className="p-6">
-                <form onSubmit={async (e) => {
-                  e.preventDefault();
-                  if (!editId) return;
-                  setSavingEdit(true);
-                  try {
-                    const res = await fetch(`/api/templates/${editId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: editName, subject: editSubject, html: editHtml, text: '' }) });
-                    if (!res.ok) throw new Error('Save failed');
-                    await refresh();
-                    setOpenEdit(false);
-                    toast.success('Template updated successfully');
-                  } catch (err) {
-                    toast.error('Failed to update template');
-                  } finally {
-                    setSavingEdit(false);
-                  }
-                }} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <form onSubmit={onUpdateTemplate} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Left Column - Form Fields */}
                   <div className="space-y-6">
                     <div>
@@ -407,13 +519,13 @@ export default function TemplatesPage() {
                       <div className="mb-4">
                         <div className="text-sm font-medium text-gray-700 mb-2">Subject:</div>
                         <div className="text-gray-900 bg-gray-50 rounded px-3 py-2 border">
-                          {editSubject}
+                          {editSubject || 'No subject'}
                         </div>
                       </div>
                       <div>
                         <div className="text-sm font-medium text-gray-700 mb-2">HTML Body:</div>
                         <div className="bg-white border rounded-lg p-4 max-h-64 overflow-y-auto">
-                          <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(editHtml) }} />
+                          <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(editHtml || '') || '<p class="text-gray-400">No content</p>' }} />
                         </div>
                       </div>
                     </Card>
@@ -424,18 +536,7 @@ export default function TemplatesPage() {
                     <button 
                       type="button" 
                       className="text-sm text-red-600 hover:text-red-700 font-medium px-3 py-2 rounded-lg hover:bg-red-50 transition-colors"
-                      onClick={async () => {
-                        if (!editId) return;
-                        if (!confirm('Are you sure you want to delete this template? This action cannot be undone.')) return;
-                        try {
-                          await fetch(`/api/templates/${editId}`, { method: 'DELETE' });
-                          await refresh();
-                          setOpenEdit(false);
-                          toast.success('Template deleted successfully');
-                        } catch (err) {
-                          toast.error('Failed to delete template');
-                        }
-                      }}
+                      onClick={() => onDeleteTemplate(editId)}
                     >
                       <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
