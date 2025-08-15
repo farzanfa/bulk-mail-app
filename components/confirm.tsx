@@ -36,6 +36,7 @@ export function ConfirmButton({
             <div className="p-4 flex items-center justify-end gap-2">
               <Button onClick={() => setOpen(false)}>{cancelText}</Button>
               <PrimaryButton
+                loading={busy}
                 disabled={busy}
                 onClick={async () => {
                   try {

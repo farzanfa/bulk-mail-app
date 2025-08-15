@@ -22,12 +22,16 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
   }
   useEffect(() => { load(); }, [id, page]);
 
+  const [busyPause, setBusyPause] = useState(false);
+  const [busyRun, setBusyRun] = useState(false);
   async function pause() {
-    await fetch(`/api/campaigns/${id}/pause`, { method: 'POST' });
+    setBusyPause(true);
+    try { await fetch(`/api/campaigns/${id}/pause`, { method: 'POST' }); } finally { setBusyPause(false); }
     await load();
   }
   async function runNow() {
-    await fetch(`/api/campaigns/${id}/run`, { method: 'POST' });
+    setBusyRun(true);
+    try { await fetch(`/api/campaigns/${id}/run`, { method: 'POST' }); } finally { setBusyRun(false); }
     await load();
   }
 
@@ -40,7 +44,7 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
         <h1 className="text-2xl font-semibold">Campaign {id}</h1>
         <div className="flex gap-2">
           <ConfirmButton onConfirm={pause}>Pause</ConfirmButton>
-          <Button onClick={runNow}>Run now</Button>
+          <Button onClick={runNow} loading={busyRun}>Run now</Button>
         </div>
       </div>
       <Section title="Progress">

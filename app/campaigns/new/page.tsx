@@ -28,13 +28,21 @@ export default function CampaignNewPage() {
     })();
   }, []);
 
+  const [loadingDryRun, setLoadingDryRun] = useState(false);
+  const [loadingLaunch, setLoadingLaunch] = useState(false);
+
   async function doDryRun() {
     if (!templateId) { alert('Select a template'); return; }
     if (!uploadId) { alert('Select an upload'); return; }
-    const res = await fetch('/api/campaigns/dry-run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ template_id: templateId, upload_id: uploadId, limit: 10 }) });
-    const json = await res.json();
-    if (!res.ok) { alert(json.error || 'Dry run failed'); return; }
-    setDry(json.renders || []);
+    setLoadingDryRun(true);
+    try {
+      const res = await fetch('/api/campaigns/dry-run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ template_id: templateId, upload_id: uploadId, limit: 10 }) });
+      const json = await res.json();
+      if (!res.ok) { alert(json.error || 'Dry run failed'); return; }
+      setDry(json.renders || []);
+    } finally {
+      setLoadingDryRun(false);
+    }
   }
 
   async function createAndLaunch() {
@@ -42,13 +50,18 @@ export default function CampaignNewPage() {
     if (!templateId) { alert('Select a template'); return; }
     if (!uploadId) { alert('Select an upload'); return; }
     if (!googleId) { alert('Connect/select a Google account'); return; }
-    const res = await fetch('/api/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, google_account_id: googleId, template_id: templateId, upload_id: uploadId, filters: {} }) });
-    const json = await res.json();
-    if (!res.ok) { alert(json.error || 'Failed'); return; }
-    const id = json.campaign.id;
-    const r = await fetch(`/api/campaigns/${id}/launch`, { method: 'POST' });
-    if (!r.ok) { alert('Launch failed'); return; }
-    window.location.href = `/campaigns/${id}`;
+    setLoadingLaunch(true);
+    try {
+      const res = await fetch('/api/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, google_account_id: googleId, template_id: templateId, upload_id: uploadId, filters: {} }) });
+      const json = await res.json();
+      if (!res.ok) { alert(json.error || 'Failed'); return; }
+      const id = json.campaign.id;
+      const r = await fetch(`/api/campaigns/${id}/launch`, { method: 'POST' });
+      if (!r.ok) { alert('Launch failed'); return; }
+      window.location.href = `/campaigns/${id}`;
+    } finally {
+      setLoadingLaunch(false);
+    }
   }
 
   return (
@@ -95,8 +108,8 @@ export default function CampaignNewPage() {
         {/* Limits are hidden and use safe defaults on the server */}
       </div>
       <div className="mt-4 flex gap-2">
-        <Button disabled={!canDryRun} onClick={doDryRun} className="disabled:opacity-50">Dry run</Button>
-        <PrimaryButton disabled={!canDryRun || !googleId || !name.trim()} onClick={createAndLaunch} className="disabled:opacity-50">Launch</PrimaryButton>
+        <Button disabled={!canDryRun} loading={loadingDryRun} onClick={doDryRun} className="disabled:opacity-50">Dry run</Button>
+        <PrimaryButton disabled={!canDryRun || !googleId || !name.trim()} loading={loadingLaunch} onClick={createAndLaunch} className="disabled:opacity-50">Launch</PrimaryButton>
       </div>
       {dry.length > 0 && (
         <Section title="Dry run preview">

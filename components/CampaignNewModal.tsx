@@ -11,6 +11,8 @@ export function CampaignNewModal({ onClose }: { onClose: () => void }) {
   const [googleId, setGoogleId] = useState('');
   const [name, setName] = useState('');
   const [dry, setDry] = useState<any[]>([]);
+  const [loadingDryRun, setLoadingDryRun] = useState(false);
+  const [loadingLaunch, setLoadingLaunch] = useState(false);
   const canDryRun = useMemo(() => Boolean(templateId && uploadId), [templateId, uploadId]);
 
   useEffect(() => {
@@ -28,10 +30,15 @@ export function CampaignNewModal({ onClose }: { onClose: () => void }) {
   async function doDryRun() {
     if (!templateId) { alert('Select a template'); return; }
     if (!uploadId) { alert('Select an upload'); return; }
-    const res = await fetch('/api/campaigns/dry-run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ template_id: templateId, upload_id: uploadId, limit: 10 }) });
-    const json = await res.json();
-    if (!res.ok) { alert(json.error || 'Dry run failed'); return; }
-    setDry(json.renders || []);
+    setLoadingDryRun(true);
+    try {
+      const res = await fetch('/api/campaigns/dry-run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ template_id: templateId, upload_id: uploadId, limit: 10 }) });
+      const json = await res.json();
+      if (!res.ok) { alert(json.error || 'Dry run failed'); return; }
+      setDry(json.renders || []);
+    } finally {
+      setLoadingDryRun(false);
+    }
   }
 
   async function createAndLaunch() {
@@ -39,13 +46,18 @@ export function CampaignNewModal({ onClose }: { onClose: () => void }) {
     if (!templateId) { alert('Select a template'); return; }
     if (!uploadId) { alert('Select an upload'); return; }
     if (!googleId) { alert('Connect/select a Google account'); return; }
-    const res = await fetch('/api/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, google_account_id: googleId, template_id: templateId, upload_id: uploadId, filters: {} }) });
-    const json = await res.json();
-    if (!res.ok) { alert(json.error || 'Failed'); return; }
-    const id = json.campaign.id;
-    const r = await fetch(`/api/campaigns/${id}/launch`, { method: 'POST' });
-    if (!r.ok) { alert('Launch failed'); return; }
-    window.location.href = `/campaigns/${id}`;
+    setLoadingLaunch(true);
+    try {
+      const res = await fetch('/api/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, google_account_id: googleId, template_id: templateId, upload_id: uploadId, filters: {} }) });
+      const json = await res.json();
+      if (!res.ok) { alert(json.error || 'Failed'); return; }
+      const id = json.campaign.id;
+      const r = await fetch(`/api/campaigns/${id}/launch`, { method: 'POST' });
+      if (!r.ok) { alert('Launch failed'); return; }
+      window.location.href = `/campaigns/${id}`;
+    } finally {
+      setLoadingLaunch(false);
+    }
   }
 
   return (
@@ -96,8 +108,8 @@ export function CampaignNewModal({ onClose }: { onClose: () => void }) {
             </Card>
           </div>
           <div className="flex gap-2">
-            <Button disabled={!canDryRun} onClick={doDryRun} className="disabled:opacity-50">Dry run</Button>
-            <PrimaryButton disabled={!canDryRun || !googleId || !name.trim()} onClick={createAndLaunch} className="disabled:opacity-50">Launch</PrimaryButton>
+            <Button disabled={!canDryRun} loading={loadingDryRun} onClick={doDryRun} className="disabled:opacity-50">Dry run</Button>
+            <PrimaryButton disabled={!canDryRun || !googleId || !name.trim()} loading={loadingLaunch} onClick={createAndLaunch} className="disabled:opacity-50">Launch</PrimaryButton>
           </div>
           {dry.length > 0 && (
             <Section title="Dry run preview">

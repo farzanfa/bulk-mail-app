@@ -38,29 +38,38 @@ export default function CampaignsPage() {
     }
   }
 
+  const [busyRun, setBusyRun] = useState(false);
+  const [busyLaunch, setBusyLaunch] = useState(false);
+  const [busyPause, setBusyPause] = useState(false);
   async function launch() {
     if (!current) return;
+    setBusyLaunch(true);
     const res = await fetch(`/api/campaigns/${current.id}/launch`, { method: 'POST' });
     if (!res.ok) { toast.error('Launch failed'); return; }
     toast.success('Campaign launched');
     await refresh();
     await openCampaignModal(current.id);
+    setBusyLaunch(false);
   }
   async function pause() {
     if (!current) return;
+    setBusyPause(true);
     const res = await fetch(`/api/campaigns/${current.id}/pause`, { method: 'POST' });
     if (!res.ok) { toast.error('Pause failed'); return; }
     toast.success('Campaign paused');
     await refresh();
     await openCampaignModal(current.id);
+    setBusyPause(false);
   }
   async function runNow() {
     if (!current) return;
+    setBusyRun(true);
     const res = await fetch(`/api/campaigns/${current.id}/run`, { method: 'POST' });
     if (!res.ok) { toast.error('Run failed'); return; }
     toast.success('Worker triggered');
     await refresh();
     await openCampaignModal(current.id);
+    setBusyRun(false);
   }
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -158,7 +167,7 @@ export default function CampaignsPage() {
                     await refresh();
                   }}
                 >Delete</ConfirmButton>
-                <Button onClick={runNow} className="text-sm">Run now</Button>
+                <Button onClick={runNow} loading={busyRun} className="text-sm">Run now</Button>
               </div>
             </div>
           </div>
