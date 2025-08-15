@@ -80,26 +80,7 @@ export default function HomeClient() {
         </div>
       </section>
 
-      <section>
-        <div className="text-center mb-4">
-          <h2 className="text-xl font-semibold">How it works</h2>
-          <p className="text-sm text-gray-600">Three simple steps to send personalized campaigns</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card className="p-4">
-            <div className="text-sm font-medium mb-1">1. Upload your CSV</div>
-            <p className="text-sm text-gray-600">Import contacts with automatic header detection and de-duplication.</p>
-          </Card>
-          <Card className="p-4">
-            <div className="text-sm font-medium mb-1">2. Create a template</div>
-            <p className="text-sm text-gray-600">Use variables like {`{{ first_name }}`} for personalized subjects and bodies.</p>
-          </Card>
-          <Card className="p-4">
-            <div className="text-sm font-medium mb-1">3. Launch and monitor</div>
-            <p className="text-sm text-gray-600">Send via Gmail with built-in rate limiting and live progress.</p>
-          </Card>
-        </div>
-      </section>
+      
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="p-4 text-center">
@@ -116,57 +97,9 @@ export default function HomeClient() {
         </Card>
       </section>
 
-      <section>
-        <div className="text-center mb-4">
-          <h2 className="text-xl font-semibold">Why teams choose MailWeaver</h2>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Card className="p-4">
-            <div className="text-sm font-medium mb-1">Gmail-native sending</div>
-            <p className="text-sm text-gray-600">Authenticate with Google and send via Gmail API for reliable deliverability.</p>
-          </Card>
-          <Card className="p-4">
-            <div className="text-sm font-medium mb-1">Personalization at scale</div>
-            <p className="text-sm text-gray-600">Liquid-style variables and dry-run previews prevent merge mistakes.</p>
-          </Card>
-          <Card className="p-4">
-            <div className="text-sm font-medium mb-1">Robust CSV ingestion</div>
-            <p className="text-sm text-gray-600">Header normalization, trimming, de-duplication, and safe upserts.</p>
-          </Card>
-          <Card className="p-4">
-            <div className="text-sm font-medium mb-1">Safe sending</div>
-            <p className="text-sm text-gray-600">Token bucket rate limiting and backoff to respect provider limits.</p>
-          </Card>
-          <Card className="p-4">
-            <div className="text-sm font-medium mb-1">Unsubscribe built-in</div>
-            <p className="text-sm text-gray-600">HMAC-protected links keep you compliant with one click.</p>
-          </Card>
-          <Card className="p-4">
-            <div className="text-sm font-medium mb-1">Modern UI</div>
-            <p className="text-sm text-gray-600">Responsive, Mailchimp-inspired design with fast modals and cards.</p>
-          </Card>
-        </div>
-      </section>
+      
 
-      <section>
-        <div className="text-center mb-4">
-          <h2 className="text-xl font-semibold">Use cases</h2>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card className="p-4">
-            <div className="text-sm font-medium mb-1">Product launches</div>
-            <p className="text-sm text-gray-600">Announce new features to your entire customer base safely.</p>
-          </Card>
-          <Card className="p-4">
-            <div className="text-sm font-medium mb-1">Newsletters</div>
-            <p className="text-sm text-gray-600">Send personalized newsletters using CSV fields without code.</p>
-          </Card>
-          <Card className="p-4">
-            <div className="text-sm font-medium mb-1">Event invites</div>
-            <p className="text-sm text-gray-600">Invite segmented contacts and track sending progress.</p>
-          </Card>
-        </div>
-      </section>
+      
 
       <section>
         <Card className="p-5">
