@@ -63,14 +63,21 @@ table {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+.marquee { position: relative; }
 .marquee-track {
   display: inline-flex;
   gap: 12px;
   padding-left: 12px;
   animation: marquee 22s linear infinite;
+  white-space: nowrap;
 }
+.marquee:hover .marquee-track { animation-play-state: paused; }
 .marquee-mask {
   mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
 }
 
 /* Hover lift */

@@ -73,7 +73,7 @@ export default function HomeClient() {
 
       <section>
         <div className="text-center text-xs text-gray-500 mb-3">Trusted by teams using</div>
-        <div className="overflow-hidden marquee-mask">
+        <div className="overflow-hidden marquee marquee-mask">
           <div className="marquee-track">
             {['Notion','Figma','Linear','Vercel','Netlify','Next.js','Gmail','Zapier'].map((b) => (
               <span key={b} className="px-3 py-1.5 rounded-full border text-xs text-gray-700 bg-white hover:lift">{b}</span>
