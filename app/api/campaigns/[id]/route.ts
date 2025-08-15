@@ -12,4 +12,15 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   return NextResponse.json({ campaign: item });
 }
 
+export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+  if (!session || !(session as any).user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const userId = (session as any).user.id as string;
+  const found = await prisma.campaigns.findFirst({ where: { id: params.id, user_id: userId } });
+  if (!found) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  await prisma.campaign_recipients.deleteMany({ where: { campaign_id: params.id } });
+  await prisma.campaigns.delete({ where: { id: params.id } });
+  return NextResponse.json({ ok: true });
+}
+
 

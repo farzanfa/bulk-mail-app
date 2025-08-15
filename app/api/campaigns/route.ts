@@ -40,4 +40,17 @@ export async function POST(req: Request) {
   return NextResponse.json({ campaign: created });
 }
 
+export async function DELETE(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session || !(session as any).user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const userId = (session as any).user.id as string;
+  const body = await req.json().catch(() => ({}));
+  const ids: string[] = Array.isArray(body?.ids) ? body.ids : [];
+  if (ids.length === 0) return NextResponse.json({ deleted: 0 });
+  // Delete recipients first due to FK
+  await prisma.campaign_recipients.deleteMany({ where: { campaign_id: { in: ids } } });
+  const res = await prisma.campaigns.deleteMany({ where: { id: { in: ids }, user_id: userId } });
+  return NextResponse.json({ deleted: res.count });
+}
+
 

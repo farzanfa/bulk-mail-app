@@ -35,6 +35,10 @@ export function CampaignNewModal({ onClose }: { onClose: () => void }) {
   }
 
   async function createAndLaunch() {
+    if (!name.trim()) { alert('Please enter a campaign name'); return; }
+    if (!templateId) { alert('Select a template'); return; }
+    if (!uploadId) { alert('Select an upload'); return; }
+    if (!googleId) { alert('Connect/select a Google account'); return; }
     const res = await fetch('/api/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, google_account_id: googleId, template_id: templateId, upload_id: uploadId, filters: {} }) });
     const json = await res.json();
     if (!res.ok) { alert(json.error || 'Failed'); return; }
@@ -93,7 +97,7 @@ export function CampaignNewModal({ onClose }: { onClose: () => void }) {
           </div>
           <div className="flex gap-2">
             <Button disabled={!canDryRun} onClick={doDryRun} className="disabled:opacity-50">Dry run</Button>
-            <PrimaryButton disabled={!canDryRun || !googleId} onClick={createAndLaunch} className="disabled:opacity-50">Launch</PrimaryButton>
+            <PrimaryButton disabled={!canDryRun || !googleId || !name.trim()} onClick={createAndLaunch} className="disabled:opacity-50">Launch</PrimaryButton>
           </div>
           {dry.length > 0 && (
             <Section title="Dry run preview">

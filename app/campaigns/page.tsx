@@ -12,6 +12,7 @@ export default function CampaignsPage() {
   const [openEdit, setOpenEdit] = useState(false);
   const [current, setCurrent] = useState<any | null>(null);
   const [openNew, setOpenNew] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
 
   async function refresh() {
     const res = await fetch('/api/campaigns', { cache: 'no-store' });
@@ -65,7 +66,24 @@ export default function CampaignsPage() {
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Campaigns</h1>
-        <button onClick={() => setOpenNew(true)} className="px-3 py-2 bg-black text-white rounded text-sm">New Campaign</button>
+        <div className="flex items-center gap-2">
+          <ConfirmButton
+            onConfirm={async () => {
+              if (selected.length === 0) return;
+              const res = await fetch('/api/campaigns', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: selected }) });
+              const j = await res.json();
+              if (!res.ok) { return; }
+              setSelected([]);
+              await refresh();
+            }}
+            disabled={selected.length===0}
+            className="disabled:opacity-50"
+            title="Delete selected campaigns?"
+            description={`This will remove ${selected.length} campaigns and their recipients.`}
+            confirmText="Delete"
+          >Delete Selected</ConfirmButton>
+          <button onClick={() => setOpenNew(true)} className="px-3 py-2 bg-black text-white rounded text-sm">New Campaign</button>
+        </div>
       </div>
       <Section title="All campaigns">
         {loading && <div className="p-3 text-sm text-gray-500">Loading…</div>}
@@ -76,7 +94,17 @@ export default function CampaignsPage() {
               <div key={c.id} className="block cursor-pointer" onClick={() => openCampaignModal(c.id)}>
                 <Card className="p-4 h-full hover:shadow-md transition">
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <div>
+                    <div className="flex items-start gap-2">
+                      <input
+                        type="checkbox"
+                        className="mt-1"
+                        onClick={(e) => e.stopPropagation()}
+                        checked={selected.includes(c.id)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          setSelected(e.target.checked ? [...selected, c.id] : selected.filter(x => x !== c.id));
+                        }}
+                      />
                       <div className="font-medium truncate max-w-[14rem]">{c.name || c.id}</div>
                       <div className="text-xs text-gray-500">Started: {c.started_at ? new Date(c.started_at).toLocaleString() : '—'}</div>
                     </div>
@@ -117,6 +145,19 @@ export default function CampaignsPage() {
                 {current.status !== 'paused' && current.status !== 'draft' && (
                   <ConfirmButton className="text-sm" title="Pause campaign?" confirmText="Pause" onConfirm={pause}>Pause</ConfirmButton>
                 )}
+                <ConfirmButton
+                  className="text-sm"
+                  title="Delete campaign?"
+                  description="This will delete the campaign and its recipients."
+                  confirmText="Delete"
+                  onConfirm={async () => {
+                    if (!current) return;
+                    const res = await fetch(`/api/campaigns/${current.id}`, { method: 'DELETE' });
+                    if (!res.ok) return;
+                    setOpenEdit(false);
+                    await refresh();
+                  }}
+                >Delete</ConfirmButton>
                 <Button onClick={runNow} className="text-sm">Run now</Button>
               </div>
             </div>
