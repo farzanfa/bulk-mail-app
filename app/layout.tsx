@@ -8,7 +8,26 @@ export const metadata = {
   title: 'MailWeaver',
   description: 'Modern bulk mailing platform',
   icons: { icon: '/icon.svg', shortcut: '/icon.svg', apple: '/icon.svg' },
-  manifest: '/manifest.webmanifest'
+  manifest: '/manifest.webmanifest',
+  metadataBase: new URL('https://mailweaver.farzanfa.com'),
+  openGraph: {
+    title: 'MailWeaver',
+    description: 'Modern bulk mailing platform',
+    url: 'https://mailweaver.farzanfa.com/',
+    siteName: 'MailWeaver',
+    images: ['/icon.svg'],
+    type: 'website'
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'MailWeaver',
+    description: 'Modern bulk mailing platform',
+    images: ['/icon.svg']
+  },
+  robots: {
+    index: true,
+    follow: true
+  }
 };
 
 export const viewport = {
