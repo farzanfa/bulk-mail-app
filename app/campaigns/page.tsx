@@ -23,17 +23,25 @@ export default function CampaignsPage() {
       <Section title="All campaigns">
         {loading && <div className="p-3 text-sm text-gray-500">Loading…</div>}
         {!loading && items.length === 0 && <div className="p-3 text-sm text-gray-500">No campaigns yet.</div>}
-        {items.map((c) => (
-          <a key={c.id} href={`/campaigns/${c.id}`} className="block p-3 hover:bg-gray-50">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-medium">{c.id}</div>
-                <div className="text-sm text-gray-500">Started: {c.started_at ? new Date(c.started_at).toLocaleString() : '—'}</div>
-              </div>
-              <StatusBadge value={c.status} />
-            </div>
-          </a>
-        ))}
+        {!loading && items.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {items.map((c) => (
+              <a key={c.id} href={`/campaigns/${c.id}`} className="block">
+                <Card className="p-4 h-full hover:shadow-md transition">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div>
+                      <div className="font-medium truncate max-w-[14rem]">{c.name || c.id}</div>
+                      <div className="text-xs text-gray-500">Started: {c.started_at ? new Date(c.started_at).toLocaleString() : '—'}</div>
+                    </div>
+                    <StatusBadge value={c.status} />
+                  </div>
+                  <div className="text-xs text-gray-600">Template: <span className="font-medium">{c.template_id}</span></div>
+                  <div className="text-xs text-gray-600">Upload: <span className="font-medium">{c.upload_id}</span></div>
+                </Card>
+              </a>
+            ))}
+          </div>
+        )}
       </Section>
     </div>
   );
