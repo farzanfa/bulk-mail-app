@@ -1,36 +1,58 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, Input, Button, PrimaryButton } from '@/components/ui';
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const [form, setForm] = useState({ full_name: '', company: '', website: '', role: '', purpose: '', phone: '' });
   const [loading, setLoading] = useState(false);
   const [skipLoading, setSkipLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
   
   useEffect(() => {
     (async () => {
-      const res = await fetch('/api/me', { cache: 'no-store' });
-      const j = await res.json();
-      if (j?.user) {
-        setForm({
-          full_name: j.user.full_name || '',
-          company: j.user.company || '',
-          website: j.user.website || '',
-          role: j.user.role || '',
-          purpose: j.user.purpose || '',
-          phone: j.user.phone || ''
-        });
-        if (j.user.onboarding_completed_at) window.location.href = '/dashboard';
+      try {
+        const res = await fetch('/api/me', { cache: 'no-store' });
+        const j = await res.json();
+        if (j?.user) {
+          setForm({
+            full_name: j.user.full_name || '',
+            company: j.user.company || '',
+            website: j.user.website || '',
+            role: j.user.role || '',
+            purpose: j.user.purpose || '',
+            phone: j.user.phone || ''
+          });
+          // If user has already completed onboarding, redirect to dashboard
+          if (j.user.onboarding_completed_at) {
+            router.push('/dashboard');
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error checking user:', error);
+      } finally {
+        setChecking(false);
       }
     })();
-  }, []);
+  }, [router]);
 
   async function submit() {
     setLoading(true);
     try {
-      const res = await fetch('/api/me', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, onboarding_completed: true }) });
+      const res = await fetch('/api/me', { 
+        method: 'PUT', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ ...form, onboarding_completed: true }) 
+      });
       if (!res.ok) throw new Error('Save failed');
+      
+      // Force reload to clear any cached auth state
       window.location.href = '/dashboard';
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      alert('Failed to save profile. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -39,12 +61,32 @@ export default function OnboardingPage() {
   async function skip() {
     setSkipLoading(true);
     try {
-      const res = await fetch('/api/me', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ onboarding_completed: true }) });
+      const res = await fetch('/api/me', { 
+        method: 'PUT', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ onboarding_completed: true }) 
+      });
       if (!res.ok) throw new Error('Skip failed');
+      
+      // Force reload to clear any cached auth state
       window.location.href = '/dashboard';
+    } catch (error) {
+      console.error('Error skipping:', error);
+      alert('Failed to skip. Please try again.');
     } finally {
       setSkipLoading(false);
     }
+  }
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-12 w-12 border-4 border-gray-200 border-t-purple-600 rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

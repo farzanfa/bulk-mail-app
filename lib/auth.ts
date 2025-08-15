@@ -57,8 +57,6 @@ export const authOptions: NextAuthOptions = {
               });
             }
           }
-          // Set onboarding flag for first-time users
-          (token as any).needsOnboarding = !appUser.full_name && !appUser.onboarding_completed_at;
         }
       }
       return token;

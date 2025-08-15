@@ -14,11 +14,19 @@ export const fetchCache = 'force-no-store';
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   const userId = (session as any)?.user?.id as string | undefined;
-  if ((session as any)?.user?.needsOnboarding) {
-    redirect('/onboarding');
-  }
+  
   if (!userId) {
     redirect('/login');
+  }
+  
+  // Check if user needs onboarding from database
+  const user = await prisma.users.findUnique({
+    where: { id: userId },
+    select: { onboarding_completed_at: true }
+  });
+  
+  if (!user?.onboarding_completed_at) {
+    redirect('/onboarding');
   }
 
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
