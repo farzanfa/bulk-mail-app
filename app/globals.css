@@ -48,13 +48,14 @@ table {
 }
 .animate-float {
   animation: float 12s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* Subtle dot grid background */
 .bg-dot-grid {
   background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
-  background-size: 22px 22px;
-  opacity: 0.35;
+  background-size: 20px 20px;
+  opacity: 0.6;
 }
 
 /* Marquee */
