@@ -11,7 +11,8 @@ export default function PricingPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Card className="p-5">
           <div className="text-sm font-medium mb-1">Free</div>
-          <div className="text-3xl font-semibold mb-4">$0</div>
+          <div className="text-3xl font-semibold">$0<span className="text-base font-normal text-gray-600">/mo</span></div>
+          <div className="text-xs text-gray-500 mb-3">Billed monthly</div>
           <ul className="text-sm text-gray-700 space-y-1">
             <li>• Create up to 2 templates</li>
             <li>• Upload up to 2 CSV files</li>
@@ -21,7 +22,8 @@ export default function PricingPage() {
         </Card>
         <Card className="p-5">
           <div className="text-sm font-medium mb-1">Pro (coming soon)</div>
-          <div className="text-3xl font-semibold mb-4">$—</div>
+          <div className="text-3xl font-semibold">$—<span className="text-base font-normal text-gray-600">/mo</span></div>
+          <div className="text-xs text-gray-500 mb-3">Billed monthly</div>
           <ul className="text-sm text-gray-700 space-y-1">
             <li>• Unlimited templates</li>
             <li>• Unlimited uploads</li>
