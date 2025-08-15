@@ -8,6 +8,7 @@ export const config = {
     '/uploads/:path*',
     '/campaigns/:path*',
     '/admin/:path*',
+    '/onboarding/:path*'
   ]
 };
 

@@ -58,6 +58,9 @@ export default function Header() {
             <a href="/campaigns/new" className="hidden sm:inline-flex items-center gap-2 bg-brand px-3 py-2 rounded text-sm hover:bg-brand-dark">New Campaign</a>
           )}
           {!isMarketing && (
+            <a href="/onboarding" className="hidden sm:inline-flex items-center gap-2 border px-3 py-2 rounded text-sm">Onboarding</a>
+          )}
+          {!isMarketing && (
             <button onClick={() => signOut({ callbackUrl: '/' })} className="hidden sm:inline-flex items-center gap-2 bg-black text-white px-3 py-2 rounded text-sm hover:opacity-90">Logout</button>
           )}
           <button aria-label="Open menu" className="md:hidden inline-flex items-center justify-center p-2 rounded border" onClick={() => setOpen(true)}>
