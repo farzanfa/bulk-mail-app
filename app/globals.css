@@ -63,6 +63,12 @@ table {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+@keyframes gradient-text {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 .marquee { position: relative; }
 .marquee-track {
   display: inline-flex;
