@@ -6,7 +6,7 @@ import { signIn, signOut, useSession } from 'next-auth/react';
 export default function Header() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const isMarketing = pathname === '/' || pathname === '/home' || pathname === '/login' || pathname === '/about' || pathname === '/privacy' || pathname === '/terms' || pathname === '/why-us';
+  const isMarketing = pathname === '/' || pathname === '/home' || pathname === '/login' || pathname === '/about' || pathname === '/privacy' || pathname === '/terms' || pathname === '/why-us' || pathname === '/pricing';
   const [open, setOpen] = useState(false);
   const links = isMarketing
     ? [
