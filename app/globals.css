@@ -67,7 +67,6 @@ table {
 .marquee-track {
   display: inline-flex;
   gap: 12px;
-  padding-left: 12px;
   animation: marquee 22s linear infinite;
   white-space: nowrap;
 }
