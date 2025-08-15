@@ -252,7 +252,7 @@ export default function TemplatesPage() {
               </PrimaryButton>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
               {items.map((t) => (
                 <button 
                   key={t.id} 
@@ -260,11 +260,11 @@ export default function TemplatesPage() {
                   onClick={() => onEditTemplate(t.id)}
                   className="block text-left group w-full"
                 >
-                  <Card className="p-4 sm:p-6 h-full hover:shadow-xl transition-all duration-300 group-hover:scale-105 border-2 border-transparent group-hover:border-purple-200">
+                  <Card className="p-3 sm:p-4 lg:p-6 h-full hover:shadow-xl transition-all duration-300 group-hover:scale-105 border-2 border-transparent group-hover:border-purple-200">
                     {/* Template Header */}
-                    <div className="flex items-start justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="flex items-start justify-between gap-2 sm:gap-3 mb-2 sm:mb-3 lg:mb-4">
                       <div className="flex-1 min-w-0">
-                        <div className="text-base sm:text-lg font-semibold text-gray-900 truncate mb-1 group-hover:text-purple-600 transition-colors">
+                        <div className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 truncate mb-1 group-hover:text-purple-600 transition-colors">
                           {t.name || 'Untitled Template'}
                         </div>
                         <div className="text-xs sm:text-sm text-gray-500">
@@ -276,35 +276,36 @@ export default function TemplatesPage() {
                           })}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full whitespace-nowrap">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full whitespace-nowrap">
+                          <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                           </svg>
-                          {Array.isArray(t.variables) ? t.variables.length : 0} vars
+                          <span className="hidden sm:inline">{Array.isArray(t.variables) ? t.variables.length : 0} vars</span>
+                          <span className="sm:hidden">{Array.isArray(t.variables) ? t.variables.length : 0}</span>
                         </span>
                       </div>
                     </div>
 
                     {/* Subject Preview */}
-                    <div className="mb-3 sm:mb-4">
-                      <div className="text-xs text-gray-500 mb-2 uppercase tracking-wide font-medium">Subject</div>
-                      <div className="text-xs sm:text-sm text-gray-700 bg-gray-50 rounded px-2 sm:px-3 py-1.5 sm:py-2 border truncate">
+                    <div className="mb-2 sm:mb-3 lg:mb-4">
+                      <div className="text-xs text-gray-500 mb-1.5 sm:mb-2 uppercase tracking-wide font-medium">Subject</div>
+                      <div className="text-xs sm:text-sm text-gray-700 bg-gray-50 rounded px-2 sm:px-3 py-1 sm:py-1.5 lg:py-2 border truncate">
                         {render(t.subject || '') || 'No subject'}
                       </div>
                     </div>
 
                     {/* HTML Preview */}
-                    <div className="mb-3 sm:mb-4">
-                      <div className="text-xs text-gray-500 mb-2 uppercase tracking-wide font-medium">Preview</div>
+                    <div className="mb-2 sm:mb-3 lg:mb-4">
+                      <div className="text-xs text-gray-500 mb-1.5 sm:mb-2 uppercase tracking-wide font-medium">Preview</div>
                       <div className="relative">
-                        <div className="w-full h-28 sm:h-36 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                          <div className="p-3 sm:p-4 h-full overflow-hidden bg-gradient-to-br from-gray-50 to-white">
+                        <div className="w-full h-24 sm:h-28 lg:h-36 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                          <div className="p-2 sm:p-3 lg:p-4 h-full overflow-hidden bg-gradient-to-br from-gray-50 to-white">
                             {t.html ? (
                               <div className="h-full flex items-center justify-center">
-                                <div className="w-full max-w-xs transform scale-90 origin-center">
+                                <div className="w-full max-w-xs transform scale-75 sm:scale-90 origin-center">
                                   <div
-                                    className="prose prose-sm max-w-none text-gray-800"
+                                    className="prose prose-xs sm:prose-sm max-w-none text-gray-800"
                                     dangerouslySetInnerHTML={{ 
                                       __html: render(t.html) || '<p class="text-gray-400 text-center">No content</p>' 
                                     }} 
@@ -314,7 +315,7 @@ export default function TemplatesPage() {
                             ) : (
                               <div className="h-full flex items-center justify-center">
                                 <div className="text-center text-gray-400">
-                                  <svg className="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                                   </svg>
                                   <p className="text-xs">No HTML content</p>
@@ -326,13 +327,14 @@ export default function TemplatesPage() {
                         {/* Subtle overlay for better readability */}
                         <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-transparent pointer-events-none rounded-lg"></div>
                         {/* Preview indicator */}
-                        <div className="absolute top-2 right-2">
-                          <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
-                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="absolute top-1 sm:top-2 right-1 sm:right-2">
+                          <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                            <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                            Preview
+                            <span className="hidden sm:inline">Preview</span>
+                            <span className="sm:hidden">P</span>
                           </span>
                         </div>
                       </div>
@@ -354,21 +356,21 @@ export default function TemplatesPage() {
 
         {/* Create Template Modal */}
         {openCreate && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4">
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-3 lg:p-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-5xl lg:max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
               {/* Modal Header */}
-              <div className="p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
+              <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Create New Template</h2>
-                    <p className="text-sm sm:text-base text-gray-600 mt-1">Design your email template with personalized variables</p>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Create New Template</h2>
+                    <p className="text-xs sm:text-sm lg:text-base text-gray-600 mt-1">Design your email template with personalized variables</p>
                   </div>
                   <button 
                     aria-label="Close" 
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors" 
+                    className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors ml-2" 
                     onClick={() => setOpenCreate(false)}
                   >
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -376,12 +378,12 @@ export default function TemplatesPage() {
               </div>
 
               {/* Modal Content */}
-              <div className="p-4 sm:p-6">
-                <form onSubmit={onCreate} className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+              <div className="p-3 sm:p-4 lg:p-6">
+                <form onSubmit={onCreate} className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
                   {/* Left Column - Form Fields */}
-                  <div className="space-y-4 sm:space-y-6">
+                  <div className="space-y-3 sm:space-y-4 lg:space-y-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Template Name</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Template Name</label>
                       <Input 
                         className="w-full" 
                         value={name} 
@@ -392,7 +394,7 @@ export default function TemplatesPage() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Email Subject</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Email Subject</label>
                       <Input 
                         className="w-full" 
                         value={subject} 
@@ -490,24 +492,24 @@ export default function TemplatesPage() {
 
                 {/* Edit Template Modal */}
         {openEdit && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4">
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-3 lg:p-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-5xl lg:max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
               {/* Modal Header */}
-              <div className="p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+              <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Edit Template</h2>
-                    <p className="text-sm sm:text-base text-gray-600 mt-1">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Edit Template</h2>
+                    <p className="text-xs sm:text-sm lg:text-base text-gray-600 mt-1">
                       {editVersion ? `Version ${editVersion}` : 'Update your template'} • 
                       <span className="text-purple-600 font-medium"> This will create a new version</span>
                     </p>
                   </div>
                   <button 
                     aria-label="Close" 
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors" 
+                    className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors ml-2" 
                     onClick={() => setOpenEdit(false)}
                   >
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -515,12 +517,12 @@ export default function TemplatesPage() {
               </div>
 
               {/* Modal Content */}
-              <div className="p-4 sm:p-6">
-                <form onSubmit={onUpdateTemplate} className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+              <div className="p-3 sm:p-4 lg:p-6">
+                <form onSubmit={onUpdateTemplate} className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
                   {/* Left Column - Form Fields */}
-                  <div className="space-y-4 sm:space-y-6">
+                  <div className="space-y-3 sm:space-y-4 lg:space-y-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Template Name</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Template Name</label>
                       <Input 
                         className="w-full" 
                         value={editName} 
@@ -530,7 +532,7 @@ export default function TemplatesPage() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Email Subject</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Email Subject</label>
                       <Input 
                         className="w-full" 
                         value={editSubject} 
@@ -540,9 +542,9 @@ export default function TemplatesPage() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">HTML Body</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">HTML Body</label>
                       <textarea 
-                        className="border border-gray-300 rounded-lg w-full p-3 h-32 sm:h-48 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none" 
+                        className="border border-gray-300 rounded-lg w-full p-2 sm:p-3 h-28 sm:h-32 lg:h-48 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none" 
                         value={editHtml} 
                         onChange={(e) => setEditHtml(e.target.value)}
                       />
@@ -551,18 +553,18 @@ export default function TemplatesPage() {
 
                   {/* Right Column - Preview */}
                   <div>
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Preview</h3>
-                    <Card className="p-3 sm:p-4 border-2 border-gray-200">
-                      <div className="mb-3 sm:mb-4">
-                        <div className="text-sm font-medium text-gray-700 mb-2">Subject:</div>
-                        <div className="text-gray-900 bg-gray-50 rounded px-2 sm:px-3 py-1.5 sm:py-2 border text-sm">
+                    <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 mb-2 sm:mb-3">Preview</h3>
+                    <Card className="p-2 sm:p-3 lg:p-4 border-2 border-gray-200">
+                      <div className="mb-2 sm:mb-3 lg:mb-4">
+                        <div className="text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Subject:</div>
+                        <div className="text-gray-900 bg-gray-50 rounded px-2 sm:px-3 py-1 sm:py-1.5 lg:py-2 border text-xs sm:text-sm">
                           {editSubject || 'No subject'}
                         </div>
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-700 mb-2">HTML Body:</div>
-                        <div className="bg-white border rounded-lg p-3 sm:p-4 max-h-48 sm:max-h-64 overflow-y-auto">
-                          <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: sanitizeHtml(editHtml || '') || '<p class="text-gray-400">No content</p>' }} />
+                        <div className="text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">HTML Body:</div>
+                        <div className="bg-white border rounded-lg p-2 sm:p-3 lg:p-4 max-h-40 sm:max-h-48 lg:max-h-64 overflow-y-auto">
+                          <div className="prose prose-xs sm:prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(editHtml || '') || '<p class="text-gray-400">No content</p>' }} />
                         </div>
                       </div>
                     </Card>
