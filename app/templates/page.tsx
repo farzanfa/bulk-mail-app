@@ -90,12 +90,14 @@ export default function TemplatesPage() {
 
   async function onEditTemplate(templateId: string) {
     try {
+      console.log('Opening edit modal for template:', templateId);
       const res = await fetch(`/api/templates/${templateId}`, { cache: 'no-store' });
       if (!res.ok) {
         throw new Error(`Failed to load template: ${res.status}`);
       }
       
       const json = await res.json();
+      console.log('Template data received:', json);
       if (json.template) {
         setEditId(json.template.id);
         setEditName(json.template.name || '');
@@ -103,6 +105,7 @@ export default function TemplatesPage() {
         setEditHtml(json.template.html || '');
         setEditVersion(json.template.version);
         setOpenEdit(true);
+        console.log('Edit modal opened successfully');
       } else {
         throw new Error('Invalid template data received');
       }
@@ -192,6 +195,9 @@ export default function TemplatesPage() {
     }
   };
 
+  // Debug logging
+  console.log('Template page render - openEdit:', openEdit, 'editId:', editId, 'items count:', items.length);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
@@ -221,6 +227,25 @@ export default function TemplatesPage() {
 
         {/* Templates Grid */}
         <Section title="Your Templates">
+          {/* Debug section - remove after testing */}
+          <div className="mb-4 p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
+            <p className="text-sm text-yellow-800 mb-2">Debug: Modal State</p>
+            <p className="text-xs text-yellow-700">openEdit: {String(openEdit)} | editId: {editId || 'none'}</p>
+            <button 
+              onClick={() => {
+                console.log('Manual modal open clicked');
+                setEditId('test');
+                setEditName('Test Template');
+                setEditSubject('Test Subject');
+                setEditHtml('<p>Test HTML</p>');
+                setEditVersion(1);
+                setOpenEdit(true);
+              }}
+              className="mt-2 px-3 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600"
+            >
+              Test Open Modal
+            </button>
+          </div>
           {loading ? (
             <Card className="p-8 sm:p-16 text-center">
               <div className="w-6 h-6 sm:w-8 sm:h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -483,7 +508,7 @@ export default function TemplatesPage() {
           </div>
         )}
 
-        {/* Edit Template Modal */}
+                {/* Edit Template Modal */}
         {openEdit && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4">
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
