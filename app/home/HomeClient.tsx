@@ -149,16 +149,7 @@ export default function HomeClient() {
         </div>
       </section>
 
-      <section>
-        <Card className="p-6 text-center bg-gradient-to-r from-yellow-200 to-yellow-100">
-          <h3 className="text-lg font-semibold">Ready to get started?</h3>
-          <p className="text-sm text-gray-700 mt-1">Authenticate with Google and launch your first campaign in minutes.</p>
-          <div className="mt-3 flex items-center justify-center gap-3">
-            <button className="border px-4 py-2 rounded text-sm bg-white" onClick={() => signIn('google', { callbackUrl: '/dashboard' })}>Sign in with Google</button>
-            <a href="/privacy" className="text-sm underline">Privacy</a>
-          </div>
-        </Card>
-      </section>
+      
     </div>
   );
 }
