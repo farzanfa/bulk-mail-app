@@ -40,5 +40,22 @@ table {
   animation: shimmer 1.4s ease-in-out infinite;
 }
 
+/* Floating background blobs */
+@keyframes float {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(12px, -10px, 0) scale(1.05); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+.animate-float {
+  animation: float 12s ease-in-out infinite;
+}
+
+/* Subtle dot grid background */
+.bg-dot-grid {
+  background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+  background-size: 22px 22px;
+  opacity: 0.35;
+}
+
 
 
