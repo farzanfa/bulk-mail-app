@@ -14,6 +14,9 @@ export const fetchCache = 'force-no-store';
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   const userId = (session as any)?.user?.id as string | undefined;
+  if ((session as any)?.user?.needsOnboarding) {
+    redirect('/onboarding');
+  }
   if (!userId) {
     redirect('/login');
   }

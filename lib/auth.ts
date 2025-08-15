@@ -57,6 +57,8 @@ export const authOptions: NextAuthOptions = {
               });
             }
           }
+          // Set onboarding flag for first-time users
+          (token as any).needsOnboarding = !appUser.full_name && !appUser.onboarding_completed_at;
         }
       }
       return token;
@@ -64,6 +66,9 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token?.sub) {
         (session as any).user.id = token.sub;
+      }
+      if ((token as any)?.needsOnboarding) {
+        (session as any).user.needsOnboarding = true;
       }
       return session;
     }
