@@ -47,7 +47,7 @@ export function Input({ className = '', ...props }: InputHTMLAttributes<HTMLInpu
 
 export function Card({ className = '', children, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div {...props} className={`bg-white rounded-lg shadow-card ${className}`}>
+    <div {...props} className={`bg-white rounded-lg shadow-card animate-fadeIn ${className}`}>
       {children}
     </div>
   );
