@@ -2,8 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { ConfirmButton } from '@/components/confirm';
-import { Section, Input, Button } from '@/components/ui';
+import { Section, Input, Button, Card } from '@/components/ui';
 
 export default function UploadDetail({ params }: { params: { id: string } }) {
   const id = params.id;
@@ -15,107 +14,388 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<{ key: 'email' | 'created'; dir: 'asc' | 'desc' }>({ key: 'created', dir: 'asc' });
   const [selected, setSelected] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
   const pageSize = 50;
 
   async function load() {
-    const u = await fetch(`/api/uploads/${id}`, { cache: 'no-store' }).then(r => r.json());
-    setUpload(u.upload);
-    const c = await fetch(`/api/uploads/${id}/contacts?search=${encodeURIComponent(search)}&page=${page}`, { cache: 'no-store' }).then(r => r.json());
-    setItems(c.items || []);
-    setTotal(c.total || 0);
+    try {
+      setLoading(true);
+      const u = await fetch(`/api/uploads/${id}`, { cache: 'no-store' }).then(r => r.json());
+      setUpload(u.upload);
+      const c = await fetch(`/api/uploads/${id}/contacts?search=${encodeURIComponent(search)}&page=${page}`, { cache: 'no-store' }).then(r => r.json());
+      setItems(c.items || []);
+      setTotal(c.total || 0);
+    } catch (err: any) {
+      console.error('Failed to load upload details:', err);
+      toast.error('Failed to load upload details');
+    } finally {
+      setLoading(false);
+    }
   }
-  useEffect(() => { load(); }, [id, page]);
+
+  useEffect(() => { load(); }, [id, page, search]);
+
+  const handleSearch = () => {
+    setPage(1);
+    load();
+  };
+
+  const handleDeleteUpload = async () => {
+    if (!confirm('Are you sure you want to delete this upload and all contacts created from it? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      const res = await fetch(`/api/uploads/${id}`, { method: 'DELETE' });
+      if (!res.ok) { 
+        toast.error('Delete failed'); 
+        return; 
+      }
+      toast.success('Upload deleted successfully');
+      window.location.href = '/uploads';
+    } catch (err: any) {
+      console.error('Delete failed:', err);
+      toast.error('Delete failed');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeletePageContacts = async () => {
+    if (items.length === 0) {
+      toast.error('No contacts to delete on this page');
+      return;
+    }
+
+    const ids = items.map((c: any) => c.id);
+    if (!confirm(`Delete or unsubscribe ${ids.length} contacts from this page? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/contacts', { 
+        method: 'DELETE', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ ids }) 
+      });
+      const json = await res.json();
+      toast.success(`Successfully processed: ${json.deleted} deleted, ${json.unsubscribed} unsubscribed`);
+      await load();
+    } catch (err: any) {
+      console.error('Delete failed:', err);
+      toast.error('Failed to delete contacts');
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selected.length === 0) {
+      toast.error('Select contacts to delete');
+      return;
+    }
+
+    if (!confirm(`Delete or unsubscribe ${selected.length} selected contacts? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/contacts', { 
+        method: 'DELETE', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ ids: selected }) 
+      });
+      const json = await res.json();
+      toast.success(`Successfully processed: ${json.deleted} deleted, ${json.unsubscribed} unsubscribed`);
+      setSelected([]);
+      await load();
+    } catch (err: any) {
+      console.error('Delete failed:', err);
+      toast.error('Failed to delete contacts');
+    }
+  };
+
+  const selectAll = () => {
+    if (selected.length === items.length) {
+      setSelected([]);
+    } else {
+      setSelected(items.map((c: any) => c.id));
+    }
+  };
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <Section
-        title="Upload"
-        actions={
-          <div className="flex gap-2 items-center">
-            <ConfirmButton
-              className="text-sm"
-              title="Delete upload?"
-              description="This will also delete contacts created from this upload."
-              confirmText="Delete"
-              onConfirm={async () => {
-                const res = await fetch(`/api/uploads/${id}`, { method: 'DELETE' });
-                if (!res.ok) { toast.error('Delete failed'); return; }
-                toast.success('Upload deleted');
-                window.location.href = '/uploads';
-              }}
-            >Delete upload</ConfirmButton>
-            <Button onClick={() => router.back()} className="text-sm">Back</Button>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-2">
+              <button 
+                onClick={() => router.back()}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 hover:text-gray-900"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Upload Details</h1>
+            </div>
+            {upload && (
+              <p className="text-sm sm:text-base text-gray-600">
+                {upload.filename} • {new Date(upload.created_at).toLocaleDateString('en-US', { 
+                  year: 'numeric',
+                  month: 'long', 
+                  day: 'numeric',
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })} • {upload.row_count?.toLocaleString() || '0'} contacts
+              </p>
+            )}
           </div>
-        }
-      >
-        <div className="flex flex-wrap items-center gap-2 mb-3 justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-          <Input placeholder="Search email" value={search} onChange={(e) => setSearch(e.target.value)} />
-          <Button onClick={() => { setPage(1); load(); }}>Search</Button>
-          <Button onClick={async () => {
-            if (items.length === 0) return toast.error('No contacts to delete on this page');
-            const ids = items.map((c: any) => c.id);
-              if (!confirm(`Delete or unsubscribe ${ids.length} contacts from this page?`)) return;
-            const res = await fetch('/api/contacts', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids }) });
-            const json = await res.json();
-            toast.success(`Deleted: ${json.deleted}, Unsubscribed: ${json.unsubscribed}`);
-            await load();
-            }}>Delete page contacts</Button>
-          <Button onClick={async () => {
-            if (selected.length === 0) return toast.error('Select contacts to delete');
-            if (!confirm(`Delete or unsubscribe ${selected.length} selected contacts?`)) return;
-            const res = await fetch('/api/contacts', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: selected }) });
-            const json = await res.json();
-            toast.success(`Deleted: ${json.deleted}, Unsubscribed: ${json.unsubscribed}`);
-            setSelected([]);
-            await load();
-          }}>Delete selected</Button>
-          </div>
-          <div className="flex items-center gap-2">
-            <a href={`/api/uploads/${id}/export`} className="px-3 py-2 border rounded">Export CSV</a>
+          
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
+            <a 
+              href={`/api/uploads/${id}/export`} 
+              className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 inline-flex items-center gap-2"
+            >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span className="hidden sm:inline">Export CSV</span>
+              <span className="sm:hidden">Export</span>
+            </a>
+            
+            <button
+              onClick={handleDeleteUpload}
+              disabled={deleting}
+              className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {deleting ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Deleting...</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>Delete Upload</span>
+                </div>
+              )}
+            </button>
           </div>
         </div>
-        {upload && (
-          <div className="text-sm text-gray-500 mb-3">{new Date(upload.created_at).toLocaleString()} • {upload.row_count} rows</div>
-        )}
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="p-2"><input type="checkbox" aria-label="Select all" checked={selected.length>0 && selected.length===items.length} onChange={(e)=> setSelected(e.target.checked ? items.map((c:any)=>c.id) : [])} /></th>
-                <th className="p-2 text-left cursor-pointer" onClick={() => setSort(s => ({ key: 'email', dir: s.dir === 'asc' ? 'desc' : 'asc' }))}>Email</th>
-                <th className="p-2 text-left">first_name</th>
-                <th className="p-2 text-left cursor-pointer" onClick={() => setSort(s => ({ key: 'created', dir: s.dir === 'asc' ? 'desc' : 'asc' }))}>Created</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...items].sort((a: any, b: any) => {
-                if (sort.key === 'email') {
-                  return sort.dir === 'asc' ? a.email.localeCompare(b.email) : b.email.localeCompare(a.email);
+
+        {/* Search and Actions */}
+        <Card className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="relative w-full sm:w-80">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <Input
+                  type="text"
+                  placeholder="Search contacts by email..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  className="pl-10 w-full"
+                />
+              </div>
+              <Button 
+                onClick={handleSearch}
+                className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200"
+              >
+                Search
+              </Button>
+            </div>
+            
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Button
+                onClick={selectAll}
+                className="px-3 sm:px-4 py-2 text-sm border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white font-medium rounded-lg transition-all duration-200"
+              >
+                {selected.length === items.length ? 'Deselect All' : 'Select All'}
+              </Button>
+              
+              <Button
+                onClick={handleDeletePageContacts}
+                disabled={items.length === 0}
+                className="px-3 sm:px-4 py-2 text-sm bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Delete Page ({items.length})
+              </Button>
+              
+              <Button
+                onClick={handleDeleteSelected}
+                disabled={selected.length === 0}
+                className="px-3 sm:px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Delete Selected ({selected.length})
+              </Button>
+            </div>
+          </div>
+
+          {/* Results Summary */}
+          <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+            <div>
+              Showing {((page - 1) * pageSize) + 1} to {Math.min(page * pageSize, total)} of {total.toLocaleString()} contacts
+            </div>
+            {search && (
+              <div className="text-blue-600">
+                Search results for: "{search}"
+              </div>
+            )}
+          </div>
+
+          {/* Contacts Table */}
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-sm sm:text-base text-gray-600">Loading contacts...</p>
+            </div>
+          ) : items.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+                {search ? 'No contacts found' : 'No contacts yet'}
+              </h3>
+              <p className="text-sm sm:text-base text-gray-600">
+                {search 
+                  ? `No contacts match "${search}". Try a different search term.`
+                  : 'This upload contains no contacts.'
                 }
-                const at = new Date(a.created_at).getTime();
-                const bt = new Date(b.created_at).getTime();
-                return sort.dir === 'asc' ? at - bt : bt - at;
-              }).map((c: any) => (
-                <tr key={c.id} className="border-t odd:bg-gray-50/40">
-                  <td className="p-2"><input type="checkbox" aria-label="Select row" checked={selected.includes(c.id)} onChange={(e)=> setSelected(e.target.checked ? [...selected, c.id] : selected.filter(id=>id!==c.id))} /></td>
-                  <td className="p-2">{c.email}</td>
-                  <td className="p-2">{c.fields?.first_name || ''}</td>
-                  <td className="p-2">{new Date(c.created_at).toLocaleString()}</td>
-                </tr>
-              ))}
-              {items.length === 0 && <tr><td colSpan={4} className="p-3 text-gray-500">No contacts.</td></tr>}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-3 flex justify-between text-sm text-gray-600">
-          <div className="flex items-center gap-3 flex-wrap">
-            <button disabled={page<=1} onClick={()=>setPage(p=>Math.max(1,p-1))}>Prev</button>
-          </div>
-          <div>Page {page} / {Math.max(1, Math.ceil(total / pageSize))}</div>
-          <button disabled={page>=Math.ceil(total/pageSize)} onClick={()=>setPage(p=>p+1)}>Next</button>
-        </div>
-      </Section>
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="p-3 text-left">
+                      <input 
+                        type="checkbox" 
+                        aria-label="Select all" 
+                        checked={selected.length > 0 && selected.length === items.length} 
+                        onChange={selectAll}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    </th>
+                    <th 
+                      className="p-3 text-left cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => setSort(s => ({ key: 'email', dir: s.dir === 'asc' ? 'desc' : 'asc' }))}
+                    >
+                      <div className="flex items-center gap-2">
+                        Email
+                        <svg className={`w-4 h-4 transition-transform ${sort.key === 'email' && sort.dir === 'desc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                        </svg>
+                      </div>
+                    </th>
+                    <th className="p-3 text-left">First Name</th>
+                    <th 
+                      className="p-3 text-left cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => setSort(s => ({ key: 'created', dir: s.dir === 'asc' ? 'desc' : 'asc' }))}
+                    >
+                      <div className="flex items-center gap-2">
+                        Created
+                        <svg className={`w-4 h-4 transition-transform ${sort.key === 'created' && sort.dir === 'desc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                        </svg>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...items].sort((a: any, b: any) => {
+                    if (sort.key === 'email') {
+                      return sort.dir === 'asc' ? a.email.localeCompare(b.email) : b.email.localeCompare(a.email);
+                    }
+                    const at = new Date(a.created_at).getTime();
+                    const bt = new Date(b.created_at).getTime();
+                    return sort.dir === 'asc' ? at - bt : bt - at;
+                  }).map((c: any) => (
+                    <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="p-3">
+                        <input 
+                          type="checkbox" 
+                          aria-label="Select row" 
+                          checked={selected.includes(c.id)} 
+                          onChange={(e) => setSelected(e.target.checked ? [...selected, c.id] : selected.filter(id => id !== c.id))}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                      </td>
+                      <td className="p-3 font-medium text-gray-900">{c.email}</td>
+                      <td className="p-3 text-gray-700">{c.fields?.first_name || '-'}</td>
+                      <td className="p-3 text-gray-600">{new Date(c.created_at).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {total > pageSize && (
+            <div className="flex items-center justify-between text-sm text-gray-600 mt-4 pt-4 border-t border-gray-200">
+              <button 
+                disabled={page <= 1} 
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                className="px-3 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Previous
+              </button>
+              
+              <div className="flex items-center gap-2">
+                <span>Page {page} of {totalPages}</span>
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      const pageNum = Math.max(1, Math.min(totalPages, page - 2 + i));
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setPage(pageNum)}
+                          className={`px-2 py-1 rounded text-xs ${
+                            pageNum === page 
+                              ? 'bg-blue-600 text-white' 
+                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                          } transition-colors`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              
+              <button 
+                disabled={page >= totalPages} 
+                onClick={() => setPage(p => p + 1)}
+                className="px-3 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
