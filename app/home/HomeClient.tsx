@@ -7,7 +7,7 @@ export default function HomeClient() {
   const taglines = useMemo(() => [
     'Create beautiful email campaigns',
     'Personalize at scale with CSV variables',
-    'Send reliably with Gmail OAuth',
+    'Sign in securely with Google OAuth',
     'Track progress in real-time'
   ], []);
   const [taglineIndex, setTaglineIndex] = useState(0);
@@ -48,7 +48,7 @@ export default function HomeClient() {
   }, []);
 
   const testimonials = useMemo(() => [
-    { name: 'Growth Lead, DTC brand', quote: 'We reached 25k subscribers in under an hour with Gmail send. Zero deliverability issues.' },
+    { name: 'Growth Lead, DTC brand', quote: 'We reached 25k subscribers in under an hour. Zero deliverability issues.' },
     { name: 'Founder, SaaS', quote: 'Setup took minutes. Dry‑run caught a bad merge field before we sent to 3,400 users.' },
     { name: 'Lifecycle Marketer', quote: 'Loved the CSV → variables workflow. Non-technical teammates ran campaigns without help.' },
     { name: 'Ops Manager, SMB', quote: 'Pause/Resume and exportable reports made our compliance review painless.' }
@@ -75,10 +75,10 @@ export default function HomeClient() {
         <div className="text-center text-xs text-gray-500 mb-3">Trusted by teams using</div>
         <div className="overflow-hidden marquee marquee-mask">
           <div className="marquee-track">
-            {['Notion','Figma','Linear','Vercel','Netlify','Next.js','Gmail','Zapier'].map((b) => (
+            {['Notion','Figma','Linear','Vercel','Netlify','Next.js','Zapier'].map((b) => (
               <span key={b} className="px-3 py-1.5 rounded-full border text-xs text-gray-700 bg-white hover:lift">{b}</span>
             ))}
-            {['Notion','Figma','Linear','Vercel','Netlify','Next.js','Gmail','Zapier'].map((b) => (
+            {['Notion','Figma','Linear','Vercel','Netlify','Next.js','Zapier'].map((b) => (
               <span key={`${b}-dup`} className="px-3 py-1.5 rounded-full border text-xs text-gray-700 bg-white hover:lift">{b}</span>
             ))}
           </div>
@@ -130,7 +130,7 @@ export default function HomeClient() {
           <Card className="p-4">
             <details>
               <summary className="cursor-pointer text-sm font-medium">Do I need a Google account?</summary>
-              <p className="text-sm text-gray-600 mt-2">Yes. MailWeaver uses Google OAuth and the Gmail API to send campaigns from your own account.</p>
+              <p className="text-sm text-gray-600 mt-2">Yes. MailWeaver uses Google OAuth to send campaigns from your own account.</p>
             </details>
           </Card>
           <Card className="p-4">

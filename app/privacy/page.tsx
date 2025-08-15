@@ -12,14 +12,14 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-semibold">Data we collect</h2>
         <ul className="list-disc pl-5 space-y-1 text-gray-700">
           <li>Account information: your Google email and basic profile when you sign in.</li>
-          <li>Google tokens: refresh/access tokens required to send email via Gmail on your behalf (stored encrypted at rest).</li>
+          <li>Google tokens: refresh/access tokens required to send email on your behalf (stored encrypted at rest).</li>
           <li>Campaign and template content that you create.</li>
           <li>Recipient data that you upload (e.g., CSV columns such as <code>email</code>, <code>first_name</code>).</li>
           <li>Operational logs and metadata for reliability and security.</li>
         </ul>
 
-        <h2 className="text-lg font-semibold">Google and Gmail access</h2>
-        <p className="text-gray-700">We use Google OAuth solely to allow you to send email using your Gmail account. We request the following scopes:</p>
+        <h2 className="text-lg font-semibold">Google access</h2>
+        <p className="text-gray-700">We use Google OAuth solely to allow you to send email using your own account. We request the following scopes:</p>
         <ul className="list-disc pl-5 space-y-1 text-gray-700">
           <li><code>https://www.googleapis.com/auth/gmail.send</code> (send email)</li>
           <li><code>openid</code>, <code>email</code>, <code>profile</code> (sign-in)</li>
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-semibold">How we use data</h2>
         <ul className="list-disc pl-5 space-y-1 text-gray-700">
           <li>To authenticate your account and operate MailWeaver features.</li>
-          <li>To render templates with your uploaded variables and send your campaigns via Gmail.</li>
+          <li>To render templates with your uploaded variables and send your campaigns.</li>
           <li>To provide delivery status, logs, and basic analytics.</li>
         </ul>
 
@@ -55,16 +55,16 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-semibold">Data sharing</h2>
         <p className="text-gray-700">We do not sell your data. Limited sharing occurs with infrastructure providers strictly to operate the service:</p>
         <ul className="list-disc pl-5 space-y-1 text-gray-700">
-          <li>Hosting and build: Vercel</li>
-          <li>Database: Neon (Postgres)</li>
-          <li>Key-value store: Upstash</li>
-          <li>Blob storage: Vercel Blob</li>
+          <li>Cloud hosting and build</li>
+          <li>Managed Postgres database</li>
+          <li>Managed key-value store</li>
+          <li>Managed object storage</li>
         </ul>
-        <p className="text-gray-700">These subprocessors are bound by their own security and privacy commitments.</p>
+        <p className="text-gray-700">Our subprocessors are bound by security and privacy commitments appropriate to their services.</p>
 
         <h2 className="text-lg font-semibold">Your choices</h2>
         <ul className="list-disc pl-5 space-y-1 text-gray-700">
-          <li>Revoke Gmail access at any time from your Google Account permissions.</li>
+          <li>Revoke Google access at any time from your Google Account permissions.</li>
           <li>Delete uploads, contacts, campaigns, and templates in the app.</li>
           <li>Contact us to request account deletion.</li>
         </ul>

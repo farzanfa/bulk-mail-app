@@ -16,11 +16,11 @@ export default function WhyUsPage() {
           </Card>
           <Card className="p-4">
             <div className="text-sm font-medium mb-1">2. Create a template</div>
-            <p className="text-sm text-gray-600">Use variables like {`{{ first_name }}`} for personalized subjects and bodies.</p>
+            <p className="text-sm text-gray-600">Add personalized fields for subjects and bodies, then preview before sending.</p>
           </Card>
           <Card className="p-4">
             <div className="text-sm font-medium mb-1">3. Launch and monitor</div>
-            <p className="text-sm text-gray-600">Send via Gmail with built-in rate limiting and live progress.</p>
+            <p className="text-sm text-gray-600">Send with built-in pacing and live progress.</p>
           </Card>
         </div>
       </Section>
@@ -28,28 +28,28 @@ export default function WhyUsPage() {
       <Section title="Why teams choose MailWeaver">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card className="p-4">
-            <div className="text-sm font-medium mb-1">Gmail-native sending</div>
-            <p className="text-sm text-gray-600">Authenticate with Google and send via Gmail API for reliable deliverability.</p>
+            <div className="text-sm font-medium mb-1">Google sign-in</div>
+            <p className="text-sm text-gray-600">Authenticate with Google and send from your account for reliable delivery.</p>
           </Card>
           <Card className="p-4">
             <div className="text-sm font-medium mb-1">Personalization at scale</div>
-            <p className="text-sm text-gray-600">Liquid-style variables and dry-run previews prevent merge mistakes.</p>
+            <p className="text-sm text-gray-600">Flexible placeholders with previews help prevent mistakes.</p>
           </Card>
           <Card className="p-4">
-            <div className="text-sm font-medium mb-1">Robust CSV ingestion</div>
-            <p className="text-sm text-gray-600">Header normalization, trimming, de-duplication, and safe upserts.</p>
+            <div className="text-sm font-medium mb-1">Reliable CSV import</div>
+            <p className="text-sm text-gray-600">Cleans your data and maps columns automatically.</p>
           </Card>
           <Card className="p-4">
             <div className="text-sm font-medium mb-1">Safe sending</div>
-            <p className="text-sm text-gray-600">Token bucket rate limiting and backoff to respect provider limits.</p>
+            <p className="text-sm text-gray-600">Smart pacing to respect provider limits.</p>
           </Card>
           <Card className="p-4">
             <div className="text-sm font-medium mb-1">Unsubscribe built-in</div>
-            <p className="text-sm text-gray-600">HMAC-protected links keep you compliant with one click.</p>
+            <p className="text-sm text-gray-600">Secure unsubscribe links keep you compliant with one click.</p>
           </Card>
           <Card className="p-4">
             <div className="text-sm font-medium mb-1">Modern UI</div>
-            <p className="text-sm text-gray-600">Responsive, Mailchimp-inspired design with fast modals and cards.</p>
+            <p className="text-sm text-gray-600">Responsive, polished interface with fast modals and cards.</p>
           </Card>
         </div>
       </Section>

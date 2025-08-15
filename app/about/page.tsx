@@ -14,7 +14,7 @@ export default function AboutPage() {
         <div>
           <h2 className="text-lg font-semibold mb-2">What you can do</h2>
           <ul className="list-disc pl-5 space-y-1 text-gray-700">
-            <li>Sign in with your Google account and send campaigns using Gmail.</li>
+            <li>Sign in with your Google account and send campaigns from your account.</li>
             <li>Create reusable templates with variables for personalized emails.</li>
             <li>Upload CSV files and manage recipients grouped by each upload.</li>
             <li>Run campaigns in the background with automatic pacing and retries.</li>

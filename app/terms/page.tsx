@@ -18,7 +18,7 @@ export default function TermsPage() {
         <ul className="list-disc pl-5 space-y-1 text-gray-700">
           <li>You control the content of your messages and the recipient lists you upload.</li>
           <li>You must have a lawful basis and consent to contact recipients.</li>
-          <li>You will comply with Gmail and Google API policies when using Google integrations.</li>
+          <li>You will comply with applicable Google policies when using Google integrations.</li>
         </ul>
 
         <h2 className="text-lg font-semibold">Google policies</h2>
