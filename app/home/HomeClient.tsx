@@ -48,9 +48,10 @@ export default function HomeClient() {
   }, []);
 
   const testimonials = useMemo(() => [
-    { name: 'Growth Lead', quote: 'MailWeaver made our seasonal campaign a breeze. CSV → personalize → send.' },
-    { name: 'Founder', quote: 'Simple, fast, and focused. Exactly what we needed to reach our users.' },
-    { name: 'Marketer', quote: 'Love the clean UI and dry-run previews. Confidence before hitting send.' }
+    { name: 'Growth Lead, DTC brand', quote: 'We reached 25k subscribers in under an hour with Gmail send. Zero deliverability issues.' },
+    { name: 'Founder, SaaS', quote: 'Setup took minutes. Dry‑run caught a bad merge field before we sent to 3,400 users.' },
+    { name: 'Lifecycle Marketer', quote: 'Loved the CSV → variables workflow. Non-technical teammates ran campaigns without help.' },
+    { name: 'Ops Manager, SMB', quote: 'Pause/Resume and exportable reports made our compliance review painless.' }
   ], []);
   const [ti, setTi] = useState(0);
   useEffect(() => {
