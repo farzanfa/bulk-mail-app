@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PWAInstaller from '@/components/PWAInstaller';
+import Providers from '@/components/Providers';
 export const metadata = {
   title: 'MailWeaver',
   description: 'Modern bulk mailing platform',
@@ -27,13 +28,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body className="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
-        <PWAInstaller />
-        <Toaster richColors position="top-right" />
+        <Providers>
+          <Header />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+          <PWAInstaller />
+          <Toaster richColors position="top-right" />
+        </Providers>
       </body>
     </html>
   );
