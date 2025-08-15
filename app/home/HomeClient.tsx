@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { Card } from '@/components/ui';
 
 export default function HomeClient() {
@@ -65,8 +64,7 @@ export default function HomeClient() {
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs bg-black text-white">MailWeaver</div>
         <h1 className="text-2xl sm:text-3xl font-semibold">Bulk email campaigns, simplified</h1>
         <p className="text-gray-600 text-sm sm:text-base min-h-[1.5rem] transition-all">{taglines[taglineIndex]}</p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
-          <button className="w-full sm:w-auto border px-4 py-2 rounded" onClick={() => signIn('google', { callbackUrl: '/dashboard' })}>Login with Google</button>
+        <div className="flex items-center justify-center mt-4">
           <a href="/about" className="text-sm underline">Learn more</a>
         </div>
       </section>
