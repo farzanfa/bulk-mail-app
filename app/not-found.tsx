@@ -4,7 +4,7 @@ import { Card } from '@/components/ui';
 
 export default async function NotFound() {
   const session = await getServerSession(authOptions);
-  const isAuthed = Boolean((session as any)?.user?.id);
+  const isAuthed = Boolean((session as any)?.user);
   return (
     <div className="max-w-3xl mx-auto p-6">
       <Card className="p-8 text-center space-y-4">
@@ -16,8 +16,8 @@ export default async function NotFound() {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
           <a href="/" className="px-3 py-2 border rounded text-sm">Home</a>
-          <a href={isAuthed ? '/dashboard' : '/login'} className="px-3 py-2 bg-black text-white rounded text-sm">
-            {isAuthed ? 'Go to Dashboard' : 'Login'}
+          <a href={isAuthed ? '/dashboard' : '/'} className="px-3 py-2 bg-black text-white rounded text-sm">
+            {isAuthed ? 'Go to Dashboard' : 'Explore Home'}
           </a>
         </div>
       </Card>
