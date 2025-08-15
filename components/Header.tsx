@@ -1,7 +1,7 @@
 "use client";
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { signOut, useSession } from 'next-auth/react';
+import { signIn, signOut, useSession } from 'next-auth/react';
 
 export default function Header() {
   const pathname = usePathname();
@@ -47,7 +47,7 @@ export default function Header() {
               {session?.user ? (
                 <a href="/dashboard" className="hidden sm:inline-flex items-center gap-2 border px-3 py-2 rounded text-sm hover:bg-gray-50">Go to Dashboard</a>
               ) : (
-                <a href="/login" className="hidden sm:inline-flex items-center gap-2 border px-3 py-2 rounded text-sm hover:bg-gray-50">Login</a>
+                <button onClick={() => signIn('google', { callbackUrl: '/dashboard' })} className="hidden sm:inline-flex items-center gap-2 border px-3 py-2 rounded text-sm hover:bg-gray-50">Sign in with Google</button>
               )}
             </>
           )}
@@ -83,7 +83,7 @@ export default function Header() {
                   {session?.user ? (
                     <a href="/dashboard" className="inline-flex items-center gap-2 border px-3 py-2 rounded text-sm mt-2" onClick={() => setOpen(false)}>Go to Dashboard</a>
                   ) : (
-                    <a href="/login" className="inline-flex items-center gap-2 border px-3 py-2 rounded text-sm mt-2" onClick={() => setOpen(false)}>Login</a>
+                    <button onClick={() => { setOpen(false); signIn('google', { callbackUrl: '/dashboard' }); }} className="inline-flex items-center gap-2 border px-3 py-2 rounded text-sm mt-2">Sign in with Google</button>
                   )}
                 </>
               )}
