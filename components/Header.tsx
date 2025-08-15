@@ -21,7 +21,7 @@ export default function Header() {
       ];
   return (
     <header className="border-b bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
         <a href="/" className="font-semibold inline-flex items-center gap-2">
           <img src="/icon.svg?v=2" alt="MailWeaver" className="h-6 w-6"/>
           <span className="hidden sm:inline">MailWeaver</span>

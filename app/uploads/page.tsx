@@ -123,7 +123,7 @@ export default function UploadsPage() {
               <div className="font-semibold">Upload details</div>
               <button aria-label="Close" className="p-2" onClick={() => setOpenEdit(false)}>✕</button>
             </div>
-            <div className="p-4 space-y-3 text-sm">
+            <div className="p-4 space-y-3 text-sm max-h-[60vh] overflow-auto">
               <div className="flex items-center justify-between"><div className="text-gray-500">Filename</div><div className="font-medium break-all text-right ml-3">{current.filename}</div></div>
               <div className="flex items-center justify-between"><div className="text-gray-500">Rows</div><div className="font-medium">{current.row_count}</div></div>
               <div className="flex items-center justify-between"><div className="text-gray-500">Uploaded</div><div className="font-medium">{new Date(current.created_at).toLocaleString()}</div></div>

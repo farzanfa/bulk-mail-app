@@ -94,7 +94,7 @@ export default function TemplatesPage() {
                     <span className="text-[10px] text-gray-700 bg-gray-100 rounded px-1.5 py-0.5 whitespace-nowrap flex-shrink-0">{t.variables.length} vars</span>
                   </div>
                   <div className="text-[11px] text-gray-500 mb-1">Preview</div>
-                  <div className="rounded border bg-white">
+                  <div className="rounded border bg-white overflow-x-auto">
                     <div className="px-2 py-1 border-b text-xs font-medium truncate">{render(t.subject || '')}</div>
                     <div className="p-2 flex items-center justify-center">
                       <div style={{ width: 140, height: 200, overflow: 'hidden', borderRadius: 6 }}>
