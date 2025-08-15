@@ -57,5 +57,26 @@ table {
   opacity: 0.35;
 }
 
+/* Marquee */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: inline-flex;
+  gap: 12px;
+  padding-left: 12px;
+  animation: marquee 22s linear infinite;
+}
+.marquee-mask {
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+/* Hover lift */
+.hover\:lift:hover {
+  transform: translateY(-2px);
+  transition: transform 150ms ease;
+}
+
 
 

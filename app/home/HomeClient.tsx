@@ -73,25 +73,30 @@ export default function HomeClient() {
 
       <section>
         <div className="text-center text-xs text-gray-500 mb-3">Trusted by teams using</div>
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          {['Notion', 'Figma', 'Linear', 'Vercel', 'Netlify'].map((b) => (
-            <span key={b} className="px-3 py-1.5 rounded-full border text-xs text-gray-700 bg-white">{b}</span>
-          ))}
+        <div className="overflow-hidden marquee-mask">
+          <div className="marquee-track">
+            {['Notion','Figma','Linear','Vercel','Netlify','Next.js','Gmail','Zapier'].map((b) => (
+              <span key={b} className="px-3 py-1.5 rounded-full border text-xs text-gray-700 bg-white hover:lift">{b}</span>
+            ))}
+            {['Notion','Figma','Linear','Vercel','Netlify','Next.js','Gmail','Zapier'].map((b) => (
+              <span key={`${b}-dup`} className="px-3 py-1.5 rounded-full border text-xs text-gray-700 bg-white hover:lift">{b}</span>
+            ))}
+          </div>
         </div>
       </section>
 
       
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="p-4 text-center">
+        <Card className="p-4 text-center hover:lift">
           <div className="text-sm text-gray-500">Campaigns sent</div>
           <div className="text-2xl tabular-nums">{counts.campaigns.toLocaleString()}</div>
         </Card>
-        <Card className="p-4 text-center">
+        <Card className="p-4 text-center hover:lift">
           <div className="text-sm text-gray-500">Contacts managed</div>
           <div className="text-2xl tabular-nums">{counts.contacts.toLocaleString()}</div>
         </Card>
-        <Card className="p-4 text-center">
+        <Card className="p-4 text-center hover:lift">
           <div className="text-sm text-gray-500">Avg. deliverability</div>
           <div className="text-2xl tabular-nums">{counts.deliverability}%</div>
         </Card>
@@ -102,7 +107,7 @@ export default function HomeClient() {
       
 
       <section>
-        <Card className="p-5">
+        <Card className="p-5 hover:lift">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
               <div className="text-sm text-gray-500">What users say</div>
