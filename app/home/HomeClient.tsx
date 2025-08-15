@@ -60,7 +60,7 @@ export default function HomeClient() {
   }, [testimonials.length]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 space-y-10">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 space-y-12">
       <section className="text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs bg-black text-white">MailWeaver</div>
         <h1 className="text-2xl sm:text-3xl font-semibold">Bulk email campaigns, simplified</h1>
@@ -68,6 +68,15 @@ export default function HomeClient() {
         <div className="flex items-center justify-center gap-3 mt-4">
           <button className="border px-4 py-2 rounded text-sm" onClick={() => signIn('google', { callbackUrl: '/dashboard' })}>Sign in with Google</button>
           <a href="/about" className="text-sm underline">Learn more</a>
+        </div>
+      </section>
+
+      <section>
+        <div className="text-center text-xs text-gray-500 mb-3">Trusted by teams using</div>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {['Notion', 'Figma', 'Linear', 'Vercel', 'Netlify'].map((b) => (
+            <span key={b} className="px-3 py-1.5 rounded-full border text-xs text-gray-700 bg-white">{b}</span>
+          ))}
         </div>
       </section>
 
@@ -140,6 +149,26 @@ export default function HomeClient() {
       </section>
 
       <section>
+        <div className="text-center mb-4">
+          <h2 className="text-xl font-semibold">Use cases</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card className="p-4">
+            <div className="text-sm font-medium mb-1">Product launches</div>
+            <p className="text-sm text-gray-600">Announce new features to your entire customer base safely.</p>
+          </Card>
+          <Card className="p-4">
+            <div className="text-sm font-medium mb-1">Newsletters</div>
+            <p className="text-sm text-gray-600">Send personalized newsletters using CSV fields without code.</p>
+          </Card>
+          <Card className="p-4">
+            <div className="text-sm font-medium mb-1">Event invites</div>
+            <p className="text-sm text-gray-600">Invite segmented contacts and track sending progress.</p>
+          </Card>
+        </div>
+      </section>
+
+      <section>
         <Card className="p-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
@@ -185,6 +214,17 @@ export default function HomeClient() {
             </details>
           </Card>
         </div>
+      </section>
+
+      <section>
+        <Card className="p-6 text-center bg-gradient-to-r from-yellow-200 to-yellow-100">
+          <h3 className="text-lg font-semibold">Ready to get started?</h3>
+          <p className="text-sm text-gray-700 mt-1">Authenticate with Google and launch your first campaign in minutes.</p>
+          <div className="mt-3 flex items-center justify-center gap-3">
+            <button className="border px-4 py-2 rounded text-sm bg-white" onClick={() => signIn('google', { callbackUrl: '/dashboard' })}>Sign in with Google</button>
+            <a href="/privacy" className="text-sm underline">Privacy</a>
+          </div>
+        </Card>
       </section>
     </div>
   );
