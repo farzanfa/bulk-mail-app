@@ -426,11 +426,11 @@ export default function TemplatesPage() {
                   </div>
 
                   {/* Form Actions */}
-                  <div className="lg:col-span-2 flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 sm:pt-6 border-t border-gray-200">
+                  <div className="lg:col-span-2 flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 sm:pt-6 border-t border-gray-200 bg-gray-50 p-4 rounded-lg">
                     <Button 
                       type="button" 
                       onClick={() => setOpenCreate(false)}
-                      className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 border-gray-300 text-gray-700 hover:bg-gray-50"
+                      className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 border-gray-300 text-gray-700 hover:bg-gray-50 bg-white"
                     >
                       Cancel
                     </Button>
