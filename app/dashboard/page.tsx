@@ -9,6 +9,7 @@ import { Suspense } from 'react';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+export const fetchCache = 'force-no-store';
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);

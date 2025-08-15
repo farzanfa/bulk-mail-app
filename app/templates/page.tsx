@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Section, Card, Input, PrimaryButton, Button } from '@/components/ui';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 function extractVars(s: string): string[] {
   const re = /\{\{\s*([a-zA-Z0-9_\.]+)\s*\}\}/g;
@@ -57,7 +58,7 @@ export default function TemplatesPage() {
   }
 
   let sampleObj: Record<string, unknown> = {};
-  const render = (tpl: string) => tpl.replace(/\{\{\s*([a-zA-Z0-9_\.]+)\s*\}\}/g, (_, k) => String((sampleObj as any)[k] ?? ''));
+  const render = (tpl: string) => sanitizeHtml(tpl.replace(/\{\{\s*([a-zA-Z0-9_\.]+)\s*\}\}/g, (_, k) => String((sampleObj as any)[k] ?? '')));
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -187,7 +188,7 @@ export default function TemplatesPage() {
                     <div className="text-sm text-gray-500">Subject</div>
                     <div className="mb-2">{editSubject}</div>
                     <div className="text-sm text-gray-500">HTML</div>
-                    <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: editHtml }} />
+                    <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(editHtml) }} />
                   </Card>
                 </div>
                 <div className="lg:col-span-2 flex items-center justify-between gap-2">

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Card, Section, Input, PrimaryButton } from '@/components/ui';
 import { ConfirmButton } from '@/components/confirm';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 export default function TemplateDetail({ params }: { params: { id: string } }) {
   const id = params.id;
@@ -76,7 +77,7 @@ export default function TemplateDetail({ params }: { params: { id: string } }) {
               <div className="text-sm text-gray-500">Subject</div>
               <div className="mb-2">{subject}</div>
               <div className="text-sm text-gray-500">HTML</div>
-              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
+              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }} />
             </Card>
           </div>
         </form>

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from 'react';
 import { Section, Input, Button, PrimaryButton, Card } from '@/components/ui';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 export function CampaignNewModal({ onClose }: { onClose: () => void }) {
   const [google, setGoogle] = useState<any[]>([]);
@@ -119,7 +120,7 @@ export function CampaignNewModal({ onClose }: { onClose: () => void }) {
                   <div key={r.contact_id} className="py-2">
                     <div className="text-sm text-gray-500">{r.email}</div>
                     <div className="font-medium">{r.subject}</div>
-                    <div className="prose" dangerouslySetInnerHTML={{ __html: r.html }} />
+                    <div className="prose" dangerouslySetInnerHTML={{ __html: sanitizeHtml(r.html) }} />
                   </div>
                 ))}
               </div>
