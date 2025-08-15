@@ -2,6 +2,7 @@ import './globals.css';
 import type { ReactNode } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import PWAInstaller from '@/components/PWAInstaller';
 export const metadata = {
   title: 'MailWeaver',
   description: 'Modern bulk mailing platform',
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           {children}
         </main>
         <Footer />
+        <PWAInstaller />
         <Toaster richColors position="top-right" />
       </body>
     </html>
