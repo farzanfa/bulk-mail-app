@@ -1,15 +1,17 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Section, Button, Card } from '@/components/ui';
+import { Section, Button, Card, PrimaryButton } from '@/components/ui';
 import { StatusBadge } from '@/components/status';
 import { ConfirmButton } from '@/components/confirm';
+import { CampaignNewModal } from '@/components/CampaignNewModal';
 
 export default function CampaignsPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [openEdit, setOpenEdit] = useState(false);
   const [current, setCurrent] = useState<any | null>(null);
+  const [openNew, setOpenNew] = useState(false);
 
   async function refresh() {
     const res = await fetch('/api/campaigns', { cache: 'no-store' });
@@ -63,7 +65,7 @@ export default function CampaignsPage() {
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Campaigns</h1>
-        <a href="/campaigns/new" className="px-3 py-2 bg-black text-white rounded text-sm">New Campaign</a>
+        <button onClick={() => setOpenNew(true)} className="px-3 py-2 bg-black text-white rounded text-sm">New Campaign</button>
       </div>
       <Section title="All campaigns">
         {loading && <div className="p-3 text-sm text-gray-500">Loading…</div>}
@@ -120,6 +122,9 @@ export default function CampaignsPage() {
             </div>
           </div>
         </div>
+      )}
+      {openNew && (
+        <CampaignNewModal onClose={() => setOpenNew(false)} />
       )}
     </div>
   );

@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { Card, Section } from '@/components/ui';
 import { StatusBadge } from '@/components/status';
+import { CampaignNewModal } from '@/components/CampaignNewModal';
+import { Suspense } from 'react';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -62,6 +64,11 @@ export default async function DashboardPage() {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
+      <div className="flex gap-2">
+        <a href="/campaigns" className="px-3 py-2 border rounded text-sm">View campaigns</a>
+        <a href="/uploads" className="px-3 py-2 border rounded text-sm">Uploads</a>
+        <a href="/templates" className="px-3 py-2 border rounded text-sm">Templates</a>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="text-sm text-gray-500">Google Accounts</div>
