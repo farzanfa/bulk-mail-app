@@ -1,15 +1,7 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import HomeClient from './home/HomeClient';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
-
-export default async function Home() {
-  const session = await getServerSession(authOptions);
-  const isAuthed = Boolean((session as any)?.user?.id);
-  if (isAuthed) redirect('/dashboard');
-  redirect('/home');
+export default function RootHome() {
+  return <HomeClient />;
 }
 
 
