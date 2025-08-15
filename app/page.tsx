@@ -8,7 +8,8 @@ export const runtime = 'nodejs';
 export default async function Home() {
   const session = await getServerSession(authOptions);
   const isAuthed = Boolean((session as any)?.user?.id);
-  redirect(isAuthed ? '/dashboard' : '/login');
+  if (isAuthed) redirect('/dashboard');
+  redirect('/home');
 }
 
 

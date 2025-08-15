@@ -1,0 +1,107 @@
+"use client";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { Card } from '@/components/ui';
+
+export default function HomeClient() {
+  const taglines = useMemo(() => [
+    'Create beautiful email campaigns',
+    'Personalize at scale with CSV variables',
+    'Send reliably with Gmail OAuth',
+    'Track progress in real-time'
+  ], []);
+  const [taglineIndex, setTaglineIndex] = useState(0);
+  const [counts, setCounts] = useState({ campaigns: 0, contacts: 0, deliverability: 0 });
+  const targets = useRef({ campaigns: 0, contacts: 0, deliverability: 98 });
+
+  useEffect(() => {
+    const id = setInterval(() => setTaglineIndex((i) => (i + 1) % taglines.length), 2200);
+    return () => clearInterval(id);
+  }, [taglines.length]);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const r = await fetch('/api/public/stats', { cache: 'no-store' });
+        const j = await r.json();
+        if (!r.ok) return;
+        targets.current = { campaigns: Number(j.campaigns || 0), contacts: Number(j.contacts || 0), deliverability: 98 };
+      } catch {}
+      let raf = 0;
+      const start = performance.now();
+      const duration = 1400;
+      const animate = (t: number) => {
+        if (!active) return;
+        const p = Math.min(1, (t - start) / duration);
+        setCounts({
+          campaigns: Math.round(targets.current.campaigns * p),
+          contacts: Math.round(targets.current.contacts * p),
+          deliverability: Math.round(targets.current.deliverability * p),
+        });
+        if (p < 1) raf = requestAnimationFrame(animate);
+      };
+      raf = requestAnimationFrame(animate);
+      return () => cancelAnimationFrame(raf);
+    })();
+    return () => { active = false; };
+  }, []);
+
+  const testimonials = useMemo(() => [
+    { name: 'Growth Lead', quote: 'MailWeaver made our seasonal campaign a breeze. CSV → personalize → send.' },
+    { name: 'Founder', quote: 'Simple, fast, and focused. Exactly what we needed to reach our users.' },
+    { name: 'Marketer', quote: 'Love the clean UI and dry-run previews. Confidence before hitting send.' }
+  ], []);
+  const [ti, setTi] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTi((i) => (i + 1) % testimonials.length), 4000);
+    return () => clearInterval(id);
+  }, [testimonials.length]);
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 space-y-10">
+      <section className="text-center space-y-3">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs bg-black text-white">MailWeaver</div>
+        <h1 className="text-2xl sm:text-3xl font-semibold">Bulk email campaigns, simplified</h1>
+        <p className="text-gray-600 text-sm sm:text-base min-h-[1.5rem] transition-all">{taglines[taglineIndex]}</p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
+          <button className="w-full sm:w-auto border px-4 py-2 rounded" onClick={() => signIn('google', { callbackUrl: '/dashboard' })}>Login with Google</button>
+          <a href="/about" className="text-sm underline">Learn more</a>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="p-4 text-center">
+          <div className="text-sm text-gray-500">Campaigns sent</div>
+          <div className="text-2xl tabular-nums">{counts.campaigns.toLocaleString()}</div>
+        </Card>
+        <Card className="p-4 text-center">
+          <div className="text-sm text-gray-500">Contacts managed</div>
+          <div className="text-2xl tabular-nums">{counts.contacts.toLocaleString()}</div>
+        </Card>
+        <Card className="p-4 text-center">
+          <div className="text-sm text-gray-500">Avg. deliverability</div>
+          <div className="text-2xl tabular-nums">{counts.deliverability}%</div>
+        </Card>
+      </section>
+
+      <section>
+        <Card className="p-5">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <div className="text-sm text-gray-500">What users say</div>
+              <div className="text-lg font-medium max-w-xl">“{testimonials[ti].quote}”</div>
+              <div className="text-xs text-gray-500 mt-1">— {testimonials[ti].name}</div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button aria-label="Prev" className="px-2 py-1 border rounded text-sm" onClick={() => setTi((ti - 1 + testimonials.length) % testimonials.length)}>Prev</button>
+              <button aria-label="Next" className="px-2 py-1 border rounded text-sm" onClick={() => setTi((ti + 1) % testimonials.length)}>Next</button>
+            </div>
+          </div>
+        </Card>
+      </section>
+    </div>
+  );
+}
+
+
