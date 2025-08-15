@@ -69,6 +69,27 @@ export default function HomeClient() {
         </div>
       </section>
 
+      <section>
+        <div className="text-center mb-4">
+          <h2 className="text-xl font-semibold">How it works</h2>
+          <p className="text-sm text-gray-600">Three simple steps to send personalized campaigns</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card className="p-4">
+            <div className="text-sm font-medium mb-1">1. Upload your CSV</div>
+            <p className="text-sm text-gray-600">Import contacts with automatic header detection and de-duplication.</p>
+          </Card>
+          <Card className="p-4">
+            <div className="text-sm font-medium mb-1">2. Create a template</div>
+            <p className="text-sm text-gray-600">Use variables like {`{{ first_name }}`} for personalized subjects and bodies.</p>
+          </Card>
+          <Card className="p-4">
+            <div className="text-sm font-medium mb-1">3. Launch and monitor</div>
+            <p className="text-sm text-gray-600">Send via Gmail with built-in rate limiting and live progress.</p>
+          </Card>
+        </div>
+      </section>
+
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="p-4 text-center">
           <div className="text-sm text-gray-500">Campaigns sent</div>
@@ -85,6 +106,38 @@ export default function HomeClient() {
       </section>
 
       <section>
+        <div className="text-center mb-4">
+          <h2 className="text-xl font-semibold">Why teams choose MailWeaver</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="p-4">
+            <div className="text-sm font-medium mb-1">Gmail-native sending</div>
+            <p className="text-sm text-gray-600">Authenticate with Google and send via Gmail API for reliable deliverability.</p>
+          </Card>
+          <Card className="p-4">
+            <div className="text-sm font-medium mb-1">Personalization at scale</div>
+            <p className="text-sm text-gray-600">Liquid-style variables and dry-run previews prevent merge mistakes.</p>
+          </Card>
+          <Card className="p-4">
+            <div className="text-sm font-medium mb-1">Robust CSV ingestion</div>
+            <p className="text-sm text-gray-600">Header normalization, trimming, de-duplication, and safe upserts.</p>
+          </Card>
+          <Card className="p-4">
+            <div className="text-sm font-medium mb-1">Safe sending</div>
+            <p className="text-sm text-gray-600">Token bucket rate limiting and backoff to respect provider limits.</p>
+          </Card>
+          <Card className="p-4">
+            <div className="text-sm font-medium mb-1">Unsubscribe built-in</div>
+            <p className="text-sm text-gray-600">HMAC-protected links keep you compliant with one click.</p>
+          </Card>
+          <Card className="p-4">
+            <div className="text-sm font-medium mb-1">Modern UI</div>
+            <p className="text-sm text-gray-600">Responsive, Mailchimp-inspired design with fast modals and cards.</p>
+          </Card>
+        </div>
+      </section>
+
+      <section>
         <Card className="p-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
@@ -98,6 +151,38 @@ export default function HomeClient() {
             </div>
           </div>
         </Card>
+      </section>
+
+      <section>
+        <div className="text-center mb-4">
+          <h2 className="text-xl font-semibold">FAQs</h2>
+        </div>
+        <div className="space-y-2">
+          <Card className="p-4">
+            <details>
+              <summary className="cursor-pointer text-sm font-medium">Do I need a Google account?</summary>
+              <p className="text-sm text-gray-600 mt-2">Yes. MailWeaver uses Google OAuth and the Gmail API to send campaigns from your own account.</p>
+            </details>
+          </Card>
+          <Card className="p-4">
+            <details>
+              <summary className="cursor-pointer text-sm font-medium">What scopes do you request?</summary>
+              <p className="text-sm text-gray-600 mt-2">Only <code>openid</code>, <code>email</code>, <code>profile</code>, and <code>gmail.send</code>.</p>
+            </details>
+          </Card>
+          <Card className="p-4">
+            <details>
+              <summary className="cursor-pointer text-sm font-medium">Can I personalize emails?</summary>
+              <p className="text-sm text-gray-600 mt-2">Yes. Use variables like <code>{`{{ first_name }}`}</code> in subject and HTML; they are populated from your CSV headers.</p>
+            </details>
+          </Card>
+          <Card className="p-4">
+            <details>
+              <summary className="cursor-pointer text-sm font-medium">Is there an unsubscribe link?</summary>
+              <p className="text-sm text-gray-600 mt-2">Every campaign can include an unsubscribe URL with a secure token to respect user preferences.</p>
+            </details>
+          </Card>
+        </div>
       </section>
     </div>
   );
