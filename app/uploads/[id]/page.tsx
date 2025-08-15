@@ -21,11 +21,22 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
   async function load() {
     try {
       setLoading(true);
+      console.log('Loading upload details for ID:', id);
+      
       const u = await fetch(`/api/uploads/${id}`, { cache: 'no-store' }).then(r => r.json());
+      console.log('Upload data:', u);
       setUpload(u.upload);
-      const c = await fetch(`/api/uploads/${id}/contacts?search=${encodeURIComponent(search)}&page=${page}`, { cache: 'no-store' }).then(r => r.json());
+      
+      const contactsUrl = `/api/uploads/${id}/contacts?search=${encodeURIComponent(search)}&page=${page}`;
+      console.log('Fetching contacts from:', contactsUrl);
+      
+      const c = await fetch(contactsUrl, { cache: 'no-store' }).then(r => r.json());
+      console.log('Contacts data:', c);
+      
       setItems(c.items || []);
       setTotal(c.total || 0);
+      
+      console.log('State updated - items:', c.items?.length || 0, 'total:', c.total || 0);
     } catch (err: any) {
       console.error('Failed to load upload details:', err);
       toast.error('Failed to load upload details');
@@ -34,7 +45,10 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
     }
   }
 
-  useEffect(() => { load(); }, [id, page, search]);
+  useEffect(() => { 
+    console.log('useEffect triggered - id:', id, 'page:', page, 'search:', search);
+    load(); 
+  }, [id, page, search]);
 
   const handleSearch = () => {
     setPage(1);
@@ -252,6 +266,13 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
                 Search results for: "{search}"
               </div>
             )}
+          </div>
+          
+          {/* Debug Info */}
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800 mb-2">Debug Info:</p>
+            <p className="text-xs text-yellow-700">Loading: {String(loading)} | Items: {items.length} | Total: {total} | Page: {page}</p>
+            <p className="text-xs text-yellow-700">Upload: {upload ? 'Loaded' : 'Not loaded'} | Search: "{search}"</p>
           </div>
 
           {/* Contacts Table */}
