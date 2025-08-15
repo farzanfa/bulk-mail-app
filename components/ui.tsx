@@ -1,20 +1,43 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, HTMLAttributes } from 'react';
 
-export function Button({ className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
+function Spinner({ className = '' }: { className?: string }) {
   return (
-    <button
-      {...props}
-      className={`inline-flex items-center justify-center rounded px-3 py-2 text-sm transition border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 ${className}`}
-    />
+    <svg className={`animate-spin h-4 w-4 ${className}`} viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+    </svg>
   );
 }
 
-export function PrimaryButton({ className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
+type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { loading?: boolean };
+
+export function Button({ className = '', loading = false, children, disabled, ...props }: BtnProps) {
+  const isDisabled = disabled || loading;
   return (
     <button
       {...props}
-      className={`inline-flex items-center justify-center rounded px-3 py-2 text-sm transition bg-black text-white hover:opacity-90 disabled:opacity-50 ${className}`}
-    />
+      disabled={isDisabled}
+      aria-busy={loading ? 'true' : undefined}
+      className={`inline-flex items-center justify-center gap-2 rounded px-3 py-2 text-sm transition border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 ${className}`}
+    >
+      {loading && <Spinner />}
+      <span>{children}</span>
+    </button>
+  );
+}
+
+export function PrimaryButton({ className = '', loading = false, children, disabled, ...props }: BtnProps) {
+  const isDisabled = disabled || loading;
+  return (
+    <button
+      {...props}
+      disabled={isDisabled}
+      aria-busy={loading ? 'true' : undefined}
+      className={`inline-flex items-center justify-center gap-2 rounded px-3 py-2 text-sm transition bg-black text-white hover:opacity-90 disabled:opacity-50 ${className}`}
+    >
+      {loading && <Spinner className="text-white" />}
+      <span>{children}</span>
+    </button>
   );
 }
 

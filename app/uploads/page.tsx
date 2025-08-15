@@ -85,7 +85,9 @@ export default function UploadsPage() {
           >Delete Selected</ConfirmButton>
           <label className="inline-flex items-center gap-2 text-sm bg-black text-white px-3 py-2 rounded cursor-pointer">
             <input type="file" accept=".csv" className="hidden" onChange={onFileChange} disabled={busy} />
-            {busy ? 'Uploading…' : 'Upload CSV'}
+            {busy ? (
+              <span className="inline-flex items-center gap-2"><span className="animate-spin inline-block h-4 w-4 border-2 border-white/60 border-t-white rounded-full" /> Uploading…</span>
+            ) : 'Upload CSV'}
           </label>
         </div>
       </div>
