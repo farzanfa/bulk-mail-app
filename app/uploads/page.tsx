@@ -206,20 +206,39 @@ export default function UploadsPage() {
           <div className="flex items-center gap-2 sm:gap-3">
             <Button
               onClick={selectAll}
-              className="px-3 sm:px-4 py-2 text-sm border-gray-300 text-gray-700 hover:bg-gray-50 bg-white"
+              className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white font-medium rounded-lg transition-all duration-200"
             >
-              {selected.length === filteredUploads.length ? 'Deselect All' : 'Select All'}
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span>{selected.length === filteredUploads.length ? 'Deselect All' : 'Select All'}</span>
+              </div>
             </Button>
             
             <ConfirmButton
               onConfirm={bulkDelete}
               disabled={selected.length === 0}
-              className="px-3 sm:px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border-2 ${
+                selected.length === 0 
+                  ? 'bg-gray-400 text-gray-200 border-gray-400 cursor-not-allowed' 
+                  : 'bg-red-600 hover:bg-red-700 text-white border-red-700 hover:shadow-red-500/25'
+              }`}
               title="Delete selected uploads?"
               description={`This will permanently delete ${selected.length} upload(s) and all contacts created from them. This action cannot be undone.`}
               confirmText="Delete"
             >
-              Delete Selected ({selected.length})
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span>
+                  {selected.length === 0 
+                    ? 'No Uploads Selected' 
+                    : `Delete Selected (${selected.length})`
+                  }
+                </span>
+              </div>
             </ConfirmButton>
           </div>
         </div>
@@ -429,12 +448,17 @@ export default function UploadsPage() {
                   <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
                     <a 
                       href={`/api/uploads/${current.id}/export`} 
-                      className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 bg-white font-medium transition-colors"
+                      className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white font-medium transition-all duration-200"
                     >
-                      Export CSV
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Export CSV</span>
+                      </div>
                     </a>
                     <ConfirmButton
-                      className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-red-600 hover:bg-red-700 text-white font-medium"
+                      className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border border-red-700"
                       title="Delete this upload?"
                       description="This will permanently delete this upload and all contacts created from it. This action cannot be undone."
                       confirmText="Delete"
@@ -454,7 +478,12 @@ export default function UploadsPage() {
                         }
                       }}
                     >
-                      Delete Upload
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span>Delete Upload</span>
+                      </div>
                     </ConfirmButton>
                   </div>
                 </div>
