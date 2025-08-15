@@ -90,14 +90,12 @@ export default function TemplatesPage() {
 
   async function onEditTemplate(templateId: string) {
     try {
-      console.log('Opening edit modal for template:', templateId);
       const res = await fetch(`/api/templates/${templateId}`, { cache: 'no-store' });
       if (!res.ok) {
         throw new Error(`Failed to load template: ${res.status}`);
       }
       
       const json = await res.json();
-      console.log('Template data received:', json);
       if (json.template) {
         setEditId(json.template.id);
         setEditName(json.template.name || '');
@@ -105,7 +103,6 @@ export default function TemplatesPage() {
         setEditHtml(json.template.html || '');
         setEditVersion(json.template.version);
         setOpenEdit(true);
-        console.log('Edit modal opened successfully');
       } else {
         throw new Error('Invalid template data received');
       }
@@ -195,8 +192,7 @@ export default function TemplatesPage() {
     }
   };
 
-  // Debug logging
-  console.log('Template page render - openEdit:', openEdit, 'editId:', editId, 'items count:', items.length);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -227,25 +223,6 @@ export default function TemplatesPage() {
 
         {/* Templates Grid */}
         <Section title="Your Templates">
-          {/* Debug section - remove after testing */}
-          <div className="mb-4 p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
-            <p className="text-sm text-yellow-800 mb-2">Debug: Modal State</p>
-            <p className="text-xs text-yellow-700">openEdit: {String(openEdit)} | editId: {editId || 'none'}</p>
-            <button 
-              onClick={() => {
-                console.log('Manual modal open clicked');
-                setEditId('test');
-                setEditName('Test Template');
-                setEditSubject('Test Subject');
-                setEditHtml('<p>Test HTML</p>');
-                setEditVersion(1);
-                setOpenEdit(true);
-              }}
-              className="mt-2 px-3 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600"
-            >
-              Test Open Modal
-            </button>
-          </div>
           {loading ? (
             <Card className="p-8 sm:p-16 text-center">
               <div className="w-6 h-6 sm:w-8 sm:h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -378,7 +355,7 @@ export default function TemplatesPage() {
         {/* Create Template Modal */}
         {openCreate && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4">
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
               {/* Modal Header */}
               <div className="p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
                 <div className="flex items-center justify-between">
@@ -479,28 +456,31 @@ export default function TemplatesPage() {
                   </div>
 
                   {/* Form Actions */}
-                  <div className="lg:col-span-2 flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 sm:pt-6 border-t border-gray-200 bg-gray-50 p-4 rounded-lg">
-                    <Button 
-                      type="button" 
-                      onClick={() => setOpenCreate(false)}
-                      className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 border-gray-300 text-gray-700 hover:bg-gray-50 bg-white"
-                    >
-                      Cancel
-                    </Button>
-                    <PrimaryButton 
-                      type="submit" 
-                      disabled={savingCreate}
-                      className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
-                    >
-                      {savingCreate ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                          Saving...
-                        </div>
-                      ) : (
-                        'Save Template'
-                      )}
-                    </PrimaryButton>
+                  <div className="lg:col-span-2 border-t border-gray-200 bg-gray-50 p-3 sm:p-4 rounded-lg">
+                    {/* Button Container - Improved Responsiveness */}
+                    <div className="flex flex-col sm:flex-row gap-3 justify-end">
+                      <Button 
+                        type="button" 
+                        onClick={() => setOpenCreate(false)}
+                        className="w-full sm:w-auto px-6 py-3 border-gray-300 text-gray-700 hover:bg-gray-50 bg-white font-medium"
+                      >
+                        Cancel
+                      </Button>
+                      <PrimaryButton 
+                        type="submit" 
+                        disabled={savingCreate}
+                        className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                      >
+                        {savingCreate ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            Saving...
+                          </div>
+                          ) : (
+                            'Save Template'
+                          )}
+                      </PrimaryButton>
+                    </div>
                   </div>
                 </form>
               </div>
@@ -511,7 +491,7 @@ export default function TemplatesPage() {
                 {/* Edit Template Modal */}
         {openEdit && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4">
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
               {/* Modal Header */}
               <div className="p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
                 <div className="flex items-center justify-between">
@@ -589,39 +569,45 @@ export default function TemplatesPage() {
                   </div>
 
                   {/* Form Actions */}
-                  <div className="lg:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 sm:pt-6 border-t border-gray-200 bg-gray-50 p-4 rounded-lg">
-                    <button 
-                      type="button" 
-                      className="text-sm text-red-600 hover:text-red-700 font-medium px-3 py-2 rounded-lg hover:bg-red-50 transition-colors bg-white border border-red-200"
-                      onClick={() => onDeleteTemplate(editId)}
-                    >
-                      <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                      Delete Template
-                    </button>
-                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                      <Button 
+                  <div className="lg:col-span-2 border-t border-gray-200 bg-gray-50 p-3 sm:p-4 rounded-lg">
+                    {/* Button Container - Improved Responsiveness */}
+                    <div className="flex flex-col gap-3">
+                      {/* Delete Button - Full Width on Mobile */}
+                      <button 
                         type="button" 
-                        onClick={() => setOpenEdit(false)}
-                        className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 border-gray-300 text-gray-700 hover:bg-gray-50 bg-white"
+                        className="w-full sm:w-auto text-sm text-red-600 hover:text-red-700 font-medium px-4 py-3 rounded-lg hover:bg-red-50 transition-colors bg-white border border-red-200 flex items-center justify-center sm:justify-start"
+                        onClick={() => onDeleteTemplate(editId)}
                       >
-                        Cancel
-                      </Button>
-                      <PrimaryButton 
-                        type="submit" 
-                        disabled={savingEdit}
-                        className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
-                      >
-                        {savingEdit ? (
-                          <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            Saving...
-                          </div>
-                        ) : (
-                          'Save (New Version)'
-                        )}
-                      </PrimaryButton>
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete Template
+                      </button>
+                      
+                      {/* Action Buttons - Stack on Mobile, Side by Side on Desktop */}
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <Button 
+                          type="button" 
+                          onClick={() => setOpenEdit(false)}
+                          className="w-full sm:w-auto px-6 py-3 border-gray-300 text-gray-700 hover:bg-gray-50 bg-white font-medium"
+                        >
+                          Cancel
+                        </Button>
+                        <PrimaryButton 
+                          type="submit" 
+                          disabled={savingEdit}
+                          className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                        >
+                          {savingEdit ? (
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                              Saving...
+                            </div>
+                          ) : (
+                            'Save (New Version)'
+                          )}
+                        </PrimaryButton>
+                      </div>
                     </div>
                   </div>
                 </form>
