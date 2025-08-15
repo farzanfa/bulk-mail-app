@@ -10,6 +10,7 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const links = isMarketing
     ? [
+        { href: '/why-us', label: 'Why us?' },
         { href: '/about', label: 'About' },
         { href: '/privacy', label: 'Privacy Policy' },
         { href: '/terms', label: 'Terms & Conditions' }
