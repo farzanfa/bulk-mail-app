@@ -11,6 +11,7 @@ export default function Header() {
   const links = isMarketing
     ? [
         { href: '/why-us', label: 'Why us?' },
+        { href: '/pricing', label: 'Pricing' },
         { href: '/about', label: 'About' },
         { href: '/privacy', label: 'Privacy Policy' },
         { href: '/terms', label: 'Terms & Conditions' }
