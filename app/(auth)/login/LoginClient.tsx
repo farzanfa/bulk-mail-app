@@ -15,7 +15,7 @@ export default function LoginClient() {
   const [taglineIndex, setTaglineIndex] = useState(0);
 
   const [counts, setCounts] = useState({ campaigns: 0, contacts: 0, deliverability: 0 });
-  const targets = useRef({ campaigns: 1280, contacts: 54230, deliverability: 98 });
+  const targets = useRef({ campaigns: 0, contacts: 0, deliverability: 98 });
 
   // Strip callbackUrl from the address bar immediately
   useEffect(() => {
@@ -32,22 +32,35 @@ export default function LoginClient() {
     return () => clearInterval(id);
   }, [taglines.length]);
 
-  // Animate counters
+  // Animate counters after fetching real values
   useEffect(() => {
-    let raf = 0;
-    const start = performance.now();
-    const duration = 1400;
-    const animate = (t: number) => {
-      const p = Math.min(1, (t - start) / duration);
-      setCounts({
-        campaigns: Math.round(targets.current.campaigns * p),
-        contacts: Math.round(targets.current.contacts * p),
-        deliverability: Math.round(targets.current.deliverability * p),
-      });
-      if (p < 1) raf = requestAnimationFrame(animate);
-    };
-    raf = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(raf);
+    let active = true;
+    (async () => {
+      try {
+        const r = await fetch('/api/public/stats', { cache: 'no-store' });
+        const j = await r.json();
+        if (!r.ok) return;
+        const targetCampaigns = Number(j.campaigns || 0);
+        const targetContacts = Number(j.contacts || 0);
+        targets.current = { campaigns: targetCampaigns, contacts: targetContacts, deliverability: 98 };
+      } catch {}
+      let raf = 0;
+      const start = performance.now();
+      const duration = 1400;
+      const animate = (t: number) => {
+        if (!active) return;
+        const p = Math.min(1, (t - start) / duration);
+        setCounts({
+          campaigns: Math.round(targets.current.campaigns * p),
+          contacts: Math.round(targets.current.contacts * p),
+          deliverability: Math.round(targets.current.deliverability * p),
+        });
+        if (p < 1) raf = requestAnimationFrame(animate);
+      };
+      raf = requestAnimationFrame(animate);
+      return () => cancelAnimationFrame(raf);
+    })();
+    return () => { active = false; };
   }, []);
 
   // Testimonials carousel
