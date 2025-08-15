@@ -26,7 +26,7 @@ export default function HomeClient() {
         const r = await fetch('/api/public/stats', { cache: 'no-store' });
         const j = await r.json();
         if (!r.ok) return;
-        targets.current = { campaigns: Number(j.campaigns || 0), contacts: Number(j.contacts || 0), deliverability: 98 };
+        targets.current = { campaigns: Number(j.campaigns || 0), contacts: Number(j.contacts || 0), deliverability: Number(j.deliverability || 98) };
       } catch {}
       let raf = 0;
       const start = performance.now();
