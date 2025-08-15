@@ -1,10 +1,13 @@
 export { default } from 'next-auth/middleware';
 
-// Protect all routes by default, except explicitly public ones
+// Protect only app areas; leave home, login, and public pages open
 export const config = {
   matcher: [
-    // Exclude NextAuth, cron jobs, unsubscribe links, login, OAuth callback, and static assets
-    '/((?!api/auth|api/unsubscribe|api/jobs/cron|api/jobs/send|api/google/oauth/callback|api/public|login|about|privacy|terms|u/|icon\\.svg|manifest\\.webmanifest|favicon\\.ico|_next|public).*)'
+    '/dashboard/:path*',
+    '/templates/:path*',
+    '/uploads/:path*',
+    '/campaigns/:path*',
+    '/admin/:path*',
   ]
 };
 
