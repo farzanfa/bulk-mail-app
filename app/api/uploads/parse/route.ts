@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { head } from '@vercel/blob';
 import { parse as parseSync } from 'csv-parse/sync';
 import { ensureUserIdFromSession } from '@/lib/user';
+import { getUserPlan, FREE_LIMITS } from '@/lib/plan';
 
 export const runtime = 'nodejs';
 
@@ -36,6 +37,8 @@ export async function POST(req: Request) {
     relax_column_count: true,
     delimiter: [',', ';', '\t']
   }) as Array<Record<string, unknown>>;
+  const plan = await getUserPlan(sessionUserId);
+  const maxContacts = plan === 'free' ? FREE_LIMITS.maxContacts : Number.POSITIVE_INFINITY;
   const batch: Array<{ email: string; fields: Record<string, unknown> }> = [];
   let totalProcessed = 0;
   let columns: string[] | null = null;
@@ -64,7 +67,7 @@ export async function POST(req: Request) {
     for (const [key, value] of Object.entries(rec)) {
       normalized[normalizeKey(key)] = value;
     }
-    batch.push({ email, fields: normalized });
+    if (batch.length < maxContacts) batch.push({ email, fields: normalized });
     if (batch.length >= 500) {
       // Upsert-like behavior: attach existing contacts to this upload, insert new ones
       const chunk = batch.splice(0, batch.length);
@@ -99,7 +102,7 @@ export async function POST(req: Request) {
     totalProcessed += chunk.length;
   }
 
-  await prisma.uploads.update({ where: { id: upload_id }, data: { row_count: totalProcessed, ...(columns ? { columns: columns as any } : {}) } });
+  await prisma.uploads.update({ where: { id: upload_id }, data: { row_count: Math.min(totalProcessed, maxContacts), ...(columns ? { columns: columns as any } : {}) } });
   return NextResponse.json({ ok: true, total: totalProcessed });
 }
 

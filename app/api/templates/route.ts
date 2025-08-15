@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { extractVariables } from '@/lib/render';
+import { getUserPlan, FREE_LIMITS } from '@/lib/plan';
 import { ensureUserIdFromSession } from '@/lib/user';
 
 const createSchema = z.object({
@@ -27,6 +28,11 @@ export async function POST(req: Request) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
   const { name, subject, html, text } = createSchema.parse(body);
+  const plan = await getUserPlan(userId);
+  if (plan === 'free') {
+    const count = await prisma.templates.count({ where: { user_id: userId } });
+    if (count >= FREE_LIMITS.maxTemplates) return NextResponse.json({ error: 'Free plan limit: 2 templates' }, { status: 402 });
+  }
   const variables = Array.from(new Set([...extractVariables(subject), ...extractVariables(html), ...extractVariables(text || '')]));
   const created = await prisma.templates.create({ data: { user_id: userId, name, subject, html, text, variables: variables as any } });
   return NextResponse.json({ template: created });

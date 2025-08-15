@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { ensureUserIdFromSession } from '@/lib/user';
+import { getUserPlan, FREE_LIMITS } from '@/lib/plan';
 
 const schema = z.object({ blob_key: z.string(), filename: z.string(), columns: z.array(z.string()).default([]), row_count: z.number().default(0) });
 
@@ -12,6 +13,11 @@ export async function POST(req: Request) {
   const userId = await ensureUserIdFromSession(session).catch(() => '');
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const json = await req.json();
+  const plan = await getUserPlan(userId);
+  if (plan === 'free') {
+    const count = await prisma.uploads.count({ where: { user_id: userId } });
+    if (count >= FREE_LIMITS.maxUploads) return NextResponse.json({ error: 'Free plan limit: 2 uploads' }, { status: 402 });
+  }
   const { blob_key, filename, columns, row_count } = schema.parse(json);
   const upload = await prisma.uploads.create({ data: { user_id: userId, blob_key, filename, columns: columns as any, row_count } });
   return NextResponse.json({ upload });

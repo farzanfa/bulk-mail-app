@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { kv } from '@/lib/kv';
+import { getUserPlan, FREE_LIMITS } from '@/lib/plan';
 
 export async function POST(_: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -15,7 +16,9 @@ export async function POST(_: Request, { params }: { params: { id: string } }) {
   // Create recipients from upload contacts if not exists
   const existingCount = await prisma.campaign_recipients.count({ where: { campaign_id: campaign.id } });
   if (existingCount === 0) {
-    const contacts = await prisma.contacts.findMany({ where: { user_id: userId, upload_id: campaign.upload_id, unsubscribed: false }, select: { id: true } });
+    const plan = await getUserPlan(userId);
+    const limit = plan === 'free' ? FREE_LIMITS.maxMailsPerCampaign : Number.POSITIVE_INFINITY;
+    const contacts = await prisma.contacts.findMany({ where: { user_id: userId, upload_id: campaign.upload_id, unsubscribed: false }, select: { id: true }, take: isFinite(limit) ? limit : undefined });
     for (let i = 0; i < contacts.length; i += 500) {
       const chunk = contacts.slice(i, i + 500);
       await prisma.campaign_recipients.createMany({ data: chunk.map(c => ({ campaign_id: campaign.id, contact_id: c.id })) });
