@@ -58,6 +58,63 @@
   header a {
     flex-shrink: 0;
   }
+  
+  /* Improve touch targets on mobile */
+  header .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Mobile menu animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Safe area handling for mobile devices */
+.safe-padding-bottom {
+  padding-bottom: 1rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+
+/* Prevent horizontal scroll on mobile */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Ensure full-width containers don't cause overflow */
+  .w-full {
+    max-width: 100vw;
+  }
+}
+
+/* Improve header spacing on very small screens */
+@media (max-width: 380px) {
+  header .text-sm {
+    font-size: 0.875rem;
+  }
+  
+  header button,
+  header a {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
 }
 
 /* Responsive fixes */
