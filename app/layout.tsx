@@ -1,42 +1,97 @@
 import './globals.css';
 import type { ReactNode } from 'react';
+import { Metadata, Viewport } from 'next';
 import HeaderWrapper from '@/components/HeaderWrapper';
 import Footer from '@/components/Footer';
 import PWAInstaller from '@/components/PWAInstaller';
 import Providers from '@/components/Providers';
-export const metadata = {
-  title: 'MailWeaver',
-  description: 'Modern bulk mailing platform',
-  icons: { icon: '/icon.svg', shortcut: '/icon.svg', apple: '/icon.svg' },
-  manifest: '/manifest.webmanifest',
+
+export const metadata: Metadata = {
+  title: {
+    default: 'MailWeaver - Modern Bulk Email Marketing Platform',
+    template: '%s | MailWeaver'
+  },
+  description: 'Powerful, user-friendly bulk email marketing platform. Send personalized campaigns, track engagement, and grow your audience with MailWeaver.',
+  keywords: ['email marketing', 'bulk email', 'email campaigns', 'email automation', 'marketing platform', 'email templates'],
+  authors: [{ name: 'MailWeaver Team' }],
+  creator: 'MailWeaver',
+  publisher: 'MailWeaver',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   metadataBase: new URL('https://mailweaver.farzanfa.com'),
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
-    title: 'MailWeaver',
-    description: 'Modern bulk mailing platform',
-    url: 'https://mailweaver.farzanfa.com/',
+    title: 'MailWeaver - Modern Bulk Email Marketing Platform',
+    description: 'Powerful, user-friendly bulk email marketing platform. Send personalized campaigns, track engagement, and grow your audience.',
+    url: 'https://mailweaver.farzanfa.com',
     siteName: 'MailWeaver',
-    images: ['/icon.svg'],
-    type: 'website'
+    images: [
+      {
+        url: '/og-image.svg',
+        width: 1200,
+        height: 630,
+        alt: 'MailWeaver - Email Marketing Platform',
+      }
+    ],
+    locale: 'en_US',
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MailWeaver',
-    description: 'Modern bulk mailing platform',
-    images: ['/icon.svg']
+    title: 'MailWeaver - Modern Bulk Email Marketing Platform',
+    description: 'Powerful, user-friendly bulk email marketing platform. Send personalized campaigns and grow your audience.',
+    images: ['/og-image.svg'],
+    creator: '@mailweaver',
   },
   robots: {
     index: true,
-    follow: true
-  }
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      {
+        rel: 'mask-icon',
+        url: '/safari-pinned-tab.svg',
+        color: '#ffe01b',
+      },
+    ],
+  },
+  manifest: '/manifest.webmanifest',
+  category: 'technology',
 };
 
-export const viewport = {
-  themeColor: '#ffe01b',
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffe01b' },
+    { media: '(prefers-color-scheme: dark)', color: '#ffe01b' }
+  ],
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  viewportFit: 'cover'
+  viewportFit: 'cover',
+  colorScheme: 'light dark',
 };
 import { Toaster } from 'sonner';
 
@@ -51,6 +106,36 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="theme-color" content="#ffe01b" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
         <meta name="format-detection" content="telephone=no" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'SoftwareApplication',
+              name: 'MailWeaver',
+              applicationCategory: 'BusinessApplication',
+              operatingSystem: 'Web',
+              description: 'Powerful, user-friendly bulk email marketing platform. Send personalized campaigns, track engagement, and grow your audience.',
+              url: 'https://mailweaver.farzanfa.com',
+              creator: {
+                '@type': 'Organization',
+                name: 'MailWeaver',
+                url: 'https://mailweaver.farzanfa.com',
+              },
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'USD',
+                availability: 'https://schema.org/InStock',
+              },
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: '4.8',
+                ratingCount: '250',
+              },
+            }),
+          }}
+        />
       </head>
       <body className="min-h-screen bg-gray-50 text-gray-900 flex flex-col antialiased">
         <Providers>

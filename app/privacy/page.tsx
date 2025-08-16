@@ -1,4 +1,14 @@
 import { Card } from '@/components/ui';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+  description: 'MailWeaver Privacy Policy. Learn how we collect, use, and protect your personal information and data.',
+  openGraph: {
+    title: 'Privacy Policy - MailWeaver',
+    description: 'Your privacy matters. Learn how MailWeaver protects your data and respects your privacy.',
+  },
+};
 
 export const dynamic = 'force-dynamic';
 export default function PrivacyPage() {

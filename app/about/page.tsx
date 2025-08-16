@@ -1,4 +1,14 @@
 import { Card } from '@/components/ui';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'About Us',
+  description: 'Learn about MailWeaver - the modern email marketing platform built by creators, for creators. Discover our mission and values.',
+  openGraph: {
+    title: 'About MailWeaver - Our Story',
+    description: 'Built by creators, for creators. Learn about our mission to make email marketing accessible and powerful for everyone.',
+  },
+};
 
 export const dynamic = 'force-dynamic';
 export default function AboutPage() {
