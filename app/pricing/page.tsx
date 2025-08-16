@@ -17,7 +17,7 @@ export default function PricingPage() {
             Simple, transparent <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">pricing</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Start free, scale as you grow. Cancel anytime with no hidden fees.
+            Start free, scale as you grow. All plans include secure Gmail integration with account limits. Cancel anytime with no hidden fees.
           </p>
         </div>
 
@@ -65,6 +65,14 @@ export default function PricingPage() {
                     </svg>
                   </div>
                   <span className="text-gray-700">100 emails per month</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <span className="text-gray-700">1 Gmail account</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
@@ -160,6 +168,14 @@ export default function PricingPage() {
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
+                  <span className="text-gray-700">1 Gmail account</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
                   <span className="text-gray-700">Priority support</span>
                 </div>
               </div>
@@ -219,6 +235,14 @@ export default function PricingPage() {
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
+                  <span className="text-gray-700">1 Gmail account</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
                   <span className="text-gray-700">Help shape the product</span>
                 </div>
               </div>
@@ -247,6 +271,10 @@ export default function PricingPage() {
                 <p className="text-gray-600 text-sm">We'll notify you when you're approaching limits. You can upgrade to Pro or wait until the next billing cycle.</p>
               </div>
               <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h4 className="font-medium text-gray-900 mb-2">How many Gmail accounts can I connect?</h4>
+                <p className="text-gray-600 text-sm">Free, Beta, and Pro users can connect 1 Gmail account. Admin users can connect up to 10 accounts for testing and management purposes.</p>
+              </div>
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
                 <h4 className="font-medium text-gray-900 mb-2">Is there a setup fee?</h4>
                 <p className="text-gray-600 text-sm">No setup fees, no hidden costs. You only pay for what you use with our transparent pricing.</p>
               </div>
@@ -254,7 +282,7 @@ export default function PricingPage() {
           </div>
           
           <div className="text-sm text-gray-500">
-            Subject to fair use to protect deliverability. See <a href="/terms" className="text-purple-600 hover:text-purple-700 underline">Terms</a> for details.
+            Subject to fair use to protect deliverability. Gmail account limits apply to all plans. See <a href="/terms" className="text-purple-600 hover:text-purple-700 underline">Terms</a> for details.
           </div>
         </div>
       </div>

@@ -31,28 +31,36 @@ export const PLAN_FEATURES = {
     maxTemplates: 2,
     maxUploads: 2,
     maxContacts: 50,
-    maxMailsPerCampaign: 100
+    maxMailsPerCampaign: 100,
+    analytics: 'basic',
+    support: 'community'
   },
   beta: {
     maxGmailAccounts: 1,
-    maxTemplates: 5,
-    maxUploads: 5,
-    maxContacts: 200,
-    maxMailsPerCampaign: 500
+    maxTemplates: -1, // Unlimited
+    maxUploads: -1,   // Unlimited
+    maxContacts: -1,  // Unlimited
+    maxMailsPerCampaign: -1, // Unlimited
+    analytics: 'advanced',
+    support: 'direct'
   },
   pro: {
     maxGmailAccounts: 1,
-    maxTemplates: 20,
-    maxUploads: 20,
-    maxContacts: 1000,
-    maxMailsPerCampaign: 2000
+    maxTemplates: -1, // Unlimited
+    maxUploads: -1,   // Unlimited
+    maxContacts: -1,  // Unlimited
+    maxMailsPerCampaign: -1, // Unlimited
+    analytics: 'advanced',
+    support: 'priority'
   },
   admin: {
     maxGmailAccounts: 10, // Admins can connect multiple accounts
-    maxTemplates: 100,
-    maxUploads: 100,
-    maxContacts: 10000,
-    maxMailsPerCampaign: 10000
+    maxTemplates: -1,     // Unlimited
+    maxUploads: -1,       // Unlimited
+    maxContacts: -1,      // Unlimited
+    maxMailsPerCampaign: -1, // Unlimited
+    analytics: 'advanced',
+    support: 'priority'
   }
 };
 
