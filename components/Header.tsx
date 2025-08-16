@@ -21,6 +21,17 @@ export default function Header() {
 
   const isAdmin = session?.user?.email && isAdminEmail(session.user.email);
   
+  // Temporary production debugging
+  if (typeof window !== 'undefined') {
+    console.log('Header Debug:', {
+      sessionEmail: session?.user?.email,
+      isAdmin,
+      isMarketing,
+      pathname,
+      env: process.env.NODE_ENV
+    });
+  }
+  
   const links = isMarketing
     ? [
         { href: '/', label: 'Home' },
