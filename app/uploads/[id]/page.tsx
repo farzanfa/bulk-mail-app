@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Section, Input, Button, Card } from '@/components/ui';
+import ConfirmModal from '@/components/ConfirmModal';
 
 export default function UploadDetail({ params }: { params: { id: string } }) {
   const id = params.id;
@@ -16,6 +17,11 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteUploadModal, setShowDeleteUploadModal] = useState(false);
+  const [showDeleteContactsModal, setShowDeleteContactsModal] = useState(false);
+  const [showDeleteSelectedModal, setShowDeleteSelectedModal] = useState(false);
+  const [deleteAction, setDeleteAction] = useState<(() => void) | null>(null);
+  const [deleteMessage, setDeleteMessage] = useState('');
   const pageSize = 50;
 
   async function load() {
@@ -42,25 +48,25 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
   };
 
   const handleDeleteUpload = async () => {
-    if (!confirm('Are you sure you want to delete this upload and all contacts created from it? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      setDeleting(true);
-      const res = await fetch(`/api/uploads/${id}`, { method: 'DELETE' });
-      if (!res.ok) { 
-        toast.error('Delete failed'); 
-        return; 
+    setDeleteMessage('Are you sure you want to delete this upload and all contacts created from it? This action cannot be undone.');
+    setDeleteAction(() => async () => {
+      try {
+        setDeleting(true);
+        const res = await fetch(`/api/uploads/${id}`, { method: 'DELETE' });
+        if (!res.ok) { 
+          toast.error('Delete failed'); 
+          return; 
+        }
+        toast.success('Upload deleted successfully');
+        window.location.href = '/uploads';
+      } catch (err: any) {
+        console.error('Delete failed:', err);
+        toast.error('Delete failed');
+      } finally {
+        setDeleting(false);
       }
-      toast.success('Upload deleted successfully');
-      window.location.href = '/uploads';
-    } catch (err: any) {
-      console.error('Delete failed:', err);
-      toast.error('Delete failed');
-    } finally {
-      setDeleting(false);
-    }
+    });
+    setShowDeleteUploadModal(true);
   };
 
   const handleDeletePageContacts = async () => {
@@ -70,23 +76,23 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
     }
 
     const ids = items.map((c: any) => c.id);
-    if (!confirm(`Delete or unsubscribe ${ids.length} contacts from this page? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/contacts', { 
-        method: 'DELETE', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ ids }) 
-      });
-      const json = await res.json();
-      toast.success(`Successfully processed: ${json.deleted} deleted, ${json.unsubscribed} unsubscribed`);
-      await load();
-    } catch (err: any) {
-      console.error('Delete failed:', err);
-      toast.error('Failed to delete contacts');
-    }
+    setDeleteMessage(`Delete or unsubscribe ${ids.length} contacts from this page? This action cannot be undone.`);
+    setDeleteAction(() => async () => {
+      try {
+        const res = await fetch('/api/contacts', { 
+          method: 'DELETE', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ ids }) 
+        });
+        const json = await res.json();
+        toast.success(`Successfully processed: ${json.deleted} deleted, ${json.unsubscribed} unsubscribed`);
+        await load();
+      } catch (err: any) {
+        console.error('Delete failed:', err);
+        toast.error('Failed to delete contacts');
+      }
+    });
+    setShowDeleteContactsModal(true);
   };
 
   const handleDeleteSelected = async () => {
@@ -95,24 +101,24 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
       return;
     }
 
-    if (!confirm(`Delete or unsubscribe ${selected.length} selected contacts? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/contacts', { 
-        method: 'DELETE', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ ids: selected }) 
-      });
-      const json = await res.json();
-      toast.success(`Successfully processed: ${json.deleted} deleted, ${json.unsubscribed} unsubscribed`);
-      setSelected([]);
-      await load();
-    } catch (err: any) {
-      console.error('Delete failed:', err);
-      toast.error('Failed to delete contacts');
-    }
+    setDeleteMessage(`Delete or unsubscribe ${selected.length} selected contacts? This action cannot be undone.`);
+    setDeleteAction(() => async () => {
+      try {
+        const res = await fetch('/api/contacts', { 
+          method: 'DELETE', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ ids: selected }) 
+        });
+        const json = await res.json();
+        toast.success(`Successfully processed: ${json.deleted} deleted, ${json.unsubscribed} unsubscribed`);
+        setSelected([]);
+        await load();
+      } catch (err: any) {
+        console.error('Delete failed:', err);
+        toast.error('Failed to delete contacts');
+      }
+    });
+    setShowDeleteSelectedModal(true);
   };
 
   const selectAll = () => {
@@ -398,6 +404,52 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
           )}
         </Card>
       </div>
+      
+      {/* Confirmation Modals */}
+      <ConfirmModal
+        isOpen={showDeleteUploadModal}
+        onClose={() => setShowDeleteUploadModal(false)}
+        onConfirm={() => {
+          if (deleteAction) {
+            deleteAction();
+          }
+        }}
+        title="Confirm Upload Deletion"
+        message={deleteMessage}
+        confirmText="Delete Upload"
+        cancelText="Cancel"
+        variant="danger"
+      />
+      
+      <ConfirmModal
+        isOpen={showDeleteContactsModal}
+        onClose={() => setShowDeleteContactsModal(false)}
+        onConfirm={() => {
+          if (deleteAction) {
+            deleteAction();
+          }
+        }}
+        title="Confirm Contacts Deletion"
+        message={deleteMessage}
+        confirmText="Delete Contacts"
+        cancelText="Cancel"
+        variant="danger"
+      />
+      
+      <ConfirmModal
+        isOpen={showDeleteSelectedModal}
+        onClose={() => setShowDeleteSelectedModal(false)}
+        onConfirm={() => {
+          if (deleteAction) {
+            deleteAction();
+          }
+        }}
+        title="Confirm Selected Contacts Deletion"
+        message={deleteMessage}
+        confirmText="Delete Selected"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 }
