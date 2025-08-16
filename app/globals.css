@@ -35,6 +35,10 @@
     padding-right: env(safe-area-inset-right);
   }
   
+  .safe-padding-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
   .safe-padding-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -51,12 +55,6 @@
 @media (max-width: 640px) {
   header {
     min-height: 56px;
-  }
-  
-  /* Ensure header buttons don't break layout */
-  header button,
-  header a {
-    flex-shrink: 0;
   }
   
   /* Improve touch targets on mobile */
