@@ -14,6 +14,7 @@ export default function CampaignNewPage() {
   const [googleId, setGoogleId] = useState('');
   const [name, setName] = useState('');
   const [dry, setDry] = useState<any[]>([]);
+  const [userPlan, setUserPlan] = useState<string>('free');
   const canDryRun = useMemo(() => Boolean(templateId && uploadId), [templateId, uploadId]);
 
   useEffect(() => {
@@ -22,6 +23,9 @@ export default function CampaignNewPage() {
       setGoogle(me.googleAccounts || []);
       setFromEmail(me.user?.email || '');
       if (me.googleAccounts && me.googleAccounts.length > 0) setGoogleId(me.googleAccounts[0].id);
+      if (me.user?.plan) {
+        setUserPlan(me.user.plan);
+      }
       const t = await fetch('/api/templates', { cache: 'no-store' }).then(r => r.json());
       setTemplates(t.templates || []);
       const u = await fetch('/api/uploads', { cache: 'no-store' }).then(r => r.json());
@@ -88,7 +92,7 @@ export default function CampaignNewPage() {
               {google.map((g: any) => (<option key={g.id} value={g.id}>{g.email}</option>))}
             </select>
           )}
-          {google.length > 0 && (
+          {google.length > 0 && userPlan === 'admin' && (
             <a href="/api/google/oauth/url?redirect=1" className="text-xs text-blue-600 inline-block mt-2">Connect another</a>
           )}
         </Card>

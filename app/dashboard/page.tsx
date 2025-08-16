@@ -6,6 +6,7 @@ import { Card, Section } from '@/components/ui';
 import { StatusBadge } from '@/components/status';
 import { CampaignNewModal } from '@/components/CampaignNewModal';
 import { Suspense } from 'react';
+import { getUserPlan } from '@/lib/plan';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -56,6 +57,9 @@ export default async function DashboardPage() {
     prisma.campaign_recipients.count({ where: { status: 'failed', campaign: { user_id: userId! }, created_at: { gte: since24h } } }),
     prisma.campaign_recipients.count({ where: { status: 'pending', campaign: { user_id: userId!, status: 'running' } } })
   ]);
+
+  // Get user plan for Gmail account restrictions
+  const userPlan = await getUserPlan(userId!);
 
   // Build 7-day series (UTC days)
   const dayCounts = Array.from({ length: 7 }, (_, i) => {

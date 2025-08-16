@@ -6,6 +6,7 @@ import { google } from 'googleapis';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
+import { canConnectGmailAccount } from '@/lib/plan';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -48,6 +49,14 @@ export async function GET(req: Request) {
     // resolved userId
     if (!userId) {
       return NextResponse.json({ error: 'No authenticated user to link this Google account' }, { status: 401 });
+    }
+
+    // Check if user can connect another Gmail account based on their plan
+    const canConnect = await canConnectGmailAccount(userId);
+    if (!canConnect) {
+      return NextResponse.json({ 
+        error: 'Account limit reached. Free, Beta, and Pro users can only connect one Gmail account. Contact support for multiple accounts.' 
+      }, { status: 403 });
     }
 
     const refresh = tokens.refresh_token;

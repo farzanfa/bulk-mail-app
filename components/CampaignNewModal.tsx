@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Section, Input, Button, PrimaryButton, Card } from '@/components/ui';
 import { sanitizeHtml } from '@/lib/sanitize';
 
-export function CampaignNewModal({ onClose }: { onClose: () => void }) {
+export function CampaignNewModal({ onClose, userPlan }: { onClose: () => void; userPlan?: string }) {
   const [google, setGoogle] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [uploads, setUploads] = useState<any[]>([]);
@@ -89,7 +89,7 @@ export function CampaignNewModal({ onClose }: { onClose: () => void }) {
                   {google.map((g: any) => (<option key={g.id} value={g.id}>{g.email}</option>))}
                 </select>
               )}
-              {google.length > 0 && (
+              {google.length > 0 && userPlan === 'admin' && (
                 <a href="/api/google/oauth/url?redirect=1" className="text-xs text-blue-600 inline-block mt-2">Connect another</a>
               )}
             </Card>

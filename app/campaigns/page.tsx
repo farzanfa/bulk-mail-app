@@ -13,6 +13,7 @@ export default function CampaignsPage() {
   const [current, setCurrent] = useState<any | null>(null);
   const [openNew, setOpenNew] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
+  const [userPlan, setUserPlan] = useState<string>('free');
 
   async function refresh() {
     const res = await fetch('/api/campaigns', { cache: 'no-store' });
@@ -20,9 +21,21 @@ export default function CampaignsPage() {
     setItems(json.campaigns || []);
   }
 
+  async function fetchUserPlan() {
+    try {
+      const res = await fetch('/api/me', { cache: 'no-store' });
+      const json = await res.json();
+      if (json.user?.plan) {
+        setUserPlan(json.user.plan);
+      }
+    } catch (e) {
+      console.error('Failed to fetch user plan:', e);
+    }
+  }
+
   useEffect(() => {
     (async () => {
-      await refresh();
+      await Promise.all([refresh(), fetchUserPlan()]);
       setLoading(false);
     })();
   }, []);
@@ -174,7 +187,7 @@ export default function CampaignsPage() {
         </div>
       )}
       {openNew && (
-        <CampaignNewModal onClose={() => setOpenNew(false)} />
+        <CampaignNewModal onClose={() => setOpenNew(false)} userPlan={userPlan} />
       )}
     </div>
   );
