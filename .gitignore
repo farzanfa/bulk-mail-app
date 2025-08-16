@@ -57,3 +57,4 @@ prisma/*.sqlite
 # Misc
 *.swp
 *.swo
+.env.local
