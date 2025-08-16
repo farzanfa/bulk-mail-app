@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Section, Input, PrimaryButton, Button, Card } from '@/components/ui';
+import ConfirmModal from '@/components/ConfirmModal';
 
 export default function UploadsPage() {
   const [uploads, setUploads] = useState<any[]>([]);
@@ -11,6 +12,9 @@ export default function UploadsPage() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteAction, setDeleteAction] = useState<(() => void) | null>(null);
+  const [deleteMessage, setDeleteMessage] = useState('');
 
   async function refresh() {
     try {
@@ -88,30 +92,30 @@ export default function UploadsPage() {
   async function bulkDelete() {
     if (selected.length === 0) return;
     
-    if (!confirm(`Are you sure you want to delete ${selected.length} upload(s) and their contacts? This action cannot be undone.`)) {
-      return;
-    }
-    
-    try {
-      const res = await fetch('/api/uploads', { 
-        method: 'DELETE', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ ids: selected }) 
-      });
-      
-      const json = await res.json();
-      if (!res.ok) { 
-        toast.error(json.error || 'Delete failed'); 
-        return; 
+    setDeleteMessage(`Are you sure you want to delete ${selected.length} upload(s) and their contacts? This action cannot be undone.`);
+    setDeleteAction(() => async () => {
+      try {
+        const res = await fetch('/api/uploads', { 
+          method: 'DELETE', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ ids: selected }) 
+        });
+        
+        const json = await res.json();
+        if (!res.ok) { 
+          toast.error(json.error || 'Delete failed'); 
+          return; 
+        }
+        
+        toast.success(`Successfully deleted ${json.deleted} upload(s)`);
+        setSelected([]);
+        await refresh();
+      } catch (err: any) {
+        console.error('Bulk delete failed:', err);
+        toast.error('Delete failed');
       }
-      
-      toast.success(`Successfully deleted ${json.deleted} upload(s)`);
-      setSelected([]);
-      await refresh();
-    } catch (err: any) {
-      console.error('Bulk delete failed:', err);
-      toast.error('Delete failed');
-    }
+    });
+    setShowDeleteModal(true);
   }
 
   async function openUploadModal(id: string) {
@@ -218,10 +222,7 @@ export default function UploadsPage() {
             <button
               onClick={async () => {
                 if (selected.length === 0) return;
-                
-                if (confirm(`Are you sure you want to delete ${selected.length} upload(s) and their contacts? This action cannot be undone.`)) {
-                  await bulkDelete();
-                }
+                await bulkDelete();
               }}
               disabled={selected.length === 0}
               className={`px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border-2 ${
@@ -461,7 +462,8 @@ export default function UploadsPage() {
                     </a>
                     <button
                       onClick={async () => {
-                        if (confirm('Are you sure you want to delete this upload and all contacts created from it? This action cannot be undone.')) {
+                        setDeleteMessage('Are you sure you want to delete this upload and all contacts created from it? This action cannot be undone.');
+                        setDeleteAction(() => async () => {
                           try {
                             const res = await fetch(`/api/uploads/${current.id}`, { method: 'DELETE' });
                             if (!res.ok) { 
@@ -475,7 +477,8 @@ export default function UploadsPage() {
                             console.error('Delete failed:', err);
                             toast.error('Delete failed');
                           }
-                        }
+                        });
+                        setShowDeleteModal(true);
                       }}
                       className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-red-700"
                     >
@@ -493,6 +496,22 @@ export default function UploadsPage() {
           </div>
         )}
       </div>
+      
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={() => {
+          if (deleteAction) {
+            deleteAction();
+          }
+        }}
+        title="Confirm Deletion"
+        message={deleteMessage}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 }
