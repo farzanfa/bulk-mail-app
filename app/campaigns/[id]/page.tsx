@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { Section, Button } from '@/components/ui';
+import { Section, Button, Input, Select } from '@/components/ui';
 import { ConfirmButton } from '@/components/confirm';
 import { StatusBadge } from '@/components/status';
 import ConfirmModal from '@/components/ConfirmModal';
@@ -309,25 +309,24 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
-                <input
-                  type="text"
+                <Input
+                  type="search"
                   placeholder="Search recipients..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  className="pl-10"
                 />
               </div>
               
-              <select
+              <Select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
               >
                 <option value="all">All Statuses</option>
                 <option value="pending">Pending</option>
                 <option value="sent">Sent</option>
                 <option value="failed">Failed</option>
-              </select>
+              </Select>
               
               <button
                 onClick={resetFilters}

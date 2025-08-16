@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from 'react';
-import { Section, Input, Button, PrimaryButton, Card } from '@/components/ui';
+import { Section, Input, Button, PrimaryButton, Card, Select } from '@/components/ui';
 import { sanitizeHtml } from '@/lib/sanitize';
 
 export function CampaignNewModal({ onClose, userPlan }: { onClose: () => void; userPlan?: string }) {
@@ -80,8 +80,7 @@ export function CampaignNewModal({ onClose, userPlan }: { onClose: () => void; u
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card className="p-4 col-span-1 md:col-span-2">
               <label className="block text-sm text-gray-500 mb-2">Campaign name</label>
-              <input 
-                className="border rounded-lg w-full p-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+              <Input 
                 placeholder="Spring promo" 
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
@@ -98,13 +97,12 @@ export function CampaignNewModal({ onClose, userPlan }: { onClose: () => void; u
               ) : google.length === 1 ? (
                 <div className="text-sm text-gray-700">Using: {google[0].email}</div>
               ) : (
-                <select 
-                  className="border rounded-lg w-full p-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                <Select 
                   value={googleId} 
                   onChange={(e) => setGoogleId(e.target.value)}
                 >
                   {google.map((g: any) => (<option key={g.id} value={g.id}>{g.email}</option>))}
-                </select>
+                </Select>
               )}
               {google.length > 0 && userPlan === 'admin' && (
                 <a href="/api/google/oauth/url?redirect=1" className="text-xs text-blue-600 hover:underline inline-block mt-2">Connect another</a>
@@ -112,25 +110,23 @@ export function CampaignNewModal({ onClose, userPlan }: { onClose: () => void; u
             </Card>
             <Card className="p-4">
               <label className="block text-sm text-gray-500 mb-2">2) Template</label>
-              <select 
-                className="border rounded-lg w-full p-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+              <Select 
                 value={templateId} 
                 onChange={(e) => setTemplateId(e.target.value)}
               >
                 <option value="">Select template</option>
                 {templates.map((t: any) => (<option key={t.id} value={t.id}>{t.name} (v{t.version})</option>))}
-              </select>
+              </Select>
             </Card>
             <Card className="p-4">
               <label className="block text-sm text-gray-500 mb-2">3) Upload</label>
-              <select 
-                className="border rounded-lg w-full p-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+              <Select 
                 value={uploadId} 
                 onChange={(e) => setUploadId(e.target.value)}
               >
                 <option value="">Select contact list</option>
                 {uploads.map((u: any) => (<option key={u.id} value={u.id}>{u.filename} ({u.row_count} contacts)</option>))}
-              </select>
+              </Select>
             </Card>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 pt-2">
