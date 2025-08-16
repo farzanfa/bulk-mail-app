@@ -2,9 +2,12 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { isAdminEmail } from '@/lib/admin';
 
-export default function Header() {
+interface HeaderProps {
+  isAdmin: boolean;
+}
+
+export default function Header({ isAdmin }: HeaderProps) {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const isMarketing = pathname === '/' || pathname === '/home' || pathname === '/login' || pathname === '/about' || pathname === '/privacy' || pathname === '/terms' || pathname === '/why-us' || pathname === '/pricing';
@@ -18,19 +21,8 @@ export default function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const isAdmin = session?.user?.email && isAdminEmail(session.user.email);
   
-  // Temporary production debugging
-  if (typeof window !== 'undefined') {
-    console.log('Header Debug:', {
-      sessionEmail: session?.user?.email,
-      isAdmin,
-      isMarketing,
-      pathname,
-      env: process.env.NODE_ENV
-    });
-  }
+
   
   const links = isMarketing
     ? [

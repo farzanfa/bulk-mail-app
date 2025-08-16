@@ -1,6 +1,6 @@
 import './globals.css';
 import type { ReactNode } from 'react';
-import Header from '@/components/Header';
+import HeaderWrapper from '@/components/HeaderWrapper';
 import Footer from '@/components/Footer';
 import PWAInstaller from '@/components/PWAInstaller';
 import Providers from '@/components/Providers';
@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
         <Providers>
-          <Header />
+          <HeaderWrapper />
           <main className="flex-1">
             {children}
           </main>
