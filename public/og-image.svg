@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFE01B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFC700;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)" />
+  
+  <!-- Pattern overlay -->
+  <g opacity="0.1">
+    <pattern id="pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+      <circle cx="30" cy="30" r="2" fill="#000" />
+    </pattern>
+    <rect width="1200" height="630" fill="url(#pattern)" />
+  </g>
+  
+  <!-- Logo -->
+  <g transform="translate(600, 200)">
+    <rect x="-60" y="-60" width="120" height="120" rx="24" fill="#ffffff" fill-opacity="0.95" />
+    <g transform="scale(1.5)">
+      <g fill="none" stroke="#111827" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M -18 -8 L -18 12 L 18 12 L 18 -8 Z" fill="#FFE01B" fill-opacity="0.9"/>
+        <path d="M -18 -8 L 0 4 L 18 -8" stroke-width="2.5"/>
+        <path d="M -12 0 Q -6 -3, 0 0 T 12 0" stroke-width="1.5" opacity="0.7"/>
+        <path d="M -12 4 Q -6 1, 0 4 T 12 4" stroke-width="1.5" opacity="0.7"/>
+      </g>
+    </g>
+  </g>
+  
+  <!-- Text -->
+  <text x="600" y="380" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="bold" text-anchor="middle" fill="#111827">MailWeaver</text>
+  <text x="600" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="32" text-anchor="middle" fill="#374151">Modern Bulk Email Marketing Platform</text>
+  <text x="600" y="490" font-family="system-ui, -apple-system, sans-serif" font-size="24" text-anchor="middle" fill="#6b7280">Send personalized campaigns • Track engagement • Grow your audience</text>
+</svg>

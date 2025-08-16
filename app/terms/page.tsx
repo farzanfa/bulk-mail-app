@@ -1,4 +1,14 @@
 import { Card } from '@/components/ui';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Terms of Service',
+  description: 'MailWeaver Terms of Service. Read our terms and conditions for using our email marketing platform.',
+  openGraph: {
+    title: 'Terms of Service - MailWeaver',
+    description: 'Terms and conditions for using MailWeaver email marketing platform.',
+  },
+};
 
 export const dynamic = 'force-dynamic';
 export default function TermsPage() {

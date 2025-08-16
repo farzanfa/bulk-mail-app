@@ -1,0 +1,19 @@
+# MailWeaver Robots.txt
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Specific paths to disallow
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /u/
+Disallow: /_next/
+Disallow: /uploads/
+
+# Sitemap location
+Sitemap: https://mailweaver.farzanfa.com/sitemap.xml
+
+# Crawl delay (in seconds) - optional
+Crawl-delay: 1
