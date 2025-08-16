@@ -18,7 +18,7 @@ export function Button({ className = '', loading = false, children, disabled, ..
       {...props}
       disabled={isDisabled}
       aria-busy={loading ? 'true' : undefined}
-      className={`inline-flex items-center justify-center gap-2 rounded px-3 py-2 text-sm transition border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all border border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed touch-target ${className}`}
     >
       {loading && <Spinner />}
       <span>{children}</span>
@@ -33,7 +33,7 @@ export function PrimaryButton({ className = '', loading = false, children, disab
       {...props}
       disabled={isDisabled}
       aria-busy={loading ? 'true' : undefined}
-      className={`inline-flex items-center justify-center gap-2 rounded px-3 py-2 text-sm transition bg-black text-white hover:opacity-90 disabled:opacity-50 ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow touch-target ${className}`}
     >
       {loading && <Spinner className="text-white" />}
       <span>{children}</span>
@@ -42,12 +42,17 @@ export function PrimaryButton({ className = '', loading = false, children, disab
 }
 
 export function Input({ className = '', ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={`border rounded px-3 py-2 text-sm ${className}`} />;
+  return (
+    <input 
+      {...props} 
+      className={`w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${className}`} 
+    />
+  );
 }
 
 export function Card({ className = '', children, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div {...props} className={`bg-white rounded-lg shadow-card animate-fadeIn ${className}`}>
+    <div {...props} className={`bg-white rounded-lg shadow-sm border border-gray-200 animate-fadeIn ${className}`}>
       {children}
     </div>
   );
@@ -55,18 +60,29 @@ export function Card({ className = '', children, ...props }: HTMLAttributes<HTML
 
 export function Section({ title, actions, children }: { title: string; actions?: ReactNode; children?: ReactNode }) {
   return (
-    <Card className="p-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
-        <h2 className="font-semibold">{title}</h2>
-        {actions}
+    <Card className="p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
       {children}
     </Card>
   );
 }
 
-export function Badge({ children }: { children: ReactNode }) {
-  return <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs">{children}</span>;
+export function Badge({ children, variant = 'default' }: { children: ReactNode; variant?: 'default' | 'success' | 'warning' | 'error' }) {
+  const variants = {
+    default: 'bg-gray-100 text-gray-700',
+    success: 'bg-green-100 text-green-700',
+    warning: 'bg-yellow-100 text-yellow-700',
+    error: 'bg-red-100 text-red-700'
+  };
+  
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${variants[variant]}`}>
+      {children}
+    </span>
+  );
 }
 
 

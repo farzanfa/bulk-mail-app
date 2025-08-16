@@ -31,7 +31,12 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: '#ffe01b'
+  themeColor: '#ffe01b',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: 'cover'
 };
 import { Toaster } from 'sonner';
 
@@ -44,9 +49,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="MailWeaver" />
         <meta name="theme-color" content="#ffe01b" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+        <meta name="format-detection" content="telephone=no" />
       </head>
-      <body className="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
+      <body className="min-h-screen bg-gray-50 text-gray-900 flex flex-col antialiased">
         <Providers>
           <HeaderWrapper />
           <main className="flex-1">
@@ -54,7 +60,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </main>
           <Footer />
           <PWAInstaller />
-          <Toaster richColors position="top-right" />
+          <Toaster 
+            richColors 
+            position="top-right" 
+            toastOptions={{
+              className: 'touch-target',
+              duration: 4000,
+            }}
+          />
         </Providers>
       </body>
     </html>
