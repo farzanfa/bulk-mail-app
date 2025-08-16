@@ -19,13 +19,7 @@ export default function TemplatesPage() {
   const [text, setText] = useState('');
   const [openCreate, setOpenCreate] = useState(false);
   const [savingCreate, setSavingCreate] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
-  const [editId, setEditId] = useState<string>('');
-  const [editName, setEditName] = useState('');
-  const [editSubject, setEditSubject] = useState('');
-  const [editHtml, setEditHtml] = useState('');
-  const [editVersion, setEditVersion] = useState<number | undefined>(undefined);
-  const [savingEdit, setSavingEdit] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const vars = useMemo(() => Array.from(new Set([...extractVars(subject), ...extractVars(html)])), [subject, html]);
 
@@ -88,71 +82,6 @@ export default function TemplatesPage() {
     }
   }
 
-  async function onEditTemplate(templateId: string) {
-    try {
-      const res = await fetch(`/api/templates/${templateId}`, { cache: 'no-store' });
-      if (!res.ok) {
-        throw new Error(`Failed to load template: ${res.status}`);
-      }
-      
-      const json = await res.json();
-      if (json.template) {
-        setEditId(json.template.id);
-        setEditName(json.template.name || '');
-        setEditSubject(json.template.subject || '');
-        setEditHtml(json.template.html || '');
-        setEditVersion(json.template.version);
-        setOpenEdit(true);
-      } else {
-        throw new Error('Invalid template data received');
-      }
-    } catch (err: any) {
-      console.error('Failed to load template for editing:', err);
-      toast.error(err?.message || 'Failed to load template');
-    }
-  }
-
-  async function onUpdateTemplate(e: React.FormEvent) {
-    e.preventDefault();
-    if (!editId || !editName.trim() || !editSubject.trim()) { 
-      toast.error('Name and subject are required'); 
-      return; 
-    }
-    
-    setSavingEdit(true);
-    try {
-      const res = await fetch(`/api/templates/${editId}`, { 
-        method: 'PUT', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ 
-          name: editName.trim(), 
-          subject: editSubject.trim(), 
-          html: editHtml.trim(), 
-          text: '' 
-        }) 
-      });
-      
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to update template: ${res.status}`);
-      }
-      
-      const json = await res.json();
-      if (json.template) {
-        toast.success('Template updated successfully');
-        setOpenEdit(false);
-        await refresh();
-      } else {
-        throw new Error('Invalid response from server');
-      }
-    } catch (err: any) {
-      console.error('Failed to update template:', err);
-      toast.error(err?.message || 'Failed to update template');
-    } finally {
-      setSavingEdit(false);
-    }
-  }
-
   async function onDeleteTemplate(templateId: string) {
     if (!confirm('Are you sure you want to delete this template? This action cannot be undone.')) {
       return;
@@ -166,7 +95,6 @@ export default function TemplatesPage() {
       }
       
       toast.success('Template deleted successfully');
-      setOpenEdit(false);
       await refresh();
     } catch (err: any) {
       console.error('Failed to delete template:', err);
@@ -254,10 +182,9 @@ export default function TemplatesPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
               {items.map((t) => (
-                <button 
+                <a 
                   key={t.id} 
-                  type="button" 
-                  onClick={() => onEditTemplate(t.id)}
+                  href={`/templates/${t.id}/edit`}
                   className="block text-left group w-full"
                 >
                   <Card className="p-3 sm:p-4 lg:p-6 h-full hover:shadow-xl transition-all duration-300 group-hover:scale-105 border-2 border-transparent group-hover:border-purple-200">
@@ -348,7 +275,7 @@ export default function TemplatesPage() {
                       </svg>
                     </div>
                   </Card>
-                </button>
+                </a>
               ))}
             </div>
           )}
@@ -482,134 +409,6 @@ export default function TemplatesPage() {
                             'Save Template'
                           )}
                       </PrimaryButton>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
-
-                {/* Edit Template Modal */}
-        {openEdit && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-3 lg:p-4">
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-5xl lg:max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
-              {/* Modal Header */}
-              <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Edit Template</h2>
-                    <p className="text-xs sm:text-sm lg:text-base text-gray-600 mt-1">
-                      {editVersion ? `Version ${editVersion}` : 'Update your template'} • 
-                      <span className="text-purple-600 font-medium"> This will create a new version</span>
-                    </p>
-                  </div>
-                  <button 
-                    aria-label="Close" 
-                    className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors ml-2" 
-                    onClick={() => setOpenEdit(false)}
-                  >
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {/* Modal Content */}
-              <div className="p-3 sm:p-4 lg:p-6">
-                <form onSubmit={onUpdateTemplate} className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-                  {/* Left Column - Form Fields */}
-                  <div className="space-y-3 sm:space-y-4 lg:space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Template Name</label>
-                      <Input 
-                        className="w-full" 
-                        value={editName} 
-                        onChange={(e) => setEditName(e.target.value)} 
-                        required 
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Email Subject</label>
-                      <Input 
-                        className="w-full" 
-                        value={editSubject} 
-                        onChange={(e) => setEditSubject(e.target.value)} 
-                        required 
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">HTML Body</label>
-                      <textarea 
-                        className="border border-gray-300 rounded-lg w-full p-2 sm:p-3 h-28 sm:h-32 lg:h-48 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none" 
-                        value={editHtml} 
-                        onChange={(e) => setEditHtml(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Right Column - Preview */}
-                  <div>
-                    <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 mb-2 sm:mb-3">Preview</h3>
-                    <Card className="p-2 sm:p-3 lg:p-4 border-2 border-gray-200">
-                      <div className="mb-2 sm:mb-3 lg:mb-4">
-                        <div className="text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Subject:</div>
-                        <div className="text-gray-900 bg-gray-50 rounded px-2 sm:px-3 py-1 sm:py-1.5 lg:py-2 border text-xs sm:text-sm">
-                          {editSubject || 'No subject'}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">HTML Body:</div>
-                        <div className="bg-white border rounded-lg p-2 sm:p-3 lg:p-4 max-h-40 sm:max-h-48 lg:max-h-64 overflow-y-auto">
-                          <div className="prose prose-xs sm:prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(editHtml || '') || '<p class="text-gray-400">No content</p>' }} />
-                        </div>
-                      </div>
-                    </Card>
-                  </div>
-
-                  {/* Form Actions */}
-                  <div className="lg:col-span-2 border-t border-gray-200 bg-gray-50 p-3 sm:p-4 rounded-lg">
-                    {/* Button Container - Improved Responsiveness */}
-                    <div className="flex flex-col gap-3">
-                      {/* Delete Button - Full Width on Mobile */}
-                      <button 
-                        type="button" 
-                        className="w-full sm:w-auto text-sm text-red-600 hover:text-red-700 font-medium px-4 py-3 rounded-lg hover:bg-red-50 transition-colors bg-white border border-red-200 flex items-center justify-center sm:justify-start"
-                        onClick={() => onDeleteTemplate(editId)}
-                      >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Delete Template
-                      </button>
-                      
-                      {/* Action Buttons - Stack on Mobile, Side by Side on Desktop */}
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <Button 
-                          type="button" 
-                          onClick={() => setOpenEdit(false)}
-                          className="w-full sm:w-auto px-6 py-3 border-gray-300 text-gray-700 hover:bg-gray-50 bg-white font-medium"
-                        >
-                          Cancel
-                        </Button>
-                        <PrimaryButton 
-                          type="submit" 
-                          disabled={savingEdit}
-                          className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
-                        >
-                          {savingEdit ? (
-                            <div className="flex items-center justify-center gap-2">
-                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                              Saving...
-                            </div>
-                          ) : (
-                            'Save (New Version)'
-                          )}
-                        </PrimaryButton>
-                      </div>
                     </div>
                   </div>
                 </form>
