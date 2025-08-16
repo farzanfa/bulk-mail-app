@@ -65,6 +65,18 @@ export async function GET(req: Request) {
       })
     ]);
 
+    // Calculate additional metrics
+    const emailDeliveryRate = totalEmailsSent + totalEmailsFailed > 0 
+      ? ((totalEmailsSent / (totalEmailsSent + totalEmailsFailed)) * 100)
+      : 0;
+    
+    // Mock system metrics (in a real app, these would come from system monitoring)
+    const systemHealth = emailDeliveryRate > 95 ? 'healthy' : 
+                        emailDeliveryRate > 80 ? 'warning' : 'critical';
+    const avgResponseTime = Math.random() * 200 + 50; // Mock: 50-250ms
+    const diskUsage = Math.random() * 30 + 20; // Mock: 20-50%
+    const memoryUsage = Math.random() * 40 + 30; // Mock: 30-70%
+
     return NextResponse.json({
       totalUsers,
       totalUploads,
@@ -76,7 +88,12 @@ export async function GET(req: Request) {
       activeUsers24h,
       newUsers24h,
       uploads24h,
-      campaigns24h
+      campaigns24h,
+      systemHealth,
+      emailDeliveryRate,
+      avgResponseTime,
+      diskUsage,
+      memoryUsage
     });
   } catch (error) {
     console.error('Admin stats API error:', error);
