@@ -59,13 +59,13 @@ export default function Header({ isAdmin }: HeaderProps) {
   
   return (
     <header className={`sticky top-0 z-40 border-b bg-white/95 backdrop-blur-sm transition-all duration-300 ${scrolled ? 'shadow-sm' : ''}`}>
-      <div className="w-full px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-3 sm:px-4 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-4">
+          <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
             {/* Logo */}
-            <a href="/" className="font-semibold inline-flex items-center gap-2 group flex-shrink-0">
-              <img src="/icon.svg?v=2" alt="MailWeaver" className="h-6 w-6 transition-transform group-hover:scale-110"/>
-              <span className="hidden sm:inline bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">MailWeaver</span>
+            <a href="/" className="font-semibold inline-flex items-center gap-1.5 sm:gap-2 group flex-shrink-0">
+              <img src="/icon.svg?v=2" alt="MailWeaver" className="h-5 w-5 sm:h-6 sm:w-6 transition-transform group-hover:scale-110"/>
+              <span className="text-sm sm:text-base bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">MailWeaver</span>
             </a>
             
             {/* Desktop Navigation */}
@@ -86,7 +86,7 @@ export default function Header({ isAdmin }: HeaderProps) {
             </nav>
             
             {/* Action Buttons */}
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
               {isMarketing ? (
                 <>
                   {/* GitHub Button - Hidden on mobile */}
@@ -106,13 +106,14 @@ export default function Header({ isAdmin }: HeaderProps) {
                       <div className="h-4 w-4 border-2 border-gray-300 border-t-brand rounded-full animate-spin"></div>
                     </div>
                   ) : session?.user ? (
-                    <a href="/dashboard" className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg text-sm hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-sm hover:shadow whitespace-nowrap">
-                      Go to Dashboard →
+                    <a href="/dashboard" className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-sm hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-sm hover:shadow whitespace-nowrap">
+                      <span className="hidden lg:inline">Go to</span> Dashboard
+                      <span className="hidden lg:inline">→</span>
                     </a>
                   ) : (
                     <button 
                       onClick={() => signIn('google', { callbackUrl: '/dashboard' })} 
-                      className="hidden sm:inline-flex items-center gap-2 border border-gray-200 px-3 sm:px-4 py-2 rounded-lg text-sm hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 whitespace-nowrap"
+                      className="hidden sm:inline-flex items-center gap-2 border border-gray-200 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-sm hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 whitespace-nowrap"
                     >
                       <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
                         <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
@@ -122,19 +123,19 @@ export default function Header({ isAdmin }: HeaderProps) {
                           <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/>
                         </g>
                       </svg>
-                      Sign in with Google
+                      <span className="hidden lg:inline">Sign in with</span> Google
                     </button>
                   )}
                   
                   {/* Mobile CTA Button */}
                   {session?.user ? (
-                    <a href="/dashboard" className="inline-flex sm:hidden items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:from-purple-700 hover:to-blue-700 transition-all duration-200">
+                    <a href="/dashboard" className="inline-flex sm:hidden items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-medium">
                       Dashboard
                     </a>
                   ) : (
                     <button 
                       onClick={() => signIn('google', { callbackUrl: '/dashboard' })} 
-                      className="inline-flex sm:hidden items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:from-purple-700 hover:to-blue-700 transition-all duration-200"
+                      className="inline-flex sm:hidden items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-medium"
                     >
                       Sign in
                     </button>
@@ -143,22 +144,22 @@ export default function Header({ isAdmin }: HeaderProps) {
               ) : (
                 <>
                   {/* Dashboard Actions */}
-                  <a href="/campaigns/new" className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg text-sm hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-sm hover:shadow whitespace-nowrap">
-                    + New Campaign
+                  <a href="/campaigns/new" className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-sm hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-sm hover:shadow whitespace-nowrap">
+                    <span className="text-lg leading-none">+</span> New Campaign
                   </a>
-                  <a href="/onboarding" className="hidden lg:inline-flex items-center gap-2 border border-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 hover:border-gray-300 transition-all duration-200">
+                  <a href="/onboarding" className="hidden lg:inline-flex items-center gap-2 border border-gray-200 px-3 py-1.5 sm:py-2 rounded-lg text-sm hover:bg-gray-50 hover:border-gray-300 transition-all duration-200">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     <span className="hidden xl:inline">Profile</span>
                   </a>
-                  <button onClick={() => signOut({ callbackUrl: '/' })} className="hidden sm:inline-flex items-center gap-2 bg-gray-900 text-white px-3 sm:px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition-all duration-200 whitespace-nowrap">
+                  <button onClick={() => signOut({ callbackUrl: '/' })} className="hidden sm:inline-flex items-center gap-2 bg-gray-900 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-sm hover:bg-gray-800 transition-all duration-200 whitespace-nowrap">
                     Logout
                   </button>
                   
                   {/* Mobile CTA */}
-                  <a href="/campaigns/new" className="inline-flex sm:hidden items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:from-purple-700 hover:to-blue-700 transition-all duration-200">
-                    + New
+                  <a href="/campaigns/new" className="inline-flex sm:hidden items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-medium">
+                    <span className="text-sm leading-none">+</span> New
                   </a>
                 </>
               )}
@@ -166,10 +167,10 @@ export default function Header({ isAdmin }: HeaderProps) {
               {/* Mobile Menu Button */}
               <button 
                 aria-label="Open menu" 
-                className="md:hidden inline-flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 touch-target" 
+                className="md:hidden inline-flex items-center justify-center p-1.5 rounded-lg hover:bg-gray-100 transition-colors duration-200 touch-target" 
                 onClick={() => setOpen(true)}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
@@ -185,19 +186,19 @@ export default function Header({ isAdmin }: HeaderProps) {
       >
         {/* Mobile Menu Panel */}
         <div 
-          className={`absolute left-0 top-0 h-full w-[280px] max-w-[85vw] bg-white shadow-xl transform transition-transform duration-300 ease-out flex flex-col ${open ? 'translate-x-0' : '-translate-x-full'}`}
+          className={`absolute left-0 top-0 h-full w-[280px] max-w-[75vw] bg-white shadow-xl transform transition-transform duration-300 ease-out flex flex-col ${open ? 'translate-x-0' : '-translate-x-full'}`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Menu Header */}
-          <div className="p-4 border-b flex-shrink-0">
+          <div className="p-3 sm:p-4 border-b flex-shrink-0">
             <div className="flex items-center justify-between">
-              <a href="/" className="font-semibold inline-flex items-center gap-2 flex-shrink-0">
-                <img src="/icon.svg?v=2" alt="MailWeaver" className="h-6 w-6"/>
-                <span className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">MailWeaver</span>
+              <a href="/" className="font-semibold inline-flex items-center gap-1.5 flex-shrink-0">
+                <img src="/icon.svg?v=2" alt="MailWeaver" className="h-5 w-5"/>
+                <span className="text-sm bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">MailWeaver</span>
               </a>
               <button 
                 aria-label="Close menu" 
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 -mr-2" 
+                className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors duration-200 -mr-1.5" 
                 onClick={() => setOpen(false)}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,13 +209,13 @@ export default function Header({ isAdmin }: HeaderProps) {
           </div>
           
           {/* Navigation Links */}
-          <nav className="flex-1 overflow-y-auto py-4">
-            <div className="px-3 space-y-1">
+          <nav className="flex-1 overflow-y-auto py-3">
+            <div className="px-2 space-y-0.5">
               {links.map((l) => (
                 <a 
                   key={l.href} 
                   href={l.href} 
-                  className={`block px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                  className={`block px-3 py-2 rounded-lg transition-all duration-200 text-sm ${
                     pathname === l.href 
                       ? 'bg-gray-100 text-gray-900 font-medium' 
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -228,27 +229,27 @@ export default function Header({ isAdmin }: HeaderProps) {
           </nav>
           
           {/* Menu Footer */}
-          <div className="p-4 border-t border-gray-200 space-y-3 flex-shrink-0 safe-padding-bottom">
+          <div className="p-3 sm:p-4 border-t border-gray-200 space-y-2 flex-shrink-0 safe-padding-bottom">
             {isMarketing && (
               <>
                 <a 
                   href="https://github.com/farzanfa" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="flex items-center justify-center gap-2 rounded-lg text-sm px-4 py-2.5 bg-[#24292f] text-white w-full hover:bg-[#1c2128] transition-colors duration-200" 
+                  className="flex items-center justify-center gap-2 rounded-lg text-sm px-3 py-2 bg-[#24292f] text-white w-full hover:bg-[#1c2128] transition-colors duration-200" 
                   onClick={() => setOpen(false)}
                 >
                   <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.01.08-2.1 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.09.16 1.9.08 2.1.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
                   GitHub
                 </a>
                 {status === 'loading' ? (
-                  <div className="flex items-center justify-center gap-2 border border-gray-200 px-4 py-2.5 rounded-lg text-sm">
+                  <div className="flex items-center justify-center gap-2 border border-gray-200 px-3 py-2 rounded-lg text-sm">
                     <div className="h-4 w-4 border-2 border-gray-300 border-t-brand rounded-full animate-spin"></div>
                   </div>
                 ) : session?.user ? (
                   <a 
                     href="/dashboard" 
-                    className="block w-full text-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2.5 rounded-lg text-sm hover:from-purple-700 hover:to-blue-700 transition-all duration-200" 
+                    className="block w-full text-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:from-purple-700 hover:to-blue-700 transition-all duration-200" 
                     onClick={() => setOpen(false)}
                   >
                     Go to Dashboard →
@@ -256,7 +257,7 @@ export default function Header({ isAdmin }: HeaderProps) {
                 ) : (
                   <button 
                     onClick={() => { setOpen(false); signIn('google', { callbackUrl: '/dashboard' }); }} 
-                    className="w-full flex items-center justify-center gap-2 border border-gray-200 px-4 py-2.5 rounded-lg text-sm hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
+                    className="w-full flex items-center justify-center gap-2 border border-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
                   >
                     <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
                       <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
@@ -275,14 +276,14 @@ export default function Header({ isAdmin }: HeaderProps) {
               <>
                 <a 
                   href="/campaigns/new" 
-                  className="block w-full text-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2.5 rounded-lg text-sm hover:from-purple-700 hover:to-blue-700 transition-all duration-200" 
+                  className="block w-full text-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:from-purple-700 hover:to-blue-700 transition-all duration-200" 
                   onClick={() => setOpen(false)}
                 >
                   + New Campaign
                 </a>
                 <a 
                   href="/onboarding" 
-                  className="flex items-center justify-center gap-2 border border-gray-200 px-4 py-2.5 rounded-lg text-sm w-full hover:bg-gray-50 hover:border-gray-300 transition-all duration-200" 
+                  className="flex items-center justify-center gap-2 border border-gray-200 px-3 py-2 rounded-lg text-sm w-full hover:bg-gray-50 hover:border-gray-300 transition-all duration-200" 
                   onClick={() => setOpen(false)}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -292,7 +293,7 @@ export default function Header({ isAdmin }: HeaderProps) {
                 </a>
                 <button 
                   onClick={() => { setOpen(false); signOut({ callbackUrl: '/' }); }} 
-                  className="w-full bg-gray-900 text-white px-4 py-2.5 rounded-lg text-sm hover:bg-gray-800 transition-all duration-200"
+                  className="w-full bg-gray-900 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-800 transition-all duration-200"
                 >
                   Logout
                 </button>

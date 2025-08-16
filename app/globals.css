@@ -65,6 +65,55 @@
     min-height: 44px;
     -webkit-tap-highlight-color: transparent;
   }
+  
+  /* Prevent text overflow in mobile buttons */
+  header button span,
+  header a span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Ensure proper spacing for header content */
+  header .max-w-7xl {
+    width: 100%;
+  }
+}
+
+/* Very small devices (< 360px) */
+@media (max-width: 359px) {
+  /* Reduce font sizes further */
+  header .text-sm {
+    font-size: 0.75rem;
+  }
+  
+  header .text-xs {
+    font-size: 0.6875rem;
+  }
+  
+  /* Reduce padding on very small screens */
+  header .px-3 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  /* Adjust button padding */
+  header button.px-3,
+  header a.px-3 {
+    padding-left: 0.625rem;
+    padding-right: 0.625rem;
+  }
+}
+
+/* Improve header layout on tablets */
+@media (min-width: 640px) and (max-width: 767px) {
+  header nav {
+    gap: 0.5rem;
+  }
+  
+  header nav a {
+    padding: 0.5rem 0.75rem;
+  }
 }
 
 /* Mobile menu animations */
