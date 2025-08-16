@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/db';
 import { isAdminEmail } from '@/lib/admin';
+import { prisma } from '@/lib/db';
+
+// Force dynamic rendering for admin routes
+export const dynamic = 'force-dynamic';
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);

@@ -4,6 +4,9 @@ import { authOptions } from '@/lib/auth';
 import { isAdminEmail } from '@/lib/admin';
 import { prisma } from '@/lib/db';
 
+// Force dynamic rendering for admin routes
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);

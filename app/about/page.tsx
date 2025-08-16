@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui';
 
-export const dynamic = 'force-static';
+export const dynamic = 'force-dynamic';
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">

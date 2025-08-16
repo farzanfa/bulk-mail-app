@@ -1,18 +1,21 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/db';
 import { isAdminEmail } from '@/lib/admin';
+import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
-export async function GET(req: Request) {
+// Force dynamic rendering for admin routes
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email || !isAdminEmail(session.user.email)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const sortBy = searchParams.get('sortBy') || 'created_at';
     const sortDir = searchParams.get('sortDir') || 'desc';
