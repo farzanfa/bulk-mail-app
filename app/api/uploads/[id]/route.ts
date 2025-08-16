@@ -33,7 +33,15 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
     } 
   });
   
-  // 2. Then delete contacts belonging to this upload
+  // 2. Then delete campaigns that reference this upload
+  await prisma.campaigns.deleteMany({ 
+    where: { 
+      upload_id: upload.id, 
+      user_id: userId 
+    } 
+  });
+  
+  // 3. Then delete contacts belonging to this upload
   await prisma.contacts.deleteMany({ 
     where: { 
       upload_id: upload.id, 
@@ -41,7 +49,7 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
     } 
   });
   
-  // 3. Finally delete the upload
+  // 4. Finally delete the upload
   await prisma.uploads.delete({ where: { id: upload.id } });
   
   return NextResponse.json({ ok: true });

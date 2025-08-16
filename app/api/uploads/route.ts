@@ -51,7 +51,15 @@ export async function DELETE(req: Request) {
     } 
   });
   
-  // 2. Then delete contacts belonging to these uploads and user
+  // 2. Then delete campaigns that reference these uploads
+  await prisma.campaigns.deleteMany({ 
+    where: { 
+      upload_id: { in: ids }, 
+      user_id: userId 
+    } 
+  });
+  
+  // 3. Then delete contacts belonging to these uploads and user
   await prisma.contacts.deleteMany({ 
     where: { 
       upload_id: { in: ids }, 
@@ -59,7 +67,7 @@ export async function DELETE(req: Request) {
     } 
   });
   
-  // 3. Finally delete uploads rows
+  // 4. Finally delete uploads rows
   const result = await prisma.uploads.deleteMany({ 
     where: { 
       id: { in: ids }, 
