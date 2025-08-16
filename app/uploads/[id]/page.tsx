@@ -197,8 +197,9 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
 
         {/* Search and Actions */}
         <Card className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mb-4">
-            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
+            {/* Search Section */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
               <div className="relative w-full sm:w-80">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,37 +215,38 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
                   className="pl-10 w-full"
                 />
               </div>
-              <Button 
+              <button 
                 onClick={handleSearch}
-                className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200"
+                className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow"
               >
                 Search
-              </Button>
+              </button>
             </div>
             
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Button
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto justify-center lg:justify-end">
+              <button
                 onClick={selectAll}
-                className="px-3 sm:px-4 py-2 text-sm border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white font-medium rounded-lg transition-all duration-200"
+                className="px-4 sm:px-5 py-2.5 text-sm border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow"
               >
                 {selected.length === items.length ? 'Deselect All' : 'Select All'}
-              </Button>
+              </button>
               
-              <Button
+              <button
                 onClick={handleDeletePageContacts}
                 disabled={items.length === 0}
-                className="px-3 sm:px-4 py-2 text-sm bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 sm:px-5 py-2.5 text-sm bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow"
               >
                 Delete Page ({items.length})
-              </Button>
+              </button>
               
-              <Button
+              <button
                 onClick={handleDeleteSelected}
                 disabled={selected.length === 0}
-                className="px-3 sm:px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 sm:px-5 py-2.5 text-sm bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow"
               >
                 Delete Selected ({selected.length})
-              </Button>
+              </button>
             </div>
           </div>
 
