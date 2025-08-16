@@ -213,7 +213,7 @@ export default function TemplatesPage() {
               <span className="sm:hidden">New</span>
             </PrimaryButton>
           </div>
-
+        </div>
 
         {/* Search and Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
@@ -287,7 +287,7 @@ export default function TemplatesPage() {
               <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 max-w-md mx-auto px-4">
                 {searchTerm 
                   ? `No templates match "${searchTerm}". Try a different search term.`
-                  : 'Create your first email template to start building personalized campaigns. Templates support variables like {'{{ first_name }}'} for dynamic content.'
+                  : 'Create your first email template to start building personalized campaigns. Templates support variables like {{ first_name }} for dynamic content.'
                 }
               </p>
               {!searchTerm && (
