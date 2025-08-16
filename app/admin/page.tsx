@@ -372,7 +372,7 @@ export default function AdminPage() {
               </div>
 
               {/* Users Table */}
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto table-responsive rounded-lg border border-gray-200">
                 <table className="min-w-full text-sm">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
@@ -517,7 +517,7 @@ export default function AdminPage() {
         {activeTab === 'campaigns' && (
           <Section title="Campaign Performance">
             <Card className="p-6">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto table-responsive rounded-lg border border-gray-200">
                 <table className="min-w-full text-sm">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
