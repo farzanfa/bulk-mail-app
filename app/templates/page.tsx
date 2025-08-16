@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Section, Card, Input, PrimaryButton, Button } from '@/components/ui';
 import { sanitizeHtml } from '@/lib/sanitize';
 import ConfirmModal from '@/components/ConfirmModal';
+import { TemplateNewModal } from '@/components/TemplateNewModal';
 
 function extractVars(s: string): string[] {
   const re = /\{\{\s*([a-zA-Z0-9_\.]+)\s*\}\}/g;
@@ -14,12 +15,6 @@ function extractVars(s: string): string[] {
 
 export default function TemplatesPage() {
   const [items, setItems] = useState<any[]>([]);
-  const [name, setName] = useState('');
-  const [subject, setSubject] = useState('');
-  const [html, setHtml] = useState('<p>Hello {{ first_name }}</p>');
-  const [text, setText] = useState('');
-  const [openCreate, setOpenCreate] = useState(false);
-  const [savingCreate, setSavingCreate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,7 +23,7 @@ export default function TemplatesPage() {
   const [deleteMessage, setDeleteMessage] = useState('');
   const [openView, setOpenView] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState<any | null>(null);
-  const vars = useMemo(() => Array.from(new Set([...extractVars(subject), ...extractVars(html)])), [subject, html]);
+  const [openCreate, setOpenCreate] = useState(false);
 
   async function refresh() {
     try {
@@ -48,46 +43,6 @@ export default function TemplatesPage() {
   }
 
   useEffect(() => { refresh(); }, []);
-
-  async function onCreate(e: React.FormEvent) {
-    e.preventDefault();
-    if (!name.trim() || !subject.trim()) { 
-      toast.error('Name and subject are required'); 
-      return; 
-    }
-    
-    setSavingCreate(true);
-    try {
-      const res = await fetch('/api/templates', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ name: name.trim(), subject: subject.trim(), html: html.trim(), text: text.trim() }) 
-      });
-      
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to save template: ${res.status}`);
-      }
-      
-      const json = await res.json();
-      if (json.template) {
-        toast.success('Template saved successfully');
-        setName('');
-        setSubject('');
-        setHtml('<p>Hello {{ first_name }}</p>');
-        setText('');
-        setOpenCreate(false);
-        await refresh();
-      } else {
-        throw new Error('Invalid response from server');
-      }
-    } catch (err: any) {
-      console.error('Failed to create template:', err);
-      toast.error(err?.message || 'Failed to save template');
-    } finally {
-      setSavingCreate(false);
-    }
-  }
 
   async function onDeleteTemplate(templateId: string) {
     if (!confirm('Are you sure you want to delete this template? This action cannot be undone.')) {
@@ -396,138 +351,7 @@ export default function TemplatesPage() {
 
         {/* Create Template Modal */}
         {openCreate && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-3 lg:p-4">
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-5xl lg:max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
-              {/* Modal Header */}
-              <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Create New Template</h2>
-                    <p className="text-xs sm:text-sm lg:text-base text-gray-600 mt-1">Design your email template with personalized variables</p>
-                  </div>
-                  <button 
-                    aria-label="Close" 
-                    className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors ml-2" 
-                    onClick={() => setOpenCreate(false)}
-                  >
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {/* Modal Content */}
-              <div className="p-3 sm:p-4 lg:p-6">
-                <form onSubmit={onCreate} className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-                  {/* Left Column - Form Fields */}
-                  <div className="space-y-3 sm:space-y-4 lg:space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Template Name</label>
-                      <Input 
-                        className="w-full" 
-                        value={name} 
-                        onChange={(e) => setName(e.target.value)} 
-                        placeholder="e.g., Welcome Email, Newsletter Template"
-                        required 
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Email Subject</label>
-                      <Input 
-                        className="w-full" 
-                        value={subject} 
-                        onChange={(e) => setSubject(e.target.value)} 
-                        placeholder="e.g., Welcome {{ first_name }}!"
-                        required 
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">HTML Body</label>
-                      <textarea 
-                        className="border border-gray-300 rounded-lg w-full p-3 h-32 sm:h-48 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all resize-none" 
-                        value={html} 
-                        onChange={(e) => setHtml(e.target.value)}
-                        placeholder="<p>Hello {{ first_name }}, welcome to our service!</p>"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Use variables like {'{{ first_name }}'}, {'{{ company }}'}, etc. for personalization
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Right Column - Preview & Variables */}
-                  <div className="space-y-4 sm:space-y-6">
-                    <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Variables Detected</h3>
-                      {vars.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {vars.map((v, i) => (
-                            <span key={i} className="inline-flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1 bg-purple-100 text-purple-700 text-xs sm:text-sm font-medium rounded-full">
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                              </svg>
-                              {v}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-gray-500 text-sm">No variables detected yet</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Preview</h3>
-                      <Card className="p-3 sm:p-4 border-2 border-gray-200">
-                        <div className="mb-3 sm:mb-4">
-                          <div className="text-sm font-medium text-gray-700 mb-2">Subject:</div>
-                          <div className="text-gray-900 bg-gray-50 rounded px-2 sm:px-3 py-1.5 sm:py-2 border text-sm">
-                            {render(subject) || 'Preview will appear here'}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-700 mb-2">HTML Body:</div>
-                          <div className="bg-white border rounded-lg p-3 sm:p-4 max-h-48 sm:max-h-64 overflow-y-auto">
-                            <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: render(html) || '<p class="text-gray-400">Preview will appear here</p>' }} />
-                          </div>
-                        </div>
-                      </Card>
-                    </div>
-                  </div>
-
-                  {/* Form Actions */}
-                  <div className="lg:col-span-2 border-t border-gray-200 bg-gray-50 p-3 sm:p-4 rounded-lg">
-                    {/* Button Container - Improved Responsiveness */}
-                    <div className="flex flex-col sm:flex-row gap-3 justify-end">
-                      <Button 
-                        type="button" 
-                        onClick={() => setOpenCreate(false)}
-                        className="w-full sm:w-auto px-6 py-3 border-gray-300 text-gray-700 hover:bg-gray-50 bg-white font-medium"
-                      >
-                        Cancel
-                      </Button>
-                      <PrimaryButton 
-                        type="submit" 
-                        disabled={savingCreate}
-                        className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
-                      >
-                        {savingCreate ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            Saving...
-                          </div>
-                          ) : (
-                            'Save Template'
-                          )}
-                      </PrimaryButton>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
+          <TemplateNewModal onClose={() => setOpenCreate(false)} />
         )}
 
         {/* Template Details Modal */}
