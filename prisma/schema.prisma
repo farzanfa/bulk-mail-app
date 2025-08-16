@@ -102,7 +102,7 @@ model contacts {
   user_id       String
   user          users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
   upload_id     String?
-  upload        uploads? @relation(fields: [upload_id], references: [id])
+  upload        uploads? @relation(fields: [upload_id], references: [id], onDelete: Cascade)
   email         String
   fields        Json
   unsubscribed  Boolean  @default(false)
@@ -124,7 +124,7 @@ model campaigns {
   template_id      String
   template         templates @relation(fields: [template_id], references: [id])
   upload_id        String
-  upload           uploads   @relation(fields: [upload_id], references: [id])
+  upload           uploads   @relation(fields: [upload_id], references: [id], onDelete: Cascade)
   filters          Json
   status           CampaignStatus
   batch_size       Int       @default(40)
@@ -143,7 +143,7 @@ model campaign_recipients {
   campaign_id      String
   campaign         campaigns @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
   contact_id       String
-  contact          contacts  @relation(fields: [contact_id], references: [id])
+  contact          contacts  @relation(fields: [contact_id], references: [id], onDelete: Cascade)
   rendered_subject String?
   rendered_html    String?
   rendered_text    String?

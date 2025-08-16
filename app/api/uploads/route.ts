@@ -40,34 +40,7 @@ export async function DELETE(req: Request) {
   const body = await req.json().catch(() => null);
   const { ids } = delSchema.parse(body || {});
 
-  // Delete in correct order to avoid foreign key constraints:
-  // 1. First delete campaign recipients that reference contacts from these uploads
-  await prisma.campaign_recipients.deleteMany({ 
-    where: { 
-      contact: { 
-        upload_id: { in: ids }, 
-        user_id: userId 
-      } 
-    } 
-  });
-  
-  // 2. Then delete campaigns that reference these uploads
-  await prisma.campaigns.deleteMany({ 
-    where: { 
-      upload_id: { in: ids }, 
-      user_id: userId 
-    } 
-  });
-  
-  // 3. Then delete contacts belonging to these uploads and user
-  await prisma.contacts.deleteMany({ 
-    where: { 
-      upload_id: { in: ids }, 
-      user_id: userId 
-    } 
-  });
-  
-  // 4. Finally delete uploads rows
+  // Delete uploads - database will handle cascading deletes automatically
   const result = await prisma.uploads.deleteMany({ 
     where: { 
       id: { in: ids }, 
