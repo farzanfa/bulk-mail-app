@@ -11,7 +11,8 @@ function isBetaEmail(email: string | null | undefined): boolean {
 
 export async function getUserPlan(userId: string): Promise<Plan> {
   const user = await prisma.users.findUnique({ where: { id: userId }, select: { email: true } });
-  const email = user?.email ?? null;
+  const email = user?.email;
+  if (!email) return 'free';
   if (isAdminEmail(email)) return 'admin';
   if (isBetaEmail(email)) return 'beta';
   return 'free';
