@@ -44,7 +44,7 @@ export default function AdminPage() {
   const [deleteMessage, setDeleteMessage] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [sortBy, setSortBy] = useState<'created_at' | 'email' | 'last_activity'>('created_at');
+  const [sortBy, setSortBy] = useState<'created_at' | 'email'>('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const pageSize = 20;
 
@@ -83,7 +83,7 @@ export default function AdminPage() {
     loadAdminData();
   };
 
-  const handleSort = (field: 'created_at' | 'email' | 'last_activity') => {
+  const handleSort = (field: 'created_at' | 'email') => {
     if (sortBy === field) {
       setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
     } else {

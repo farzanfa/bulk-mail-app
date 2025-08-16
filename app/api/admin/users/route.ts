@@ -34,8 +34,6 @@ export async function GET(req: Request) {
     const orderBy: any = {};
     if (sortBy === 'email') {
       orderBy.email = sortDir;
-    } else if (sortBy === 'last_activity') {
-      orderBy.updated_at = sortDir;
     } else {
       orderBy.created_at = sortDir;
     }
@@ -54,8 +52,7 @@ export async function GET(req: Request) {
           company: true,
           role: true,
           created_at: true,
-          onboarding_completed_at: true,
-          updated_at: true
+          onboarding_completed_at: true
         }
       }),
       prisma.users.count({ where: whereClause })
