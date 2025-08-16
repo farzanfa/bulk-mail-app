@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Logo Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+        }
+
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .logo-container {
+            background: #f9f9f9;
+            border-radius: 15px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+
+        .logo-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo-container.selected {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        }
+
+        .logo {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .logo-name {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            background: #f0f0f0;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .control-group input[type="text"],
+        .control-group input[type="color"],
+        .control-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .control-group input[type="text"]:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .color-inputs {
+            display: flex;
+            gap: 15px;
+        }
+
+        .color-input-group {
+            flex: 1;
+        }
+
+        .color-input-group input[type="color"] {
+            width: 100%;
+            height: 50px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+        }
+
+        .preview-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .preview-box {
+            display: inline-block;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .preview-logo {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .logo-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+            }
+
+            .export-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Brand Logo Generator</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="brandName">Brand Name</label>
+                <input type="text" id="brandName" placeholder="Enter your brand name" value="BRAND">
+            </div>
+            
+            <div class="control-group">
+                <label>Colors</label>
+                <div class="color-inputs">
+                    <div class="color-input-group">
+                        <label for="primaryColor">Primary</label>
+                        <input type="color" id="primaryColor" value="#4CAF50">
+                    </div>
+                    <div class="color-input-group">
+                        <label for="secondaryColor">Secondary</label>
+                        <input type="color" id="secondaryColor" value="#2196F3">
+                    </div>
+                    <div class="color-input-group">
+                        <label for="accentColor">Accent</label>
+                        <input type="color" id="accentColor" value="#FF9800">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label for="fontStyle">Font Style</label>
+                <select id="fontStyle">
+                    <option value="sans-serif">Modern Sans-Serif</option>
+                    <option value="serif">Classic Serif</option>
+                    <option value="monospace">Tech Monospace</option>
+                    <option value="cursive">Elegant Script</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="preview-section">
+            <h2 style="margin-bottom: 20px; color: #333;">Preview</h2>
+            <div class="preview-box">
+                <div class="preview-logo" id="previewLogo"></div>
+            </div>
+        </div>
+
+        <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Choose a Logo Style</h2>
+        
+        <div class="logo-grid">
+            <!-- Geometric Logo -->
+            <div class="logo-container" data-logo-type="geometric">
+                <div class="logo" id="logo-geometric">
+                    <svg viewBox="0 0 200 200">
+                        <defs>
+                            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#2196F3;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <polygon points="100,20 180,80 150,170 50,170 20,80" fill="url(#grad1)" />
+                        <text x="100" y="110" text-anchor="middle" fill="white" font-size="24" font-weight="bold" font-family="sans-serif">BRAND</text>
+                    </svg>
+                </div>
+                <div class="logo-name">Geometric Modern</div>
+            </div>
+
+            <!-- Circular Badge Logo -->
+            <div class="logo-container" data-logo-type="badge">
+                <div class="logo" id="logo-badge">
+                    <svg viewBox="0 0 200 200">
+                        <circle cx="100" cy="100" r="90" fill="#4CAF50" />
+                        <circle cx="100" cy="100" r="75" fill="none" stroke="white" stroke-width="3" />
+                        <text x="100" y="110" text-anchor="middle" fill="white" font-size="28" font-weight="bold" font-family="sans-serif">BRAND</text>
+                    </svg>
+                </div>
+                <div class="logo-name">Classic Badge</div>
+            </div>
+
+            <!-- Minimalist Text Logo -->
+            <div class="logo-container" data-logo-type="minimal">
+                <div class="logo" id="logo-minimal">
+                    <svg viewBox="0 0 200 200">
+                        <rect x="10" y="80" width="180" height="40" fill="#2196F3" rx="5" />
+                        <text x="100" y="105" text-anchor="middle" fill="white" font-size="32" font-weight="300" font-family="sans-serif">BRAND</text>
+                    </svg>
+                </div>
+                <div class="logo-name">Minimalist</div>
+            </div>
+
+            <!-- Abstract Shape Logo -->
+            <div class="logo-container" data-logo-type="abstract">
+                <div class="logo" id="logo-abstract">
+                    <svg viewBox="0 0 200 200">
+                        <path d="M50,100 Q100,20 150,100 Q100,180 50,100" fill="#FF9800" opacity="0.8" />
+                        <path d="M150,100 Q100,20 50,100 Q100,180 150,100" fill="#4CAF50" opacity="0.6" />
+                        <text x="100" y="110" text-anchor="middle" fill="white" font-size="24" font-weight="bold" font-family="sans-serif">BRAND</text>
+                    </svg>
+                </div>
+                <div class="logo-name">Abstract Wave</div>
+            </div>
+
+            <!-- Tech Circuit Logo -->
+            <div class="logo-container" data-logo-type="tech">
+                <div class="logo" id="logo-tech">
+                    <svg viewBox="0 0 200 200">
+                        <rect x="40" y="40" width="120" height="120" fill="none" stroke="#2196F3" stroke-width="3" />
+                        <circle cx="40" cy="40" r="8" fill="#FF9800" />
+                        <circle cx="160" cy="40" r="8" fill="#FF9800" />
+                        <circle cx="40" cy="160" r="8" fill="#FF9800" />
+                        <circle cx="160" cy="160" r="8" fill="#FF9800" />
+                        <line x1="40" y1="100" x2="160" y2="100" stroke="#4CAF50" stroke-width="2" />
+                        <line x1="100" y1="40" x2="100" y2="160" stroke="#4CAF50" stroke-width="2" />
+                        <text x="100" y="110" text-anchor="middle" fill="#2196F3" font-size="20" font-weight="bold" font-family="monospace">BRAND</text>
+                    </svg>
+                </div>
+                <div class="logo-name">Tech Circuit</div>
+            </div>
+
+            <!-- Gradient Sphere Logo -->
+            <div class="logo-container" data-logo-type="sphere">
+                <div class="logo" id="logo-sphere">
+                    <svg viewBox="0 0 200 200">
+                        <defs>
+                            <radialGradient id="grad2">
+                                <stop offset="0%" style="stop-color:#FF9800;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#4CAF50;stop-opacity:1" />
+                            </radialGradient>
+                        </defs>
+                        <circle cx="100" cy="100" r="80" fill="url(#grad2)" />
+                        <ellipse cx="100" cy="100" rx="80" ry="20" fill="rgba(255,255,255,0.3)" />
+                        <text x="100" y="110" text-anchor="middle" fill="white" font-size="26" font-weight="bold" font-family="sans-serif">BRAND</text>
+                    </svg>
+                </div>
+                <div class="logo-name">Gradient Sphere</div>
+            </div>
+        </div>
+
+        <div class="export-buttons">
+            <button class="btn btn-primary" onclick="downloadSVG()">Download SVG</button>
+            <button class="btn btn-secondary" onclick="downloadPNG()">Download PNG</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedLogoType = 'geometric';
+        let currentLogo = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up logo container click handlers
+            const logoContainers = document.querySelectorAll('.logo-container');
+            logoContainers.forEach(container => {
+                container.addEventListener('click', function() {
+                    logoContainers.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedLogoType = this.getAttribute('data-logo-type');
+                    updatePreview();
+                });
+            });
+
+            // Set up input handlers
+            document.getElementById('brandName').addEventListener('input', updateAllLogos);
+            document.getElementById('primaryColor').addEventListener('change', updateAllLogos);
+            document.getElementById('secondaryColor').addEventListener('change', updateAllLogos);
+            document.getElementById('accentColor').addEventListener('change', updateAllLogos);
+            document.getElementById('fontStyle').addEventListener('change', updateAllLogos);
+
+            // Select first logo by default
+            logoContainers[0].classList.add('selected');
+            updateAllLogos();
+            updatePreview();
+        });
+
+        function updateAllLogos() {
+            const brandName = document.getElementById('brandName').value || 'BRAND';
+            const primaryColor = document.getElementById('primaryColor').value;
+            const secondaryColor = document.getElementById('secondaryColor').value;
+            const accentColor = document.getElementById('accentColor').value;
+            const fontStyle = document.getElementById('fontStyle').value;
+
+            // Update Geometric Logo
+            const geoLogo = document.querySelector('#logo-geometric svg');
+            geoLogo.querySelector('linearGradient stop:first-child').style.stopColor = primaryColor;
+            geoLogo.querySelector('linearGradient stop:last-child').style.stopColor = secondaryColor;
+            geoLogo.querySelector('text').textContent = brandName;
+            geoLogo.querySelector('text').style.fontFamily = fontStyle;
+
+            // Update Badge Logo
+            const badgeLogo = document.querySelector('#logo-badge svg');
+            badgeLogo.querySelector('circle:first-child').setAttribute('fill', primaryColor);
+            badgeLogo.querySelector('text').textContent = brandName;
+            badgeLogo.querySelector('text').style.fontFamily = fontStyle;
+
+            // Update Minimal Logo
+            const minLogo = document.querySelector('#logo-minimal svg');
+            minLogo.querySelector('rect').setAttribute('fill', secondaryColor);
+            minLogo.querySelector('text').textContent = brandName;
+            minLogo.querySelector('text').style.fontFamily = fontStyle;
+
+            // Update Abstract Logo
+            const absLogo = document.querySelector('#logo-abstract svg');
+            absLogo.querySelector('path:first-child').setAttribute('fill', accentColor);
+            absLogo.querySelector('path:last-child').setAttribute('fill', primaryColor);
+            absLogo.querySelector('text').textContent = brandName;
+            absLogo.querySelector('text').style.fontFamily = fontStyle;
+
+            // Update Tech Logo
+            const techLogo = document.querySelector('#logo-tech svg');
+            techLogo.querySelector('rect').setAttribute('stroke', secondaryColor);
+            techLogo.querySelectorAll('circle').forEach(c => c.setAttribute('fill', accentColor));
+            techLogo.querySelectorAll('line').forEach(l => l.setAttribute('stroke', primaryColor));
+            techLogo.querySelector('text').textContent = brandName;
+            techLogo.querySelector('text').setAttribute('fill', secondaryColor);
+            techLogo.querySelector('text').style.fontFamily = fontStyle;
+
+            // Update Sphere Logo
+            const sphereLogo = document.querySelector('#logo-sphere svg');
+            sphereLogo.querySelector('radialGradient stop:first-child').style.stopColor = accentColor;
+            sphereLogo.querySelector('radialGradient stop:last-child').style.stopColor = primaryColor;
+            sphereLogo.querySelector('text').textContent = brandName;
+            sphereLogo.querySelector('text').style.fontFamily = fontStyle;
+
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const selectedLogo = document.querySelector(`#logo-${selectedLogoType} svg`);
+            const previewLogo = document.getElementById('previewLogo');
+            
+            if (selectedLogo) {
+                currentLogo = selectedLogo.cloneNode(true);
+                previewLogo.innerHTML = '';
+                previewLogo.appendChild(currentLogo);
+            }
+        }
+
+        function downloadSVG() {
+            if (!currentLogo) return;
+
+            const svgData = new XMLSerializer().serializeToString(currentLogo);
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            const svgUrl = URL.createObjectURL(svgBlob);
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.href = svgUrl;
+            downloadLink.download = `${document.getElementById('brandName').value || 'brand'}_logo.svg`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+
+        function downloadPNG() {
+            if (!currentLogo) return;
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const size = 1024; // High resolution
+            
+            canvas.width = size;
+            canvas.height = size;
+            
+            // White background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, size, size);
+            
+            const svgData = new XMLSerializer().serializeToString(currentLogo);
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(svgBlob);
+            
+            const img = new Image();
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, size, size);
+                URL.revokeObjectURL(url);
+                
+                canvas.toBlob(function(blob) {
+                    const pngUrl = URL.createObjectURL(blob);
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = pngUrl;
+                    downloadLink.download = `${document.getElementById('brandName').value || 'brand'}_logo.png`;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                });
+            };
+            img.src = url;
+        }
+    </script>
+</body>
+</html>
