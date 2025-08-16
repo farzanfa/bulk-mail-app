@@ -58,14 +58,14 @@ export default function Header({ isAdmin }: HeaderProps) {
       ];
   
   return (
-    <header className={`sticky top-0 z-40 border-b bg-white/95 backdrop-blur-sm transition-all duration-300 ${scrolled ? 'shadow-sm' : ''}`}>
-      <div className="w-full px-3 sm:px-4 lg:px-8">
+    <header className={`sticky top-0 z-40 border-b bg-white/95 backdrop-blur-sm transition-all duration-300 ${scrolled ? 'shadow-sm' : ''} safe-padding-top`}>
+      <div className="w-full px-3 sm:px-4 lg:px-8 safe-padding">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
+          <div className="flex min-w-0 items-center justify-between h-14 sm:h-16 gap-2">
             {/* Logo */}
-            <a href="/" className="font-semibold inline-flex items-center gap-1.5 sm:gap-2 group flex-shrink-0">
+            <a href="/" aria-label="MailWeaver home" className="font-semibold inline-flex items-center gap-1.5 sm:gap-2 group flex-shrink-0">
               <img src="/icon.svg?v=2" alt="MailWeaver" className="h-5 w-5 sm:h-6 sm:w-6 transition-transform group-hover:scale-110"/>
-              <span className="text-sm sm:text-base bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">MailWeaver</span>
+              <span className="hidden sm:inline text-base bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent header-text">MailWeaver</span>
             </a>
             
             {/* Desktop Navigation */}
@@ -167,6 +167,8 @@ export default function Header({ isAdmin }: HeaderProps) {
               {/* Mobile Menu Button */}
               <button 
                 aria-label="Open menu" 
+                aria-expanded={open}
+                aria-controls="mobile-menu-panel"
                 className="md:hidden inline-flex items-center justify-center p-1.5 rounded-lg hover:bg-gray-100 transition-colors duration-200 touch-target" 
                 onClick={() => setOpen(true)}
               >
@@ -186,11 +188,14 @@ export default function Header({ isAdmin }: HeaderProps) {
       >
         {/* Mobile Menu Panel */}
         <div 
+          id="mobile-menu-panel"
+          role="dialog"
+          aria-modal="true"
           className={`absolute left-0 top-0 h-full w-[280px] max-w-[75vw] bg-white shadow-xl transform transition-transform duration-300 ease-out flex flex-col ${open ? 'translate-x-0' : '-translate-x-full'}`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Menu Header */}
-          <div className="p-3 sm:p-4 border-b flex-shrink-0">
+          <div className="p-3 sm:p-4 border-b flex-shrink-0 safe-padding">
             <div className="flex items-center justify-between">
               <a href="/" className="font-semibold inline-flex items-center gap-1.5 flex-shrink-0">
                 <img src="/icon.svg?v=2" alt="MailWeaver" className="h-5 w-5"/>
