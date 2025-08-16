@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import { Section, Input, Button, PrimaryButton, Card } from '@/components/ui';
+import { Section, Input, Button, PrimaryButton, Card, Textarea } from '@/components/ui';
 import { sanitizeHtml } from '@/lib/sanitize';
 
 function extractVars(s: string): string[] {
@@ -94,9 +94,8 @@ export function TemplateNewModal({ onClose }: { onClose: () => void }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card className="p-4">
               <label className="block text-sm text-gray-500 mb-2">Template name</label>
-              <input 
+              <Input 
                 type="text"
-                className="border rounded-lg w-full p-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
                 placeholder="Welcome Email" 
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
@@ -105,9 +104,8 @@ export function TemplateNewModal({ onClose }: { onClose: () => void }) {
             </Card>
             <Card className="p-4">
               <label className="block text-sm text-gray-500 mb-2">Email subject</label>
-              <input 
+              <Input 
                 type="text"
-                className="border rounded-lg w-full p-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
                 placeholder="Welcome {{ first_name }}!" 
                 value={subject} 
                 onChange={(e) => setSubject(e.target.value)} 
@@ -118,8 +116,8 @@ export function TemplateNewModal({ onClose }: { onClose: () => void }) {
           
           <Card className="p-4">
             <label className="block text-sm text-gray-500 mb-2">HTML body</label>
-            <textarea 
-              className="border rounded-lg w-full p-3 h-32 resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+            <Textarea 
+              rows={8}
               placeholder="<p>Hello {{ first_name }}, welcome to our service!</p>"
               value={html} 
               onChange={(e) => setHtml(e.target.value)}
@@ -131,8 +129,8 @@ export function TemplateNewModal({ onClose }: { onClose: () => void }) {
 
           <Card className="p-4">
             <label className="block text-sm text-gray-500 mb-2">Plain text version (optional)</label>
-            <textarea 
-              className="border rounded-lg w-full p-3 h-24 resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+            <Textarea 
+              rows={6}
               placeholder="Hello {{ first_name }}, welcome to our service!"
               value={text} 
               onChange={(e) => setText(e.target.value)}

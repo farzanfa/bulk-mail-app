@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Section, Button, Card, PrimaryButton } from '@/components/ui';
+import { Section, Button, Card, PrimaryButton, Input, Select } from '@/components/ui';
 import { StatusBadge } from '@/components/status';
 import { ConfirmButton } from '@/components/confirm';
 import { CampaignNewModal } from '@/components/CampaignNewModal';
@@ -185,19 +185,18 @@ export default function CampaignsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <input
-                type="text"
+              <Input
+                type="search"
                 placeholder="Search campaigns by name or ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                className="pl-10"
               />
             </div>
             
-            <select
+            <Select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
             >
               <option value="all">All Statuses</option>
               <option value="draft">Draft</option>
@@ -205,7 +204,7 @@ export default function CampaignsPage() {
               <option value="paused">Paused</option>
               <option value="completed">Completed</option>
               <option value="failed">Failed</option>
-            </select>
+            </Select>
           </div>
           
           {/* Actions */}

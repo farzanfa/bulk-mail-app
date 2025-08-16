@@ -45,8 +45,42 @@ export function Input({ className = '', ...props }: InputHTMLAttributes<HTMLInpu
   return (
     <input 
       {...props} 
-      className={`w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${className}`} 
+      className={`w-full border border-gray-300 rounded-lg px-4 py-3 text-sm placeholder-gray-400 transition-all duration-200 ease-in-out
+        hover:border-gray-400 
+        focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent 
+        disabled:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60
+        ${props.type === 'search' ? 'pl-10' : ''}
+        ${className}`} 
     />
+  );
+}
+
+export function Textarea({ className = '', rows = 4, ...props }: InputHTMLAttributes<HTMLTextAreaElement> & { rows?: number }) {
+  return (
+    <textarea 
+      {...props}
+      rows={rows}
+      className={`w-full border border-gray-300 rounded-lg px-4 py-3 text-sm placeholder-gray-400 resize-y transition-all duration-200 ease-in-out
+        hover:border-gray-400 
+        focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent 
+        disabled:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60
+        ${className}`} 
+    />
+  );
+}
+
+export function Select({ className = '', children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <select 
+      {...props}
+      className={`w-full border border-gray-300 rounded-lg px-4 py-3 text-sm appearance-none bg-white transition-all duration-200 ease-in-out
+        hover:border-gray-400 
+        focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent 
+        disabled:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60
+        ${className}`} 
+    >
+      {children}
+    </select>
   );
 }
 
