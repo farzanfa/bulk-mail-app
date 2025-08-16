@@ -38,6 +38,26 @@
   .safe-padding-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
+  
+  /* Prevent text overflow in header */
+  .header-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Header responsive fixes */
+@media (max-width: 640px) {
+  header {
+    min-height: 56px;
+  }
+  
+  /* Ensure header buttons don't break layout */
+  header button,
+  header a {
+    flex-shrink: 0;
+  }
 }
 
 /* Responsive fixes */
