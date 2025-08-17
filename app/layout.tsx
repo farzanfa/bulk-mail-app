@@ -46,6 +46,7 @@ export const metadata: Metadata = {
     title: 'MailWeaver - Modern Email Marketing Platform',
     description: 'Powerful, user-friendly bulk email marketing platform. Send personalized campaigns and grow your audience.',
     images: ['/og-image.svg'],
+    creator: '@mailweaver',
   },
   robots: {
     index: true,
