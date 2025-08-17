@@ -328,7 +328,7 @@
 /* Mobile menu animations */
 @keyframes slideIn {
   from {
-    transform: translateX(-100%);
+    transform: translateX(100%);
   }
   to {
     transform: translateX(0);
@@ -347,11 +347,13 @@
 /* Mobile menu panel animation */
 #mobile-menu-panel {
   animation: slideIn 0.3s ease-out;
+  will-change: transform;
 }
 
 /* Mobile menu overlay animation */
 .mobile-menu-overlay {
   animation: fadeIn 0.3s ease-out;
+  will-change: opacity;
 }
 
 /* Prevent scrolling when mobile menu is open */
@@ -395,6 +397,13 @@ body.menu-open {
   min-height: 44px;
   display: flex;
   align-items: center;
+}
+
+/* Focus visible styles for mobile menu */
+#mobile-menu-panel button:focus-visible,
+#mobile-menu-panel a:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
 
 /* Smooth scrolling for menu content */
