@@ -167,18 +167,22 @@ export default function CampaignsPage() {
     }
   };
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Campaigns</h1>
-        <p className="text-gray-600">Manage and monitor your email campaigns</p>
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-12">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl font-bold text-white mb-2">Campaigns</h1>
+          <p className="text-purple-100 text-lg">Create and manage your email marketing campaigns</p>
+        </div>
       </div>
+      
+      <div className="max-w-7xl mx-auto px-6 -mt-6 pb-12 space-y-6">
 
       {/* Search, Filters, and Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
           {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
             <div className="relative w-full sm:w-80">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -308,18 +312,21 @@ export default function CampaignsPage() {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
               {sortedCampaigns.map((c) => (
                 <div key={c.id} className="group">
                   <div 
-                    className="block cursor-pointer bg-white border border-gray-200 rounded-lg p-4 h-full hover:shadow-lg hover:border-purple-300 transition-all duration-200"
+                    className="relative bg-white border border-gray-200 rounded-xl p-6 h-full cursor-pointer hover:shadow-2xl hover:border-purple-400 transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
                     onClick={() => openCampaignModal(c.id)}
                   >
+                    {/* Gradient overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
                     {/* Header with checkbox and status */}
-                    <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="relative flex items-start justify-between gap-2 mb-4">
                       <input
                         type="checkbox"
-                        className="mt-1 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                        className="mt-1 rounded border-gray-300 text-purple-600 focus:ring-purple-500 hover:scale-110 transition-transform"
                         onClick={(e) => e.stopPropagation()}
                         checked={selected.includes(c.id)}
                         onChange={(e) => {
@@ -331,42 +338,66 @@ export default function CampaignsPage() {
                     </div>
                     
                     {/* Campaign name */}
-                    <h4 className="font-semibold text-gray-900 mb-2 truncate group-hover:text-purple-600 transition-colors">
+                    <h4 className="relative font-bold text-lg text-gray-900 mb-3 truncate group-hover:text-purple-600 transition-colors">
                       {c.name || 'Unnamed Campaign'}
                     </h4>
                     
                     {/* Campaign details */}
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>Created: {new Date(c.created_at).toLocaleDateString()}</span>
+                    <div className="relative space-y-3 text-sm">
+                      <div className="flex items-center gap-3 text-gray-600">
+                        <div className="p-2 bg-gray-100 rounded-lg">
+                          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <span>{new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                       </div>
                       
                       {c.started_at && (
-                        <div className="flex items-center gap-2">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                          </svg>
-                          <span>Started: {new Date(c.started_at).toLocaleDateString()}</span>
+                        <div className="flex items-center gap-3 text-gray-600">
+                          <div className="p-2 bg-green-100 rounded-lg">
+                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                          </div>
+                          <span>Started {new Date(c.started_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                         </div>
                       )}
                       
                       {Array.isArray(c.recipients) && (
-                        <div className="flex items-center gap-2">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                          <span>{c.recipients.length} recipients</span>
+                        <div className="flex items-center gap-3 text-gray-600">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                          </div>
+                          <span className="font-semibold">{c.recipients.length.toLocaleString()} recipients</span>
                         </div>
                       )}
                     </div>
                     
+                    {/* Progress bar for running campaigns */}
+                    {c.status === 'running' && c.recipients && (
+                      <div className="relative mt-4">
+                        <div className="flex justify-between text-xs text-gray-600 mb-1">
+                          <span>Progress</span>
+                          <span className="font-semibold">{Math.round((c.sent_count || 0) / c.recipients.length * 100)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                          <div 
+                            className="bg-gradient-to-r from-purple-500 to-blue-500 h-full rounded-full transition-all duration-500"
+                            style={{ width: `${Math.round((c.sent_count || 0) / c.recipients.length * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    
                     {/* Hover indicator */}
-                    <div className="mt-3 pt-3 border-t border-gray-100">
-                      <div className="text-xs text-purple-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                        Click to view details →
+                    <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                      <div className="bg-purple-600 text-white p-2 rounded-lg shadow-lg">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
                       </div>
                     </div>
                   </div>
@@ -378,20 +409,20 @@ export default function CampaignsPage() {
       </div>
       {/* Campaign Details Modal */}
       {openEdit && current && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
+            <div className="px-6 py-5 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">Campaign Details</h3>
-                  <p className="text-sm text-gray-600 mt-1">Manage and monitor your campaign</p>
+                  <h3 className="text-2xl font-bold">Campaign Details</h3>
+                  <p className="text-purple-100 mt-1">Manage and monitor your campaign performance</p>
                 </div>
                 <button 
                   onClick={() => setOpenEdit(false)}
-                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -577,6 +608,7 @@ export default function CampaignsPage() {
         cancelText="Cancel"
         variant="danger"
       />
+      </div>
     </div>
   );
 }

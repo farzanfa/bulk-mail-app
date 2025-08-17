@@ -62,32 +62,43 @@ export function CampaignNewModal({ onClose, userPlan }: { onClose: () => void; u
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl my-8 mx-auto">
-        <div className="sticky top-0 z-10 bg-white p-4 border-b flex items-center justify-between rounded-t-lg">
-          <h2 className="text-lg font-semibold">New Campaign</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl my-8 mx-auto">
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-purple-600 to-blue-600 p-6 flex items-center justify-between rounded-t-2xl text-white">
+          <div>
+            <h2 className="text-2xl font-bold">Create New Campaign</h2>
+            <p className="text-purple-100 mt-1">Set up your email marketing campaign</p>
+          </div>
           <button 
             aria-label="Close" 
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors touch-target flex items-center justify-center" 
+            className="p-2 hover:bg-white/20 rounded-lg transition-all duration-200" 
             onClick={onClose}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        <div className="p-4 space-y-4 modal-content">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="p-4 col-span-1 md:col-span-2">
-              <label className="block text-sm text-gray-500 mb-2">Campaign name</label>
-              <Input 
-                placeholder="Spring promo" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-              />
-            </Card>
-            <Card className="p-4">
-              <label className="block text-sm text-gray-500 mb-2">1) Google Account</label>
+        <div className="p-6 space-y-6 modal-content">
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Configuration</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="col-span-1 md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Name</label>
+                <Input 
+                  placeholder="e.g., Spring Sale 2024" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                />
+              </div>
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  <span className="inline-flex items-center gap-2">
+                    <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-md text-xs font-semibold">Step 1</span>
+                    Google Account
+                  </span>
+                </label>
               {google.length === 0 ? (
                 <div className="text-sm text-gray-600">
                   No Google account connected.{" "}
@@ -105,60 +116,92 @@ export function CampaignNewModal({ onClose, userPlan }: { onClose: () => void; u
                 </Select>
               )}
               {google.length > 0 && userPlan === 'admin' && (
-                <a href="/api/google/oauth/url?redirect=1" className="text-xs text-blue-600 hover:underline inline-block mt-2">Connect another</a>
+                <a href="/api/google/oauth/url?redirect=1" className="text-xs text-purple-600 hover:text-purple-700 font-medium inline-block mt-2">+ Connect another account</a>
               )}
-            </Card>
-            <Card className="p-4">
-              <label className="block text-sm text-gray-500 mb-2">2) Template</label>
+            </div>
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                <span className="inline-flex items-center gap-2">
+                  <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-md text-xs font-semibold">Step 2</span>
+                  Email Template
+                </span>
+              </label>
               <Select 
                 value={templateId} 
                 onChange={(e) => setTemplateId(e.target.value)}
+                className="w-full border-gray-300 focus:border-purple-500 focus:ring-purple-500"
               >
                 <option value="">Select template</option>
                 {templates.map((t: any) => (<option key={t.id} value={t.id}>{t.name} (v{t.version})</option>))}
               </Select>
-            </Card>
-            <Card className="p-4">
-              <label className="block text-sm text-gray-500 mb-2">3) Upload</label>
+            </div>
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                <span className="inline-flex items-center gap-2">
+                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded-md text-xs font-semibold">Step 3</span>
+                  Contact List
+                </span>
+              </label>
               <Select 
                 value={uploadId} 
                 onChange={(e) => setUploadId(e.target.value)}
+                className="w-full border-gray-300 focus:border-purple-500 focus:ring-purple-500"
               >
                 <option value="">Select contact list</option>
                 {uploads.map((u: any) => (<option key={u.id} value={u.id}>{u.filename} ({u.row_count} contacts)</option>))}
               </Select>
-            </Card>
+            </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 pt-2">
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 justify-end">
             <Button 
               disabled={!canDryRun} 
               loading={loadingDryRun} 
               onClick={doDryRun} 
-              className="disabled:opacity-50 w-full sm:w-auto"
+              className="disabled:opacity-50 w-full sm:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6"
             >
-              Preview (Dry Run)
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              Preview Emails
             </Button>
             <PrimaryButton 
               disabled={!canDryRun || !googleId || !name.trim()} 
               loading={loadingLaunch} 
               onClick={createAndLaunch} 
-              className="disabled:opacity-50 w-full sm:w-auto"
+              className="disabled:opacity-50 w-full sm:w-auto bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 font-medium px-8"
             >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
               Launch Campaign
             </PrimaryButton>
           </div>
           {dry.length > 0 && (
-            <Section title={`Preview - First ${dry.length} emails`}>
-              <div className="space-y-4 max-h-96 overflow-y-auto">
+            <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Email Preview - First {dry.length} emails
+              </h3>
+              <div className="space-y-4 max-h-96 overflow-y-auto bg-white rounded-lg p-4 border border-gray-200">
                 {dry.map((r: any) => (
-                  <div key={r.contact_id} className="border-b pb-3 last:border-b-0">
-                    <div className="text-sm text-gray-500 mb-1">To: {r.email}</div>
-                    <div className="font-medium mb-2">Subject: {r.subject}</div>
-                    <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(r.html) }} />
+                  <div key={r.contact_id} className="border-b border-gray-100 pb-4 last:border-b-0">
+                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                      <span className="font-medium">To:</span>
+                      <span className="bg-gray-100 px-2 py-1 rounded">{r.email}</span>
+                    </div>
+                    <div className="flex items-start gap-2 mb-3">
+                      <span className="text-sm font-medium text-gray-600">Subject:</span>
+                      <span className="font-semibold text-gray-900">{r.subject}</span>
+                    </div>
+                    <div className="prose prose-sm max-w-none bg-gray-50 rounded-lg p-4" dangerouslySetInnerHTML={{ __html: sanitizeHtml(r.html) }} />
                   </div>
                 ))}
               </div>
-            </Section>
+            </div>
           )}
         </div>
       </div>
