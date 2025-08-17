@@ -349,89 +349,146 @@ export default function TemplatesPage() {
               )}
             </Card>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
               {filteredTemplates.map((t) => (
                 <div
                   key={t.id}
-                  className="group cursor-pointer"
+                  className="group relative"
                   onClick={() => openTemplateModal(t.id)}
                 >
-                  <Card className="p-3 sm:p-4 lg:p-6 h-full hover:shadow-xl transition-all duration-300 group-hover:scale-105 border-2 border-transparent group-hover:border-purple-200">
+                  <Card className="h-full p-6 cursor-pointer bg-white hover:bg-gray-50/50 hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-purple-300 hover:-translate-y-1">
                     {/* Template Header */}
-                    <div className="flex items-start justify-between gap-2 sm:gap-3 mb-2 sm:mb-3 lg:mb-4">
+                    <div className="flex items-start justify-between mb-4">
                       <div className="flex-1 min-w-0">
                         <label 
-                          className="inline-flex items-center gap-2 text-sm sm:text-base lg:text-lg font-semibold text-gray-900 truncate group-hover:text-purple-600 transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-2 cursor-pointer group/checkbox"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <input 
                             type="checkbox" 
                             checked={selected.includes(t.id)} 
                             onChange={(e) => setSelected(e.target.checked ? [...selected, t.id] : selected.filter(x => x !== t.id))} 
-                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                            className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 focus:ring-offset-0 transition-all"
                           />
-                          <span className="truncate">{t.name || 'Untitled Template'}</span>
+                          <h3 className="text-lg font-semibold text-gray-900 truncate group-hover:text-purple-600 transition-colors">
+                            {t.name || 'Untitled Template'}
+                          </h3>
                         </label>
                       </div>
-                      <div className="flex items-center gap-1 sm:gap-2">
-                        <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full whitespace-nowrap">
-                          <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      <div className="ml-2">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 text-xs font-semibold rounded-full border border-purple-200">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span className="hidden sm:inline">{Array.isArray(t.variables) ? t.variables.length : 0} vars</span>
-                          <span className="sm:hidden">{Array.isArray(t.variables) ? t.variables.length : 0}</span>
+                          v{t.version || 1}
                         </span>
                       </div>
                     </div>
 
-                    {/* Template Stats */}
-                    <div className="mb-2 sm:mb-3 lg:mb-4">
-                      <div className="text-xs text-gray-500 mb-1.5 sm:mb-2 uppercase tracking-wide font-medium">Version</div>
-                      <div className="text-lg sm:text-xl font-bold text-purple-600 bg-purple-50 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 border border-purple-200">
-                        v{t.version || 1}
-                      </div>
-                    </div>
-
                     {/* Subject Preview */}
-                    <div className="mb-2 sm:mb-3 lg:mb-4">
-                      <div className="text-xs text-gray-500 mb-1.5 sm:mb-2 uppercase tracking-wide font-medium">Subject</div>
-                      <div className="text-xs sm:text-sm text-gray-700 bg-gray-50 rounded px-2 sm:px-3 py-1 sm:py-1.5 lg:py-2 border truncate">
+                    <div className="mb-4">
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 mb-2">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        SUBJECT LINE
+                      </div>
+                      <div className="text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 truncate">
                         {render(t.subject || '') || 'No subject'}
                       </div>
                     </div>
 
-                    {/* Template Info */}
-                    <div className="mb-2 sm:mb-3 lg:mb-4">
-                      <div className="text-xs text-gray-500 mb-1.5 sm:mb-2 uppercase tracking-wide font-medium">Template Details</div>
-                      <div className="space-y-1 sm:space-y-1.5">
-                        <div className="text-xs sm:text-sm text-gray-700 bg-gray-50 rounded px-2 sm:px-3 py-1 sm:py-1.5 border">
-                          <span className="font-medium">Created:</span> {new Date(t.created_at).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric', 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                        </div>
-                        {t.updated_at && (
-                          <div className="text-xs sm:text-sm text-gray-700 bg-gray-50 rounded px-2 sm:px-3 py-1 sm:py-1.5 border">
-                            <span className="font-medium">Updated:</span> {new Date(t.updated_at).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric', 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            })}
-                          </div>
+                    {/* Variables Section */}
+                    <div className="mb-4">
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 mb-2">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                        VARIABLES ({Array.isArray(t.variables) ? t.variables.length : 0})
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {Array.isArray(t.variables) && t.variables.length > 0 ? (
+                          t.variables.slice(0, 3).map((v: string, i: number) => (
+                            <span key={i} className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded-md">
+                              {v}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">No variables</span>
+                        )}
+                        {Array.isArray(t.variables) && t.variables.length > 3 && (
+                          <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-md">
+                            +{t.variables.length - 3} more
+                          </span>
                         )}
                       </div>
                     </div>
 
-                    {/* Action Indicator */}
-                    <div className="flex items-center justify-between text-xs sm:text-sm">
-                      <span className="text-gray-500">Click to view details</span>
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 group-hover:text-purple-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+                    {/* Template Stats */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200">
+                        <div className="flex items-center gap-2 mb-1">
+                          <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-xs font-medium text-blue-900">Created</span>
+                        </div>
+                        <p className="text-xs text-blue-700">
+                          {new Date(t.created_at).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                      {t.updated_at && (
+                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
+                          <div className="flex items-center gap-2 mb-1">
+                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span className="text-xs font-medium text-green-900">Updated</span>
+                          </div>
+                          <p className="text-xs text-green-700">
+                            {new Date(t.updated_at).toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                      )}
                     </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.location.href = `/templates/${t.id}/edit`;
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-all"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit
+                      </button>
+                      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteTemplate(t.id);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete
+                      </button>
+                    </div>
+
+                    {/* Hover indicator */}
+                    <div className="absolute inset-0 rounded-lg ring-2 ring-purple-400 ring-opacity-0 group-hover:ring-opacity-100 pointer-events-none transition-all duration-300"></div>
                   </Card>
                 </div>
               ))}
@@ -446,30 +503,41 @@ export default function TemplatesPage() {
 
         {/* Template Details Modal */}
         {openView && currentTemplate && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-3 lg:p-4">
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-5xl lg:max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
               {/* Modal Header */}
-              <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+              <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-8 py-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Template Details</h2>
-                    <p className="text-xs sm:text-sm lg:text-base text-gray-600 mt-1">
-                      {currentTemplate.version ? `Version ${currentTemplate.version}` : 'View and manage your template'}
-                    </p>
+                    <h2 className="text-2xl font-bold text-gray-900 truncate">{currentTemplate.name || 'Untitled Template'}</h2>
+                    <div className="flex items-center gap-4 mt-2">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 text-sm font-semibold rounded-full border border-purple-200">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Version {currentTemplate.version || 1}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        Created {new Date(currentTemplate.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3 ml-4">
                     <a
                       href={`/templates/${currentTemplate.id}/edit`}
-                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors shadow-sm hover:shadow"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                     >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
                       Edit Template
                     </a>
                     <button 
                       aria-label="Close" 
-                      className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors ml-2" 
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors" 
                       onClick={() => setOpenView(false)}
                     >
-                      <svg className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
@@ -478,41 +546,27 @@ export default function TemplatesPage() {
               </div>
 
               {/* Modal Content */}
-              <div className="p-3 sm:p-4 lg:p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Left Column - Template Information */}
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h3 className="text-base font-semibold text-gray-900 mb-3">Template Information</h3>
-                      <div className="space-y-3">
+              <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Left Column - Template Information & Variables */}
+                  <div className="lg:col-span-1 space-y-6">
+                    {/* Template Info Card */}
+                    <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Template Information
+                      </h3>
+                      <div className="space-y-4">
                         <div>
-                          <div className="text-xs text-gray-500 mb-1 uppercase tracking-wide font-medium">Template Name</div>
-                          <div className="text-sm font-medium text-gray-900 bg-white rounded px-3 py-2 border">
-                            {currentTemplate.name || 'Untitled Template'}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1 uppercase tracking-wide font-medium">Version</div>
-                          <div className="text-sm font-medium text-purple-600 bg-white rounded px-3 py-2 border">
-                            v{currentTemplate.version || 1}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1 uppercase tracking-wide font-medium">Created</div>
-                          <div className="text-sm font-medium text-gray-900 bg-white rounded px-3 py-2 border">
-                            {new Date(currentTemplate.created_at).toLocaleDateString('en-US', { 
-                              year: 'numeric',
-                              month: 'long', 
-                              day: 'numeric', 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            })}
-                          </div>
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Template ID</label>
+                          <p className="mt-1 text-sm font-mono text-gray-900 bg-gray-100 rounded px-3 py-2">{currentTemplate.id}</p>
                         </div>
                         {currentTemplate.updated_at && (
                           <div>
-                            <div className="text-xs text-gray-500 mb-1 uppercase tracking-wide font-medium">Last Updated</div>
-                            <div className="text-sm font-medium text-gray-900 bg-white rounded px-3 py-2 border">
+                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</label>
+                            <p className="mt-1 text-sm text-gray-900">
                               {new Date(currentTemplate.updated_at).toLocaleDateString('en-US', { 
                                 year: 'numeric',
                                 month: 'long', 
@@ -520,48 +574,129 @@ export default function TemplatesPage() {
                                 hour: '2-digit', 
                                 minute: '2-digit' 
                               })}
-                            </div>
+                            </p>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h3 className="text-base font-semibold text-gray-900 mb-3">Variables</h3>
+                    {/* Variables Card */}
+                    <div className="bg-gradient-to-br from-purple-50 to-white rounded-xl border border-purple-200 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                        Variables ({currentTemplate.variables?.length || 0})
+                      </h3>
                       {currentTemplate.variables && currentTemplate.variables.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {currentTemplate.variables.map((v: string, i: number) => (
-                            <span key={i} className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 text-sm font-medium rounded-full">
+                            <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 text-purple-700 text-sm font-medium rounded-lg">
                               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
                               </svg>
                               {v}
                             </span>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-gray-500 text-sm">No variables detected</p>
+                        <p className="text-gray-500 text-sm italic">No variables detected in this template</p>
                       )}
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-200 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Quick Actions
+                      </h3>
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(currentTemplate.id);
+                            toast.success('Template ID copied to clipboard');
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors"
+                        >
+                          Copy Template ID
+                        </button>
+                        <button
+                          onClick={() => {
+                            const templateData = JSON.stringify({
+                              name: currentTemplate.name,
+                              subject: currentTemplate.subject,
+                              html: currentTemplate.html,
+                              text: currentTemplate.text
+                            }, null, 2);
+                            navigator.clipboard.writeText(templateData);
+                            toast.success('Template data copied to clipboard');
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors"
+                        >
+                          Copy Template Data
+                        </button>
+                      </div>
                     </div>
                   </div>
 
                   {/* Right Column - Preview */}
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h3 className="text-base font-semibold text-gray-900 mb-3">Subject Preview</h3>
-                      <div className="bg-white border rounded-lg p-3">
-                        <div className="text-sm text-gray-900">
-                          {render(currentTemplate.subject) || 'No subject'}
+                  <div className="lg:col-span-2 space-y-6">
+                    {/* Subject Preview */}
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                      <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-200">
+                        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                          Subject Line Preview
+                        </h3>
+                      </div>
+                      <div className="p-6">
+                        <div className="bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
+                          <p className="text-gray-900 font-medium">
+                            {render(currentTemplate.subject) || <span className="text-gray-400 italic">No subject</span>}
+                          </p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h3 className="text-base font-semibold text-gray-900 mb-3">HTML Preview</h3>
-                      <div className="bg-white border rounded-lg p-3 max-h-64 overflow-y-auto">
-                        <div className="prose max-w-none text-sm" dangerouslySetInnerHTML={{ __html: render(currentTemplate.html) || '<p class="text-gray-400">No content</p>' }} />
+                    {/* HTML Preview */}
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                      <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-200">
+                        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          HTML Content Preview
+                        </h3>
+                      </div>
+                      <div className="p-6">
+                        <div className="bg-white border border-gray-200 rounded-lg p-6 max-h-96 overflow-y-auto">
+                          <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: render(currentTemplate.html) || '<p class="text-gray-400 italic">No HTML content</p>' }} />
+                        </div>
                       </div>
                     </div>
+
+                    {/* Plain Text Preview (if available) */}
+                    {currentTemplate.text && (
+                      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                        <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-200">
+                          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Plain Text Preview
+                          </h3>
+                        </div>
+                        <div className="p-6">
+                          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 font-mono text-sm whitespace-pre-wrap">
+                            {render(currentTemplate.text)}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
