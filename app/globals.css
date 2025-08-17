@@ -582,5 +582,42 @@ button {
   user-select: none;
 }
 
+/* Responsive header styles */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Hide some nav items on medium screens if needed */
+  nav a:nth-child(n+5) {
+    display: none;
+  }
+}
+
+/* Ensure header doesn't overflow on small screens */
+@media (max-width: 640px) {
+  header {
+    min-width: 0;
+  }
+  
+  /* Reduce font sizes on very small screens */
+  header .text-sm {
+    font-size: 0.75rem;
+  }
+  
+  header .text-xs {
+    font-size: 0.625rem;
+  }
+}
+
+/* Improve header layout on tablets */
+@media (min-width: 640px) and (max-width: 1023px) {
+  /* Ensure proper spacing */
+  header nav {
+    margin: 0 1rem;
+  }
+  
+  header nav a {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
 
 
