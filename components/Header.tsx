@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { IconButton } from './ui';
@@ -14,6 +14,8 @@ export default function Header({ isAdmin }: HeaderProps) {
   const isMarketing = pathname === '/' || pathname === '/home' || pathname === '/login' || pathname === '/about' || pathname === '/privacy' || pathname === '/terms' || pathname === '/why-us' || pathname === '/pricing';
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,6 +30,20 @@ export default function Header({ isAdmin }: HeaderProps) {
     setOpen(false);
   }, [pathname]);
 
+  // Handle Escape key to close menu
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && open) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [open]);
+
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (open) {
@@ -40,6 +56,11 @@ export default function Header({ isAdmin }: HeaderProps) {
       document.body.style.width = '100%';
       document.body.classList.add('menu-open');
       
+      // Focus the close button when menu opens
+      setTimeout(() => {
+        closeButtonRef.current?.focus();
+      }, 100);
+      
       return () => {
         // Remove the styles and restore scroll position
         const storedScrollY = parseInt(document.body.style.top || '0') * -1;
@@ -48,6 +69,9 @@ export default function Header({ isAdmin }: HeaderProps) {
         document.body.style.width = '';
         document.body.classList.remove('menu-open');
         window.scrollTo(0, storedScrollY);
+        
+        // Return focus to menu button when menu closes
+        menuButtonRef.current?.focus();
       };
     }
   }, [open]);
@@ -215,6 +239,7 @@ export default function Header({ isAdmin }: HeaderProps) {
                 className="inline-flex md:hidden items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200 touch-target"
                 aria-expanded={open}
                 aria-label="Toggle navigation menu"
+                ref={menuButtonRef}
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {open ? (
@@ -237,14 +262,16 @@ export default function Header({ isAdmin }: HeaderProps) {
       >
         {/* Overlay */}
         <div 
-          className={`absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${
+          className={`absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300 mobile-menu-overlay ${
             open ? 'opacity-100' : 'opacity-0'
           }`} 
           onClick={() => setOpen(false)} 
         />
         
         {/* Menu Panel */}
-        <nav className={`absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-2xl transition-transform duration-300 ease-out ${
+        <nav 
+          id="mobile-menu-panel"
+          className={`absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-2xl transition-transform duration-300 ease-out mobile-menu-height ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}>
           <div className="flex flex-col h-full">
@@ -254,8 +281,9 @@ export default function Header({ isAdmin }: HeaderProps) {
                 <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
                 <button
                   onClick={() => setOpen(false)}
-                  className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                  className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200 touch-target"
                   aria-label="Close menu"
+                  ref={closeButtonRef}
                 >
                   <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
