@@ -95,17 +95,17 @@ export default function Header({ isAdmin }: HeaderProps) {
       ];
   
   return (
-    <header className={`sticky top-0 z-40 glass border-b border-gray-100 transition-all duration-300 ${scrolled ? 'shadow-lg' : ''}`}>
-      <div className="w-full px-3 sm:px-4 lg:px-8 safe-padding-top">
+    <header className={`sticky top-0 z-50 glass border-b border-gray-100 transition-all duration-300 ${scrolled ? 'shadow-lg' : ''}`}>
+      <div className="w-full px-3 sm:px-4 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex min-w-0 items-center justify-between h-14 sm:h-16 gap-2">
+          <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
             {/* Logo */}
             <a href="/" aria-label="MailWeaver home" className="font-bold inline-flex items-center gap-2 group flex-shrink-0">
               <div className="relative">
                 <img src="/icon.svg?v=2" alt="MailWeaver" className="h-6 w-6 sm:h-7 sm:w-7 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12"/>
                 <div className="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
-              <span className="hidden sm:inline text-lg font-display text-gradient header-text">MailWeaver</span>
+              <span className="hidden sm:inline text-lg font-display text-gradient">MailWeaver</span>
             </a>
             
             {/* Desktop Navigation */}
@@ -126,7 +126,7 @@ export default function Header({ isAdmin }: HeaderProps) {
             </nav>
             
             {/* Action Buttons */}
-            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0">
               {isMarketing ? (
                 <>
                   {/* GitHub Button - Hidden on mobile */}
@@ -171,13 +171,13 @@ export default function Header({ isAdmin }: HeaderProps) {
                   
                   {/* Mobile CTA Button */}
                   {session?.user ? (
-                    <a href="/dashboard" className="inline-flex sm:hidden items-center justify-center gradient-primary text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200">
+                    <a href="/dashboard" className="inline-flex sm:hidden items-center justify-center gradient-primary text-white px-3 py-2 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200">
                       Dashboard
                     </a>
                   ) : (
                     <button 
                       onClick={() => signIn('google', { callbackUrl: '/dashboard' })} 
-                      className="inline-flex sm:hidden items-center justify-center border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 transition-all duration-200"
+                      className="inline-flex sm:hidden items-center justify-center border border-gray-200 px-3 py-2 rounded-lg text-xs font-medium hover:bg-gray-50 transition-all duration-200"
                     >
                       Sign in
                     </button>
@@ -236,17 +236,18 @@ export default function Header({ isAdmin }: HeaderProps) {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setOpen(!open)}
-                className="inline-flex md:hidden items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200 touch-target"
+                className="inline-flex md:hidden items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200"
                 aria-expanded={open}
                 aria-label="Toggle navigation menu"
                 ref={menuButtonRef}
               >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {open ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d={open ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                  />
                 </svg>
               </button>
             </div>
@@ -262,7 +263,7 @@ export default function Header({ isAdmin }: HeaderProps) {
       >
         {/* Overlay */}
         <div 
-          className={`absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300 mobile-menu-overlay ${
+          className={`absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${
             open ? 'opacity-100' : 'opacity-0'
           }`} 
           onClick={() => setOpen(false)} 
@@ -270,22 +271,22 @@ export default function Header({ isAdmin }: HeaderProps) {
         
         {/* Menu Panel */}
         <nav 
-          id="mobile-menu-panel"
-          className={`absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-2xl transition-transform duration-300 ease-out mobile-menu-height ${
-          open ? 'translate-x-0' : 'translate-x-full'
-        }`}>
+          className={`absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl transition-transform duration-300 ease-out ${
+            open ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
           <div className="flex flex-col h-full">
-            {/* Menu Header with safe area padding */}
-            <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-4 safe-padding-top">
+            {/* Menu Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-3 mobile-menu-header">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
                 <button
                   onClick={() => setOpen(false)}
-                  className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200 touch-target"
+                  className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200"
                   aria-label="Close menu"
                   ref={closeButtonRef}
                 >
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -293,21 +294,21 @@ export default function Header({ isAdmin }: HeaderProps) {
             </div>
             
             {/* Menu Content */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
+            <div className="flex-1 overflow-y-auto">
               <div className="py-4">
                 <div className="space-y-1 px-3">
                   {links.map((l) => (
                     <a
                       key={l.href}
                       href={l.href}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 touch-target ${
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
                         pathname === l.href
                           ? 'bg-primary/10 text-primary'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
                       <span className="text-xl flex-shrink-0">{l.icon}</span>
-                      <span className="truncate">{l.label}</span>
+                      <span>{l.label}</span>
                     </a>
                   ))}
                 </div>
@@ -319,13 +320,13 @@ export default function Header({ isAdmin }: HeaderProps) {
                     </div>
                     
                     <div className="space-y-1 px-3">
-                      <a href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200 touch-target">
+                      <a href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
                         <span className="text-xl flex-shrink-0">👤</span>
-                        <span className="truncate">Profile</span>
+                        <span>Profile</span>
                       </a>
-                      <a href="/pricing" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200 touch-target">
+                      <a href="/pricing" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
                         <span className="text-xl flex-shrink-0">💎</span>
-                        <span className="truncate">Subscription</span>
+                        <span>Subscription</span>
                       </a>
                     </div>
                   </>
@@ -334,17 +335,17 @@ export default function Header({ isAdmin }: HeaderProps) {
             </div>
             
             {/* Mobile Menu Footer */}
-            <div className="border-t border-gray-100 p-4 space-y-3 safe-padding-bottom">
+            <div className="border-t border-gray-100 p-4 space-y-3 mobile-menu-footer">
               {isMarketing ? (
                 <>
                   {session?.user ? (
-                    <a href="/dashboard" className="block w-full text-center gradient-primary text-white px-4 py-3 rounded-xl text-base font-semibold shadow-lg">
+                    <a href="/dashboard" className="block w-full text-center gradient-primary text-white px-4 py-3 rounded-xl text-base font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
                       Go to Dashboard
                     </a>
                   ) : (
                     <button 
                       onClick={() => signIn('google', { callbackUrl: '/dashboard' })} 
-                      className="flex items-center justify-center gap-2 w-full bg-white border border-gray-200 px-4 py-3 rounded-xl text-base font-medium hover:bg-gray-50 transition-all duration-200 shadow-button"
+                      className="flex items-center justify-center gap-2 w-full bg-white border border-gray-200 px-4 py-3 rounded-xl text-base font-medium hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md"
                     >
                       <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
                         <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
