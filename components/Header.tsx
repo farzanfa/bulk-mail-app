@@ -95,7 +95,7 @@ export default function Header({ isAdmin }: HeaderProps) {
       ];
   
   return (
-    <header className={`sticky top-0 z-50 glass border-b border-gray-100 transition-all duration-300 ${scrolled ? 'shadow-lg' : ''}`}>
+    <header className={`sticky top-0 z-40 glass border-b border-gray-100 transition-all duration-300 ${scrolled ? 'shadow-lg' : ''}`}>
       <div className="w-full px-3 sm:px-4 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
@@ -236,12 +236,12 @@ export default function Header({ isAdmin }: HeaderProps) {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setOpen(!open)}
-                className="inline-flex md:hidden items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                className="inline-flex md:hidden items-center justify-center p-2.5 rounded-lg text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors duration-200 touch-manipulation"
                 aria-expanded={open}
                 aria-label="Toggle navigation menu"
                 ref={menuButtonRef}
               >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path 
                     strokeLinecap="round" 
                     strokeLinejoin="round" 
@@ -260,24 +260,28 @@ export default function Header({ isAdmin }: HeaderProps) {
         className={`md:hidden fixed inset-0 z-50 ${
           open ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
+        aria-hidden={!open}
       >
         {/* Overlay */}
         <div 
-          className={`absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${
+          className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-all duration-300 ${
             open ? 'opacity-100' : 'opacity-0'
           }`} 
-          onClick={() => setOpen(false)} 
+          onClick={() => setOpen(false)}
+          aria-label="Close menu"
         />
         
         {/* Menu Panel */}
         <nav 
-          className={`absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl transition-transform duration-300 ease-out ${
+          className={`absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl transition-all duration-300 ease-out overflow-hidden ${
             open ? 'translate-x-0' : 'translate-x-full'
           }`}
+          role="navigation"
+          aria-label="Mobile navigation"
         >
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full relative">
             {/* Menu Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-3 mobile-menu-header">
+            <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3 mobile-menu-header">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
                 <button
@@ -294,18 +298,19 @@ export default function Header({ isAdmin }: HeaderProps) {
             </div>
             
             {/* Menu Content */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto overscroll-contain">
               <div className="py-4">
                 <div className="space-y-1 px-3">
                   {links.map((l) => (
                     <a
                       key={l.href}
                       href={l.href}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 touch-manipulation ${
                         pathname === l.href
                           ? 'bg-primary/10 text-primary'
-                          : 'text-gray-700 hover:bg-gray-100'
+                          : 'text-gray-700 hover:bg-gray-100 active:bg-gray-100'
                       }`}
+                      onClick={() => setOpen(false)}
                     >
                       <span className="text-xl flex-shrink-0">{l.icon}</span>
                       <span>{l.label}</span>
@@ -320,11 +325,11 @@ export default function Header({ isAdmin }: HeaderProps) {
                     </div>
                     
                     <div className="space-y-1 px-3">
-                      <a href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
+                      <a href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 active:bg-gray-100 transition-all duration-200 touch-manipulation" onClick={() => setOpen(false)}>
                         <span className="text-xl flex-shrink-0">👤</span>
                         <span>Profile</span>
                       </a>
-                      <a href="/pricing" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
+                      <a href="/pricing" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 active:bg-gray-100 transition-all duration-200 touch-manipulation" onClick={() => setOpen(false)}>
                         <span className="text-xl flex-shrink-0">💎</span>
                         <span>Subscription</span>
                       </a>
