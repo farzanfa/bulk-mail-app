@@ -401,7 +401,7 @@ export default function UploadsPage() {
         )}
 
         {/* Uploads Grid */}
-        <Section title="Your Uploads" className="!p-0">
+        <Section title="Your Uploads">
           {loading ? (
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-16 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
