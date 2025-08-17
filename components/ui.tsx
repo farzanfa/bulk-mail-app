@@ -19,12 +19,13 @@ export function Button({ className = '', loading = false, children, disabled, ..
       disabled={isDisabled}
       aria-busy={loading ? 'true' : undefined}
       className={`btn-base rounded-lg px-4 py-2.5 text-sm font-medium 
-        border border-gray-200 bg-white text-gray-700 shadow-button
-        hover:bg-gray-50 hover:border-gray-300 hover:shadow-button-hover hover:-translate-y-0.5
+        border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-button
+        hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-button-hover hover:-translate-y-0.5
         focus:ring-2 focus:ring-primary/20 focus:ring-offset-2
         active:translate-y-0 active:shadow-sm
-        disabled:hover:translate-y-0 disabled:hover:shadow-button
-        touch-target ${className}`}
+        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none disabled:hover:shadow-button
+        transition-all duration-fast
+        ${className}`}
     >
       {loading && <Spinner />}
       <span>{children}</span>
@@ -78,11 +79,12 @@ export function Input({ className = '', ...props }: InputHTMLAttributes<HTMLInpu
   return (
     <input 
       {...props} 
-      className={`input-base border border-gray-200 rounded-lg px-4 py-3 text-sm 
-        placeholder-gray-400 bg-white shadow-sm
-        hover:border-gray-300 hover:shadow-md
+      className={`input-base border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 text-sm 
+        placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 shadow-sm
+        hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md
         focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-md
         transition-all duration-fast
+        disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:cursor-not-allowed
         ${props.type === 'search' ? 'pl-10' : ''}
         ${className}`} 
     />
@@ -94,11 +96,12 @@ export function Textarea({ className = '', rows = 4, ...props }: InputHTMLAttrib
     <textarea 
       {...props}
       rows={rows}
-      className={`input-base border border-gray-200 rounded-lg px-4 py-3 text-sm 
-        placeholder-gray-400 resize-y bg-white shadow-sm
-        hover:border-gray-300 hover:shadow-md
+      className={`input-base border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 text-sm 
+        placeholder-gray-400 dark:placeholder-gray-500 resize-y bg-white dark:bg-gray-800 shadow-sm
+        hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md
         focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-md
         transition-all duration-fast min-h-[100px]
+        disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:cursor-not-allowed disabled:resize-none
         ${className}`} 
     />
   );
@@ -109,16 +112,17 @@ export function Select({ className = '', children, ...props }: React.SelectHTMLA
     <div className="relative">
       <select 
         {...props}
-        className={`input-base border border-gray-200 rounded-lg px-4 py-3 text-sm 
-          appearance-none bg-white shadow-sm pr-10
-          hover:border-gray-300 hover:shadow-md
+        className={`input-base border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 text-sm 
+          appearance-none bg-white dark:bg-gray-800 shadow-sm pr-10
+          hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md
           focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-md
           transition-all duration-fast
+          disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:cursor-not-allowed
           ${className}`} 
       >
         {children}
       </select>
-      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 dark:text-gray-500">
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
@@ -129,7 +133,7 @@ export function Select({ className = '', children, ...props }: React.SelectHTMLA
 
 export function Card({ className = '', children, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div {...props} className={`bg-white rounded-xl shadow-card border border-gray-100 
+    <div {...props} className={`bg-white dark:bg-gray-800 rounded-xl shadow-card border border-gray-100 dark:border-gray-700 
       hover:shadow-card-hover transition-all duration-base animate-fadeInUp 
       ${className}`}>
       {children}
@@ -142,7 +146,7 @@ export function Section({ title, actions, children }: { title: string; actions?:
     <Card className="p-6 sm:p-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{title}</h2>
           <div className="h-1 w-12 bg-gradient-to-r from-primary to-secondary rounded-full mt-2"></div>
         </div>
         {actions && <div className="flex items-center gap-2">{actions}</div>}
@@ -154,7 +158,7 @@ export function Section({ title, actions, children }: { title: string; actions?:
 
 export function Badge({ children, variant = 'default' }: { children: ReactNode; variant?: 'default' | 'success' | 'warning' | 'error' | 'info' | 'primary' }) {
   const variants = {
-    default: 'bg-gray-100 text-gray-700 border-gray-200',
+    default: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600',
     primary: 'bg-primary/10 text-primary border-primary/20',
     success: 'bg-success/10 text-success border-success/20',
     warning: 'bg-warning/10 text-warning border-warning/20',
@@ -179,12 +183,13 @@ export function IconButton({ className = '', loading = false, children, disabled
       disabled={isDisabled}
       aria-busy={loading ? 'true' : undefined}
       className={`btn-base rounded-lg p-2.5 text-sm font-medium 
-        border border-gray-200 bg-white text-gray-700 shadow-button
-        hover:bg-gray-50 hover:border-gray-300 hover:shadow-button-hover hover:-translate-y-0.5
+        border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-button
+        hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-button-hover hover:-translate-y-0.5
         focus:ring-2 focus:ring-primary/20 focus:ring-offset-2
         active:translate-y-0 active:shadow-sm
-        disabled:hover:translate-y-0 disabled:hover:shadow-button
-        touch-target ${className}`}
+        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none disabled:hover:shadow-button
+        transition-all duration-fast
+        ${className}`}
     >
       {loading ? <Spinner /> : children}
     </button>
@@ -201,10 +206,10 @@ export function LoadingCard() {
   return (
     <Card className="p-6">
       <div className="animate-pulse space-y-4">
-        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-        <div className="h-4 bg-gray-200 rounded w-full"></div>
-        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
       </div>
     </Card>
   );

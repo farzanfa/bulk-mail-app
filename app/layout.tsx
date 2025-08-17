@@ -97,7 +97,7 @@ import { Toaster } from 'sonner';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -137,7 +137,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           }}
         />
       </head>
-      <body className="min-h-screen bg-gray-50 text-gray-900 flex flex-col antialiased">
+      <body className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col antialiased" suppressHydrationWarning>
         <Providers>
           <HeaderWrapper />
           <main className="flex-1">
@@ -148,6 +148,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Toaster 
             richColors 
             position="top-right" 
+            theme="system"
             toastOptions={{
               className: 'touch-target',
               duration: 4000,
