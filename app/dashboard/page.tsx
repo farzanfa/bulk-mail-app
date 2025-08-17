@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { Card, Section } from '@/components/ui';
 import { StatusBadge } from '@/components/status';
 import { CampaignNewModal } from '@/components/CampaignNewModal';
+import { PlanUsageCard } from '@/components/PlanUsageCard';
 import { Suspense } from 'react';
 import { getUserPlan } from '@/lib/plan';
 
@@ -246,6 +247,11 @@ export default async function DashboardPage() {
             </div>
           </Card>
         </div>
+
+        {/* Plan Usage */}
+        <Suspense fallback={<div className="animate-pulse h-64 bg-gray-100 rounded-lg"></div>}>
+          <PlanUsageCard />
+        </Suspense>
 
         {/* Analytics Chart */}
         <Card className="p-6 hover:shadow-xl transition-all duration-300">
