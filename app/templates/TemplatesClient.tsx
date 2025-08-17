@@ -13,6 +13,18 @@ function extractVars(s: string): string[] {
   return Array.from(out);
 }
 
+interface PlanLimits {
+  used: number;
+  total: number;
+  remaining: number;
+}
+
+interface PlanInfo {
+  type: string;
+  name: string;
+  isSubscribed: boolean;
+}
+
 export default function TemplatesPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +36,9 @@ export default function TemplatesPage() {
   const [openView, setOpenView] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState<any | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
+  const [planLimits, setPlanLimits] = useState<PlanLimits | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [planInfo, setPlanInfo] = useState<PlanInfo | null>(null);
 
   async function refresh() {
     try {
@@ -34,6 +49,8 @@ export default function TemplatesPage() {
       }
       const json = await res.json();
       setItems(json.templates || []);
+      setPlanLimits(json.limits || null);
+      setPlanInfo(json.plan || null);
     } catch (err: any) {
       console.error('Failed to refresh templates:', err);
       toast.error('Failed to load templates');
@@ -143,23 +160,56 @@ export default function TemplatesPage() {
     }
   };
 
+  const canCreateTemplate = useMemo(() => {
+    if (!planLimits) return true;
+    return planLimits.remaining === -1 || planLimits.remaining > 0;
+  }, [planLimits]);
+
+  const handleCreateClick = () => {
+    if (!canCreateTemplate) {
+      setShowUpgradeModal(true);
+      return;
+    }
+    setOpenCreate(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="text-center sm:text-left">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
-              Email Templates
-            </h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-2 max-w-2xl mx-auto sm:mx-0">
+            <div className="flex items-center gap-3 justify-center sm:justify-start mb-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+                Email Templates
+              </h1>
+              {planInfo && (
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                  planInfo.type === 'admin' 
+                    ? 'bg-red-100 text-red-800 border border-red-200' 
+                    : planInfo.type === 'pro' || planInfo.isSubscribed
+                    ? 'bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 border border-purple-200'
+                    : planInfo.type === 'beta'
+                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                    : 'bg-gray-100 text-gray-800 border border-gray-200'
+                }`}>
+                  {planInfo.name} Plan
+                </span>
+              )}
+            </div>
+            <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto sm:mx-0">
               Create and manage your email templates with personalized variables
             </p>
           </div>
           <div className="flex justify-center sm:justify-end">
             <PrimaryButton 
-              onClick={() => setOpenCreate(true)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
+              onClick={handleCreateClick}
+              className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 ${
+                canCreateTemplate 
+                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' 
+                  : 'bg-gray-400 cursor-not-allowed'
+              } text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base`}
+              disabled={!canCreateTemplate}
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -169,6 +219,41 @@ export default function TemplatesPage() {
             </PrimaryButton>
           </div>
         </div>
+
+        {/* Plan Limits Display */}
+        {planLimits && planLimits.total !== -1 && (
+          <Card className="p-4 sm:p-6 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Template Usage</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  You've used {planLimits.used} of {planLimits.total} templates in your plan
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${Math.min(100, (planLimits.used / planLimits.total) * 100)}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">
+                    {Math.round((planLimits.used / planLimits.total) * 100)}%
+                  </span>
+                </div>
+                {planLimits.remaining === 0 && (
+                  <Button
+                    onClick={() => window.location.href = '/pricing'}
+                    className="text-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                  >
+                    Upgrade Plan
+                  </Button>
+                )}
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Search and Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
@@ -247,8 +332,13 @@ export default function TemplatesPage() {
               </p>
               {!searchTerm && (
                 <PrimaryButton 
-                  onClick={() => setOpenCreate(true)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
+                  onClick={handleCreateClick}
+                  className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 ${
+                    canCreateTemplate 
+                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' 
+                      : 'bg-gray-400 cursor-not-allowed'
+                  } text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base`}
+                  disabled={!canCreateTemplate}
                 >
                   <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -351,7 +441,7 @@ export default function TemplatesPage() {
 
         {/* Create Template Modal */}
         {openCreate && (
-          <TemplateNewModal onClose={() => setOpenCreate(false)} />
+          <TemplateNewModal onClose={() => setOpenCreate(false)} onSuccess={refresh} />
         )}
 
         {/* Template Details Modal */}
@@ -492,6 +582,97 @@ export default function TemplatesPage() {
           confirmText="Delete"
           variant="danger"
         />
+
+        {/* Upgrade Plan Modal */}
+        {showUpgradeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg">
+              <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50 rounded-t-xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">Template Limit Reached</h3>
+                      <p className="text-sm text-gray-600 mt-1">Upgrade to create more templates</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowUpgradeModal(false)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-6">
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-4 p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="text-sm text-gray-600">Current Usage</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {planLimits?.used} / {planLimits?.total}
+                      </p>
+                      <p className="text-sm text-gray-500">Templates</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-600">You need</p>
+                      <p className="text-2xl font-bold text-purple-600">Unlimited</p>
+                      <p className="text-sm text-gray-500">Templates</p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">
+                    You've reached the maximum number of templates for your current plan. 
+                    Upgrade to a premium plan to create unlimited templates and unlock additional features.
+                  </p>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Unlimited email templates
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Advanced analytics & reporting
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Priority support
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setShowUpgradeModal(false)}
+                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+                  >
+                    Maybe Later
+                  </Button>
+                  <PrimaryButton
+                    onClick={() => window.location.href = '/pricing'}
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                  >
+                    View Plans
+                  </PrimaryButton>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
