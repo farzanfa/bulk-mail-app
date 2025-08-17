@@ -34,27 +34,18 @@ export default function Header({ isAdmin }: HeaderProps) {
       document.body.classList.add('menu-open');
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
-      document.body.style.insetInlineStart = '0';
-      document.body.style.insetBlockStart = '0';
-      document.body.style.insetInlineEnd = '0';
-      document.body.style.insetBlockEnd = '0';
+      document.body.style.width = '100%';
     } else {
       document.body.classList.remove('menu-open');
       document.body.style.overflow = '';
       document.body.style.position = '';
-      document.body.style.insetInlineStart = '';
-      document.body.style.insetBlockStart = '';
-      document.body.style.insetInlineEnd = '';
-      document.body.style.insetBlockEnd = '';
+      document.body.style.width = '';
     }
     return () => {
       document.body.classList.remove('menu-open');
       document.body.style.overflow = '';
       document.body.style.position = '';
-      document.body.style.insetInlineStart = '';
-      document.body.style.insetBlockStart = '';
-      document.body.style.insetInlineEnd = '';
-      document.body.style.insetBlockEnd = '';
+      document.body.style.width = '';
     };
   }, [open]);
   
@@ -218,9 +209,10 @@ export default function Header({ isAdmin }: HeaderProps) {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setOpen(!open)}
-                className="inline-flex md:hidden items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200 touch-target"
+                className="inline-flex md:hidden items-center justify-center p-2.5 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200 min-w-[44px] min-h-[44px]"
                 aria-expanded={open}
                 aria-label="Toggle navigation menu"
+                aria-controls="mobile-menu"
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {open ? (
@@ -237,49 +229,68 @@ export default function Header({ isAdmin }: HeaderProps) {
       
       {/* Mobile Navigation */}
       <div 
-        className={`md:hidden fixed inset-0 top-[57px] sm:top-[65px] z-50 transform transition-all duration-300 ease-in-out ${
-          open ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+        className={`md:hidden fixed inset-0 z-50 ${
+          open ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
       >
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setOpen(false)} />
-        <nav className="absolute right-0 top-0 bottom-0 w-full max-w-xs bg-white shadow-2xl animate-slideInRight">
-          <div className="flex flex-col h-full safe-padding">
-            <div className="flex-1 overflow-y-auto py-4 custom-scrollbar">
-              <div className="space-y-1 px-3">
-                {links.map((l) => (
-                  <a
-                    key={l.href}
-                    href={l.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
-                      pathname === l.href
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <span className="text-xl">{l.icon}</span>
-                    {l.label}
-                  </a>
-                ))}
+        {/* Backdrop */}
+        <div 
+          className={`absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${
+            open ? 'opacity-100' : 'opacity-0'
+          }`} 
+          onClick={() => setOpen(false)} 
+        />
+        
+        {/* Menu Panel */}
+        <div 
+          id="mobile-menu"
+          className={`absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-2xl transition-transform duration-300 ease-out ${
+            open ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          <div className="flex flex-col h-full">
+            {/* Header space to account for fixed header */}
+            <div className="h-[57px] sm:h-[65px]"></div>
+            
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="py-4">
+                <div className="space-y-1 px-3">
+                  {links.map((l) => (
+                    <a
+                      key={l.href}
+                      href={l.href}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
+                        pathname === l.href
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <span className="text-xl">{l.icon}</span>
+                      {l.label}
+                    </a>
+                  ))}
+                </div>
+                
+                {!isMarketing && session?.user && (
+                  <>
+                    <div className="my-4 px-6">
+                      <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+                    </div>
+                    
+                    <div className="space-y-1 px-3">
+                      <a href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
+                        <span className="text-xl">👤</span>
+                        Profile
+                      </a>
+                      <a href="/pricing" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
+                        <span className="text-xl">💎</span>
+                        Subscription
+                      </a>
+                    </div>
+                  </>
+                )}
               </div>
-              
-              {!isMarketing && session?.user && (
-                <>
-                  <div className="my-4 px-6">
-                    <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
-                  </div>
-                  
-                  <div className="space-y-1 px-3">
-                    <a href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
-                      <span className="text-xl">👤</span>
-                      Profile
-                    </a>
-                    <a href="/pricing" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
-                      <span className="text-xl">💎</span>
-                      Subscription
-                    </a>
-                  </div>
-                </>
-              )}
             </div>
             
             {/* Mobile Menu Footer */}
@@ -320,7 +331,7 @@ export default function Header({ isAdmin }: HeaderProps) {
               )}
             </div>
           </div>
-        </nav>
+        </div>
       </div>
     </header>
   );

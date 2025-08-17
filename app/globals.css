@@ -347,6 +347,7 @@ body.menu-open {
   position: fixed !important;
   width: 100% !important;
   height: 100% !important;
+  touch-action: none !important;
 }
 
 /* Ensure mobile menu panel stays in viewport */
