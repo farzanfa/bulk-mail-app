@@ -25,6 +25,20 @@ enum RecipientStatus {
   skipped
 }
 
+enum PlanType {
+  free
+  starter
+  professional
+  enterprise
+}
+
+enum SubscriptionStatus {
+  active
+  cancelled
+  expired
+  trialing
+}
+
 // Models
 model users {
   id               String    @id @default(cuid())
@@ -34,9 +48,9 @@ model users {
   full_name        String?
   company          String?
   website          String?
+  phone            String?
   role             String?
   purpose          String?
-  phone            String?
   onboarding_completed_at DateTime?
   created_at       DateTime  @default(now())
   google_accounts  google_accounts[]
@@ -46,6 +60,7 @@ model users {
   campaigns        campaigns[]
   audit_logs       audit_logs[]
   email_verifications email_verifications[]
+  subscription     user_subscriptions?
 }
 
 model google_accounts {
@@ -182,6 +197,45 @@ model email_verifications {
   created_at DateTime @default(now())
 
   @@index([user_id])
+}
+
+model plans {
+  id                     String   @id @default(cuid())
+  name                   String
+  type                   PlanType @unique
+  price_monthly          Float
+  price_yearly           Float
+  emails_per_month       Int
+  contacts_limit         Int
+  templates_limit        Int
+  campaigns_limit        Int
+  team_members           Int
+  custom_branding        Boolean  @default(false)
+  priority_support       Boolean  @default(false)
+  api_access             Boolean  @default(false)
+  advanced_analytics     Boolean  @default(false)
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+  user_subscriptions     user_subscriptions[]
+}
+
+model user_subscriptions {
+  id                     String   @id @default(cuid())
+  user_id                String   @unique
+  user                   users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  plan_id                String
+  plan                   plans    @relation(fields: [plan_id], references: [id])
+  status                 SubscriptionStatus
+  current_period_start   DateTime
+  current_period_end     DateTime
+  cancel_at_period_end   Boolean  @default(false)
+  stripe_customer_id     String?  @unique
+  stripe_subscription_id String?  @unique
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+
+  @@index([user_id])
+  @@index([plan_id])
 }
 
 
