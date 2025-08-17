@@ -274,6 +274,19 @@
   header .max-w-7xl {
     width: 100%;
   }
+  
+  /* Mobile menu button improvements */
+  header button[aria-label="Toggle navigation menu"] {
+    position: relative;
+    z-index: 10;
+  }
+  
+  /* Ensure header stays on top */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
 }
 
 /* Very small devices (< 360px) */
@@ -344,9 +357,19 @@
 /* Prevent scrolling when mobile menu is open */
 body.menu-open {
   overflow: hidden !important;
-  position: fixed !important;
-  width: 100% !important;
-  height: 100% !important;
+}
+
+/* Mobile Menu Styles */
+@supports (height: 100dvh) {
+  .mobile-menu-height {
+    height: 100dvh;
+  }
+}
+
+@supports not (height: 100dvh) {
+  .mobile-menu-height {
+    height: 100vh;
+  }
 }
 
 /* Ensure mobile menu panel stays in viewport */
