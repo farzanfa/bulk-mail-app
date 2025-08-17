@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { IconButton } from './ui';
+import ThemeToggle from './ThemeToggle';
 
 interface HeaderProps {
   isAdmin: boolean;
@@ -215,6 +216,9 @@ export default function Header({ isAdmin }: HeaderProps) {
                 </>
               )}
               
+              {/* Theme Toggle */}
+              <ThemeToggle />
+              
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setOpen(!open)}
@@ -284,6 +288,12 @@ export default function Header({ isAdmin }: HeaderProps) {
             
             {/* Mobile Menu Footer */}
             <div className="border-t border-gray-100 p-4 space-y-3 safe-padding-bottom">
+              {/* Theme Toggle in Mobile Menu */}
+              <div className="flex items-center justify-between px-4 py-2">
+                <span className="text-sm font-medium text-gray-700">Appearance</span>
+                <ThemeToggle />
+              </div>
+              
               {isMarketing ? (
                 <>
                   {session?.user ? (
