@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MailWeaver - Modern Email Marketing Platform',
+    title: 'MailWeaver - Modern Bulk Email Marketing Platform',
     description: 'Powerful, user-friendly bulk email marketing platform. Send personalized campaigns and grow your audience.',
     images: ['/og-image.svg'],
     creator: '@mailweaver',
