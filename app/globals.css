@@ -96,10 +96,27 @@
 @layer components {
   /* Glass morphism effect */
   .glass {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .glass-scrolled {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+  
+  /* iOS-specific glass effect fixes */
+  @supports (-webkit-backdrop-filter: blur(12px)) {
+    .glass {
+      background: rgba(255, 255, 255, 0.72);
+    }
+    .glass-scrolled {
+      background: rgba(255, 255, 255, 0.88);
+    }
   }
   
   /* Gradient backgrounds */
@@ -251,39 +268,62 @@
 
 /* Header responsive fixes */
 @media (max-width: 640px) {
+  /* Fixed header height compensation */
+  body {
+    padding-top: 56px; /* Base header height */
+  }
+  
+  /* Additional padding for safe area devices */
+  @supports (padding: max(0px)) {
+    body {
+      padding-top: max(56px, calc(56px + env(safe-area-inset-top)));
+    }
+  }
+  
   header {
     min-height: 56px;
   }
   
   /* Ensure header has proper safe area padding */
-  header > div:first-child {
+  header .safe-padding-top {
     padding-top: env(safe-area-inset-top);
   }
   
   /* Prevent text overflow in mobile buttons */
-  header button span,
-  header a span {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  header button,
+  header a {
+    min-height: 40px;
+    min-width: 40px;
   }
   
-  /* Ensure proper spacing for header content */
-  header .max-w-7xl {
-    width: 100%;
+  /* Better mobile logo sizing */
+  header img {
+    width: 28px;
+    height: 28px;
+  }
+  
+  /* Adjust header content height */
+  header .h-14 {
+    height: 56px !important;
   }
   
   /* Mobile menu button improvements */
   header button[aria-label="Toggle navigation menu"] {
     position: relative;
     z-index: 10;
+    min-width: 44px;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
   }
   
   /* Ensure header stays on top */
   header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    z-index: 40 !important;
   }
 }
 
@@ -367,17 +407,47 @@ body.menu-open {
 
 /* Safe area handling for iOS devices */
 @supports (padding: max(0px)) {
-  header > div:first-child {
-    padding-top: max(0.75rem, env(safe-area-inset-top));
+  /* Header safe area padding */
+  header .safe-padding-top {
+    padding-top: max(12px, env(safe-area-inset-top));
   }
   
   /* Mobile menu safe areas */
-  .mobile-menu-header {
-    padding-top: max(0.75rem, env(safe-area-inset-top));
+  .safe-padding-bottom {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
   }
   
-  .mobile-menu-footer {
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  /* Adjust body padding for safe area */
+  @media (max-width: 640px) {
+    body {
+      padding-top: max(56px, calc(56px + env(safe-area-inset-top)));
+    }
+  }
+}
+
+/* Mobile menu panel styles */
+@media (max-width: 767px) {
+  /* Ensure menu panel is properly positioned */
+  nav[role="navigation"] {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+  }
+  
+  /* Menu content scrolling */
+  nav[role="navigation"] .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Prevent bounce scrolling on iOS */
+  nav[role="navigation"] .overscroll-contain {
+    overscroll-behavior: contain;
   }
 }
 
@@ -549,6 +619,38 @@ button {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+/* Touch target improvements for mobile */
+@media (max-width: 767px) {
+  /* Minimum touch target size (44x44px) */
+  button,
+  a[role="button"],
+  .touch-manipulation {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Remove tap highlight on touch devices */
+  button,
+  a,
+  .touch-manipulation {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Better active states for touch */
+  button:active,
+  a:active,
+  .touch-manipulation:active {
+    transition-duration: 0ms;
+  }
+}
+
+/* Breakpoint for extra small devices */
+@media (min-width: 475px) {
+  .xs\:inline {
+    display: inline !important;
+  }
 }
 
 
