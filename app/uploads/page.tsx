@@ -128,26 +128,16 @@ export default function UploadsPage() {
   async function bulkDelete() {
     if (selected.length === 0) return;
     
-    setDeleteMessage(`Are you sure you want to delete ${selected.length} upload(s) and their contacts? This action cannot be undone.`);
+    setDeleteMessage(`Are you sure you want to delete ${selected.length} upload(s)? This action cannot be undone.`);
     setDeleteAction(() => async () => {
       try {
-        const res = await fetch('/api/uploads', { 
-          method: 'DELETE', 
-          headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify({ ids: selected }) 
-        });
-        
-        const json = await res.json();
-        if (!res.ok) { 
-          toast.error(json.error || 'Delete failed'); 
-          return; 
+        for (const id of selected) {
+          await fetch(`/api/uploads/${id}`, { method: 'DELETE' });
         }
-        
-        toast.success(`Successfully deleted ${json.deleted} upload(s)`);
         setSelected([]);
         await refresh();
-      } catch (err: any) {
-        console.error('Bulk delete failed:', err);
+        toast.success(`Successfully deleted ${selected.length} upload(s)`);
+      } catch (err) {
         toast.error('Delete failed');
       }
     });
@@ -171,9 +161,8 @@ export default function UploadsPage() {
 
   // Filter uploads based on search term
   const filteredUploads = uploads.filter(upload => 
-    upload.filename.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    upload.row_count?.toString().includes(searchTerm) ||
-    new Date(upload.created_at).toLocaleDateString().includes(searchTerm)
+    upload.filename?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    upload.id?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Select all filtered uploads
@@ -186,532 +175,377 @@ export default function UploadsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-6 sm:py-8 lg:py-10 space-y-6 sm:space-y-8">
-        {/* Header Section */}
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-blue-600/10 blur-3xl" />
-          <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
-            <div className="text-center sm:text-left">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Header Section with consistent styling */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 animate-fadeInUp">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div>
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                  {userPlan ? `${userPlan.planName} Uploads` : 'CSV Uploads'}
+                <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Contact Uploads
                 </h1>
                 {userPlan && (
-                  <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${
-                    userPlan.planType === 'enterprise' ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-purple-500/25 shadow-lg' :
-                    userPlan.planType === 'professional' ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-blue-500/25 shadow-lg' :
-                    userPlan.planType === 'starter' ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-emerald-500/25 shadow-lg' :
-                    'bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-gray-500/25 shadow-lg'
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                    userPlan.planType === 'admin' 
+                      ? 'bg-gradient-to-r from-red-50 to-pink-50 text-red-700 border border-red-200' 
+                      : userPlan.planType === 'pro'
+                      ? 'bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border border-purple-200'
+                      : userPlan.planType === 'beta'
+                      ? 'bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 border border-blue-200'
+                      : 'bg-gray-100 text-gray-700 border border-gray-200'
                   }`}>
-                    {userPlan.planType.toUpperCase()}
+                    {userPlan.planName}
                   </span>
                 )}
               </div>
-              <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed max-w-2xl">
-                Upload and manage your contact lists for powerful email campaigns
+              <p className="text-gray-600">
+                Upload and manage your contact lists for email campaigns
               </p>
-              {limits && limits.total !== -1 && (
-                <div className="mt-4 flex items-center gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="text-sm font-medium text-gray-600">Usage:</div>
-                    <div className="flex items-center gap-2">
-                      <span className={`font-bold text-lg ${
-                        limits.remaining === 0 ? 'text-red-600' :
-                        limits.remaining <= 2 ? 'text-orange-600' :
-                        'text-gray-900'
-                      }`}>
-                        {limits.used}
-                      </span>
-                      <span className="text-gray-400">/</span>
-                      <span className="font-medium text-gray-700">{limits.total}</span>
-                    </div>
-                  </div>
-                  {limits.remaining <= 2 && limits.remaining > 0 && (
-                    <span className="inline-flex items-center gap-1 text-xs text-orange-600 font-semibold bg-orange-50 px-3 py-1 rounded-full">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                      Only {limits.remaining} upload{limits.remaining === 1 ? '' : 's'} left
-                    </span>
-                  )}
-                  {limits.remaining === 0 && (
-                    <a 
-                      href="/pricing" 
-                      className="inline-flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700 font-semibold underline decoration-2 underline-offset-2"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd" />
-                      </svg>
-                      Upgrade for unlimited
-                    </a>
-                  )}
-                </div>
-              )}
             </div>
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <label className={`group relative inline-flex items-center justify-center gap-2 text-sm sm:text-base ${
-                limits && limits.remaining === 0 
-                  ? 'bg-gray-200 cursor-not-allowed text-gray-500' 
-                  : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 cursor-pointer text-white transform hover:scale-105'
-              } px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl font-semibold shadow-xl transition-all duration-300`}>
+            <div className="flex justify-center sm:justify-end">
+              <label className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Upload Contacts
                 <input 
                   type="file" 
                   accept=".csv" 
-                  className="hidden" 
                   onChange={onFileChange} 
-                  disabled={busy || (limits?.remaining === 0)} 
+                  className="hidden" 
+                  disabled={busy || (limits !== null && limits.remaining === 0)}
                 />
-                {busy ? (
-                  <span className="inline-flex items-center gap-2">
-                    <span className="animate-spin inline-block h-4 w-4 border-2 border-white/30 border-t-white rounded-full" /> 
-                    Processing...
-                  </span>
-                ) : limits && limits.remaining === 0 ? (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <span>Limit Reached</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <span>Upload CSV</span>
-                  </>
-                )}
-                {!busy && limits && limits.remaining !== 0 && (
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-300" />
-                )}
               </label>
-              {limits && limits.remaining === 0 && (
-                <a 
-                  href="/pricing" 
-                  className="px-6 py-3 bg-white hover:bg-gray-50 text-purple-600 font-semibold rounded-xl border-2 border-purple-200 hover:border-purple-300 transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
-                  Upgrade Plan
-                </a>
-              )}
             </div>
           </div>
         </div>
 
-        {/* Search and Actions Bar */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6">
+        {/* Usage Limits Display */}
+        {limits && limits.total !== -1 && (
+          <Card className="p-6 bg-gradient-to-br from-purple-50 via-white to-blue-50 border-2 border-purple-100 animate-fadeInUp" style={{ animationDelay: '50ms' }}>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Upload Usage</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  You've used {limits.used} of {limits.total} uploads in your plan
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${Math.min(100, (limits.used / limits.total) * 100)}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">
+                    {Math.round((limits.used / limits.total) * 100)}%
+                  </span>
+                </div>
+                {limits.remaining === 0 && (
+                  <Button
+                    onClick={() => window.location.href = '/pricing'}
+                    className="text-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 px-4 py-2 rounded-lg font-semibold"
+                  >
+                    Upgrade Plan
+                  </Button>
+                )}
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Search and Actions */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 animate-fadeInUp" style={{ animationDelay: '100ms' }}>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="relative w-full sm:w-96">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <div className="relative w-full sm:w-80">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
               <Input
                 type="text"
-                placeholder="Search by filename, contacts, or date..."
+                placeholder="Search uploads..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-11 pr-4 py-3 w-full border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 rounded-xl transition-all duration-200"
+                className="pl-10 w-full"
               />
             </div>
             
             <div className="flex items-center gap-3">
-              <button
+              <Button
                 onClick={selectAll}
-                className="group px-5 py-2.5 text-sm font-medium border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 bg-white rounded-xl transition-all duration-200 flex items-center gap-2"
+                className="px-5 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:border-purple-300 hover:bg-purple-50 hover:-translate-y-0.5 transition-all duration-200 shadow-sm hover:shadow-lg"
               >
-                <div className={`w-4 h-4 rounded border-2 ${selected.length === filteredUploads.length ? 'bg-purple-600 border-purple-600' : 'border-gray-300 group-hover:border-gray-400'} transition-colors`}>
-                  {selected.length === filteredUploads.length && (
-                    <svg className="w-full h-full text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  )}
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <span>{selected.length === filteredUploads.length && filteredUploads.length > 0 ? 'Deselect All' : 'Select All'}</span>
                 </div>
-                <span>{selected.length === filteredUploads.length ? 'Deselect All' : 'Select All'}</span>
-              </button>
+              </Button>
               
               <button
                 onClick={bulkDelete}
                 disabled={selected.length === 0}
-                className={`px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 flex items-center gap-2 ${
+                className={`px-5 py-3 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 ${
                   selected.length === 0 
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white hover:-translate-y-0.5'
                 }`}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                <span>Delete {selected.length > 0 && `(${selected.length})`}</span>
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>
+                    {selected.length === 0 
+                      ? 'Delete' 
+                      : `Delete (${selected.length})`
+                    }
+                  </span>
+                </div>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Plan Usage Card - Show when user has upload limits */}
-        {limits && limits.total !== -1 && (
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 p-6 sm:p-8 text-white shadow-xl">
-            <div className="absolute inset-0 bg-black/10" />
-            <div className="relative z-10">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    Upload Usage
-                  </h3>
-                  <div className="flex items-center gap-6">
-                    <div className="flex-1 max-w-md">
-                      <div className="flex justify-between text-sm mb-2 font-medium">
-                        <span className="text-white/80">Used Uploads</span>
-                        <span className="text-white">{limits.used} / {limits.total}</span>
-                      </div>
-                      <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden">
-                        <div 
-                          className={`h-3 rounded-full transition-all duration-500 ${
-                            limits.remaining === 0 ? 'bg-gradient-to-r from-red-400 to-red-500' :
-                            limits.remaining <= 2 ? 'bg-gradient-to-r from-orange-400 to-orange-500' :
-                            'bg-gradient-to-r from-green-400 to-emerald-500'
-                          }`}
-                          style={{ width: `${Math.min(100, (limits.used / limits.total) * 100)}%` }}
-                        />
-                      </div>
-                      <div className="mt-2 text-sm text-white/80">
-                        {limits.remaining} upload{limits.remaining === 1 ? '' : 's'} remaining
-                      </div>
-                    </div>
-                    {limits.remaining < limits.total && (
-                      <a 
-                        href="/pricing" 
-                        className="px-6 py-3 bg-white text-purple-600 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-lg flex items-center gap-2"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                        </svg>
-                        Upgrade
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Uploads Grid */}
         <Section title="Your Uploads">
           {loading ? (
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-16 text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
-                <div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin" />
-              </div>
-              <p className="text-lg text-gray-600 font-medium">Loading your uploads...</p>
+            <div className="flex items-center justify-center p-16">
+              <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : filteredUploads.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-16 text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Card className="p-16 text-center bg-gradient-to-br from-gray-50 to-white">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-slow">
                 <svg className="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {searchTerm ? 'No uploads found' : 'No uploads yet'}
-              </h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No uploads yet</h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
                 {searchTerm 
                   ? `No uploads match "${searchTerm}". Try a different search term.`
-                  : limits && limits.remaining === 0
-                  ? 'You\'ve reached your upload limit. Upgrade your plan to upload more CSV files.'
-                  : 'Upload your first CSV file to start building your contact lists. Supported formats: .csv files with headers.'
+                  : 'Upload your first CSV file to start building your contact list for email campaigns.'
                 }
               </p>
               {!searchTerm && (
-                limits && limits.remaining === 0 ? (
-                  <a 
-                    href="/pricing" 
-                    className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-3.5 rounded-xl font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    <span>Upgrade Plan</span>
-                  </a>
-                ) : (
-                  <label className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-3.5 rounded-xl cursor-pointer font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                    <input type="file" accept=".csv" className="hidden" onChange={onFileChange} />
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <span>Upload Your First CSV</span>
-                  </label>
-                )
+                <label className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  Upload Your First CSV
+                  <input 
+                    type="file" 
+                    accept=".csv" 
+                    onChange={onFileChange} 
+                    className="hidden" 
+                    disabled={busy || (limits !== null && limits.remaining === 0)}
+                  />
+                </label>
               )}
-            </div>
+            </Card>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredUploads.map((upload, index) => (
-                <div
-                  key={upload.id}
-                  className="group relative"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <div 
-                    onClick={() => openUploadModal(upload.id)}
-                    className="relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:border-purple-200 transform hover:scale-[1.02]"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    
-                    <div className="relative p-6">
-                      {/* Upload Header */}
-                      <div className="flex items-start justify-between gap-3 mb-4">
-                        <div className="flex-1 min-w-0">
-                          <label 
-                            className="flex items-center gap-3 cursor-pointer"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <div className="relative">
-                              <input 
-                                type="checkbox" 
-                                checked={selected.includes(upload.id)} 
-                                onChange={(e) => setSelected(e.target.checked ? [...selected, upload.id] : selected.filter(x => x !== upload.id))} 
-                                className="sr-only"
-                              />
-                              <div className={`w-5 h-5 rounded-md border-2 transition-all duration-200 ${
-                                selected.includes(upload.id) 
-                                  ? 'bg-purple-600 border-purple-600' 
-                                  : 'border-gray-300 group-hover:border-gray-400'
-                              }`}>
-                                {selected.includes(upload.id) && (
-                                  <svg className="w-full h-full text-white p-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                  </svg>
-                                )}
-                              </div>
-                            </div>
-                            <h3 className="font-semibold text-gray-900 truncate group-hover:text-purple-600 transition-colors">
-                              {upload.filename}
-                            </h3>
-                          </label>
-                        </div>
-                        <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-emerald-400 to-green-500 text-white text-xs font-semibold rounded-lg shadow-sm">
-                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredUploads.map(upload => {
+                const createdDate = new Date(upload.created_at);
+                const isSelected = selected.includes(upload.id);
+                
+                return (
+                  <Card key={upload.id} className="h-full p-6 bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border-2 border-transparent hover:border-purple-200">
+                    {/* Upload Header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1 min-w-0">
+                        <label className="inline-flex items-center gap-2 cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            checked={isSelected} 
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelected([...selected, upload.id]);
+                              } else {
+                                setSelected(selected.filter(id => id !== upload.id));
+                              }
+                            }} 
+                            className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 focus:ring-offset-0 transition-all"
+                          />
+                          <h3 className="text-lg font-semibold text-gray-900 truncate hover:text-purple-600 transition-colors">
+                            {upload.filename}
+                          </h3>
+                        </label>
+                      </div>
+                      <div className="ml-2">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 text-xs font-semibold rounded-full border border-green-200">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          Active
+                          Ready
                         </span>
                       </div>
+                    </div>
 
-                      {/* Upload Stats */}
-                      <div className="space-y-4">
-                        <div>
-                          <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Contacts</div>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                              {upload.row_count?.toLocaleString() || '0'}
-                            </span>
-                            <span className="text-sm text-gray-500">contacts</span>
-                          </div>
+                    {/* Upload Stats */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200">
+                        <div className="flex items-center gap-2 mb-1">
+                          <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                          <span className="text-xs font-medium text-blue-900">Contacts</span>
                         </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>{new Date(upload.created_at).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}</span>
-                          </div>
-                          {upload.columns && upload.columns.length > 0 && (
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-                              </svg>
-                              <span>{upload.columns.length} fields</span>
-                            </div>
-                          )}
-                        </div>
+                        <p className="text-lg font-bold text-blue-700">
+                          {upload.row_count?.toLocaleString() || 0}
+                        </p>
                       </div>
-
-                      {/* Hover Action */}
-                      <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                        <span className="text-sm text-gray-500 group-hover:text-purple-600 transition-colors">View details</span>
-                        <svg className="w-5 h-5 text-gray-400 group-hover:text-purple-600 transition-colors transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
+                        <div className="flex items-center gap-2 mb-1">
+                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                          </svg>
+                          <span className="text-xs font-medium text-green-900">Columns</span>
+                        </div>
+                        <p className="text-lg font-bold text-green-700">
+                          {upload.columns?.length || 0}
+                        </p>
                       </div>
                     </div>
-                  </div>
-                </div>
-              ))}
+
+                    {/* Upload Date */}
+                    <div className="mb-4">
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 mb-1">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        UPLOADED
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        {createdDate.toLocaleDateString('en-US', { 
+                          month: 'long', 
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                      <a
+                        href={`/uploads/${upload.id}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-all"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        View
+                      </a>
+                      
+                      <button
+                        onClick={async () => {
+                          if (confirm('Are you sure you want to delete this upload? This action cannot be undone.')) {
+                            try {
+                              const res = await fetch(`/api/uploads/${upload.id}`, { method: 'DELETE' });
+                              if (res.ok) {
+                                toast.success('Upload deleted successfully');
+                                await refresh();
+                              } else {
+                                toast.error('Failed to delete upload');
+                              }
+                            } catch (err) {
+                              toast.error('Failed to delete upload');
+                            }
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete
+                      </button>
+                    </div>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </Section>
 
-        {/* Upload Details Modal */}
+        {/* Edit Modal */}
         {openEdit && current && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div 
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setOpenEdit(false)}
-            />
-            <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
-              {/* Modal Header */}
-              <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-indigo-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-1">Upload Details</h2>
-                    <p className="text-gray-600">View and manage your CSV upload</p>
-                  </div>
-                  <button 
-                    aria-label="Close" 
-                    className="p-2 hover:bg-white/80 rounded-xl transition-colors" 
-                    onClick={() => setOpenEdit(false)}
-                  >
-                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+              <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
               </div>
-
-              {/* Modal Content */}
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-                <div className="space-y-6">
-                  {/* File Information Card */}
-                  <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-2xl p-6 border border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      File Information
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Filename</div>
-                        <div className="font-medium text-gray-900 bg-white rounded-lg px-4 py-2.5 border border-gray-200">
-                          {current.filename}
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Contact Count</div>
-                        <div className="font-medium bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent bg-white rounded-lg px-4 py-2.5 border border-gray-200">
-                          {current.row_count?.toLocaleString() || '0'} contacts
-                        </div>
-                      </div>
-                      <div className="space-y-1 sm:col-span-2">
-                        <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Upload Date</div>
-                        <div className="font-medium text-gray-900 bg-white rounded-lg px-4 py-2.5 border border-gray-200">
-                          {new Date(current.created_at).toLocaleDateString('en-US', { 
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long', 
-                            day: 'numeric',
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                        </div>
-                      </div>
+              <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+              <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                <div>
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Edit Upload</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Filename</label>
+                      <Input
+                        type="text"
+                        value={current.filename}
+                        onChange={(e) => setCurrent({ ...current, filename: e.target.value })}
+                        className="mt-1"
+                      />
                     </div>
                   </div>
-
-                  {/* Column Details */}
-                  {current.columns && current.columns.length > 0 && (
-                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-purple-200">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-                        </svg>
-                        CSV Columns ({current.columns.length})
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {current.columns.map((column: string, index: number) => (
-                          <span 
-                            key={index} 
-                            className="inline-flex items-center px-3 py-1.5 bg-white rounded-lg text-sm font-medium text-gray-700 border border-purple-200"
-                          >
-                            {column}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
-              </div>
-
-              {/* Modal Actions */}
-              <div className="p-6 border-t border-gray-100 bg-gray-50">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <a 
-                    href={`/uploads/${current.id}`} 
-                    className="text-purple-600 hover:text-purple-700 font-semibold underline decoration-2 underline-offset-2 transition-colors"
-                  >
-                    View Full Details Page →
-                  </a>
-                  <div className="flex items-center gap-3">
-                    <a 
-                      href={`/api/uploads/${current.id}/export`} 
-                      className="px-5 py-2.5 border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white font-semibold transition-all duration-200 flex items-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <span>Export CSV</span>
-                    </a>
-                    <button
-                      onClick={async () => {
-                        setDeleteMessage('Are you sure you want to delete this upload and all contacts created from it? This action cannot be undone.');
-                        setDeleteAction(() => async () => {
-                          try {
-                            const res = await fetch(`/api/uploads/${current.id}`, { method: 'DELETE' });
-                            if (!res.ok) { 
-                              toast.error('Delete failed'); 
-                              return; 
-                            }
-                            toast.success('Upload deleted successfully');
-                            setOpenEdit(false);
-                            await refresh();
-                          } catch (err: any) {
-                            console.error('Delete failed:', err);
-                            toast.error('Delete failed');
-                          }
+                <div className="mt-5 sm:mt-6 flex gap-3">
+                  <PrimaryButton
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`/api/uploads/${current.id}`, {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ filename: current.filename })
                         });
-                        setShowDeleteModal(true);
-                      }}
-                      className="px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                      <span>Delete Upload</span>
-                    </button>
-                  </div>
+                        if (res.ok) {
+                          toast.success('Upload updated successfully');
+                          setOpenEdit(false);
+                          await refresh();
+                        } else {
+                          toast.error('Failed to update upload');
+                        }
+                      } catch (err) {
+                        toast.error('Failed to update upload');
+                      }
+                    }}
+                  >
+                    Save Changes
+                  </PrimaryButton>
+                  <Button onClick={() => setOpenEdit(false)}>
+                    Cancel
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={() => {
+            if (deleteAction) {
+              deleteAction();
+            }
+          }}
+          title="Delete Uploads"
+          message={deleteMessage}
+          confirmText="Delete"
+          variant="danger"
+        />
       </div>
-      
-      {/* Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={() => {
-          if (deleteAction) {
-            deleteAction();
-          }
-        }}
-        title="Confirm Deletion"
-        message={deleteMessage}
-        confirmText="Delete"
-        cancelText="Cancel"
-        variant="danger"
-      />
     </div>
   );
 }

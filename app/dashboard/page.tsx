@@ -80,54 +80,56 @@ export default async function DashboardPage() {
   const points = dayCounts.map((d, i) => `${(i / 6) * 100},${100 - (d.count / max) * 100}`).join(' ');
 
   return (
-    <div className="min-h-screen gradient-mesh">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 animate-fadeInUp">
-          <div>
-            <h1 className="text-4xl sm:text-5xl font-display font-bold text-gray-900 mb-3">
-              Welcome back! <span className="text-gradient">👋</span>
-            </h1>
-            <p className="text-lg text-gray-600">
-              Here's what's happening with your email campaigns
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <a 
-              href="/campaigns" 
-              className="inline-flex items-center gap-2 px-5 py-3 gradient-primary text-white rounded-xl font-semibold hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 shadow-lg"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              View Campaigns
-            </a>
-            <a 
-              href="/uploads" 
-              className="inline-flex items-center gap-2 px-5 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:border-gray-300 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 shadow-button"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              Uploads
-            </a>
-            <a 
-              href="/templates" 
-              className="inline-flex items-center gap-2 px-5 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:border-gray-300 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 shadow-button"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-              </svg>
-              Templates
-            </a>
+        {/* Header Section with consistent styling */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 animate-fadeInUp">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                Welcome back! 👋
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Here's what's happening with your email campaigns
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <a 
+                href="/campaigns" 
+                className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                View Campaigns
+              </a>
+              <a 
+                href="/uploads" 
+                className="inline-flex items-center gap-2 px-5 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:border-purple-300 hover:bg-purple-50 hover:-translate-y-0.5 transition-all duration-200 shadow-sm hover:shadow-lg"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Uploads
+              </a>
+              <a 
+                href="/templates" 
+                className="inline-flex items-center gap-2 px-5 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:border-purple-300 hover:bg-purple-50 hover:-translate-y-0.5 transition-all duration-200 shadow-sm hover:shadow-lg"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                </svg>
+                Templates
+              </a>
+            </div>
           </div>
         </div>
 
-        {/* Main Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" style={{ animationDelay: '100ms' }}>
-          <Card className="p-6 card-hover group animate-fadeInUp">
+        {/* Main Stats Grid with consistent card styling */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="p-6 bg-white hover:shadow-lg transition-all duration-300 group animate-fadeInUp">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-14 h-14 gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
@@ -135,7 +137,7 @@ export default async function DashboardPage() {
               {googleCount > 0 ? (
                 <Badge variant="success">Connected</Badge>
               ) : (
-                <a href="/api/google/oauth/url?redirect=1" className="text-primary text-sm font-semibold hover:text-primary-dark transition-colors">
+                <a href="/api/google/oauth/url?redirect=1" className="text-purple-600 text-sm font-semibold hover:text-purple-700 transition-colors">
                   Connect →
                 </a>
               )}
@@ -144,7 +146,7 @@ export default async function DashboardPage() {
             <div className="text-sm text-gray-600">Google Accounts</div>
           </Card>
 
-          <Card className="p-6 card-hover group animate-fadeInUp" style={{ animationDelay: '150ms' }}>
+          <Card className="p-6 bg-white hover:shadow-lg transition-all duration-300 group animate-fadeInUp" style={{ animationDelay: '50ms' }}>
             <div className="flex items-center justify-between mb-4">
               <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +159,7 @@ export default async function DashboardPage() {
             <div className="text-sm text-gray-600">Total Campaigns</div>
           </Card>
 
-          <Card className="p-6 card-hover group animate-fadeInUp" style={{ animationDelay: '200ms' }}>
+          <Card className="p-6 bg-white hover:shadow-lg transition-all duration-300 group animate-fadeInUp" style={{ animationDelay: '100ms' }}>
             <div className="flex items-center justify-between mb-4">
               <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,7 +171,7 @@ export default async function DashboardPage() {
             <div className="text-sm text-gray-600">Total Contacts</div>
           </Card>
 
-          <Card className="p-6 card-hover group animate-fadeInUp" style={{ animationDelay: '250ms' }}>
+          <Card className="p-6 bg-white hover:shadow-lg transition-all duration-300 group animate-fadeInUp" style={{ animationDelay: '150ms' }}>
             <div className="flex items-center justify-between mb-4">
               <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,10 +185,10 @@ export default async function DashboardPage() {
         </div>
 
         {/* Performance Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 animate-fadeInUp" style={{ animationDelay: '300ms' }}>
-          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-l-4 border-green-500">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 animate-fadeInUp" style={{ animationDelay: '200ms' }}>
+          <Card className="p-6 bg-white hover:shadow-lg transition-all duration-300 border-l-4 border-green-500">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl flex items-center justify-center">
                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -204,9 +206,9 @@ export default async function DashboardPage() {
             </div>
           </Card>
 
-          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-l-4 border-red-500">
+          <Card className="p-6 bg-white hover:shadow-lg transition-all duration-300 border-l-4 border-red-500">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-red-50 to-pink-50 rounded-xl flex items-center justify-center">
                 <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -224,9 +226,9 @@ export default async function DashboardPage() {
             </div>
           </Card>
 
-          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-l-4 border-yellow-500">
+          <Card className="p-6 bg-white hover:shadow-lg transition-all duration-300 border-l-4 border-yellow-500">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl flex items-center justify-center">
                 <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -246,14 +248,14 @@ export default async function DashboardPage() {
         </div>
 
         {/* Plan Usage */}
-        <Suspense fallback={<div className="animate-pulse h-64 bg-gray-100 rounded-xl"></div>}>
-          <div className="animate-fadeInUp" style={{ animationDelay: '400ms' }}>
+        <Suspense fallback={<div className="animate-pulse h-64 bg-gray-100 rounded-2xl"></div>}>
+          <div className="animate-fadeInUp" style={{ animationDelay: '250ms' }}>
             <PlanUsageCard />
           </div>
         </Suspense>
 
         {/* Analytics Chart */}
-        <Card className="p-8 hover:shadow-xl transition-all duration-300 animate-fadeInUp" style={{ animationDelay: '500ms' }}>
+        <Card className="p-8 bg-white hover:shadow-lg transition-all duration-300 animate-fadeInUp" style={{ animationDelay: '300ms' }}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <div>
               <h3 className="text-2xl font-bold text-gray-900">Email Activity</h3>
@@ -261,30 +263,30 @@ export default async function DashboardPage() {
             </div>
             <div className="flex items-center gap-6 text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-gradient-to-r from-primary to-secondary"></div>
+                <div className="w-3 h-3 rounded-full bg-gradient-to-r from-purple-600 to-blue-600"></div>
                 <span className="text-gray-600">Sent emails</span>
               </div>
               <Badge variant="primary">Max: {max.toLocaleString()}</Badge>
             </div>
           </div>
-          <div className="relative bg-gray-50 rounded-xl p-4">
+          <div className="relative bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-100">
             <svg viewBox="0 0 100 100" className="w-full h-48 sm:h-40">
               <defs>
                 <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="rgb(124, 58, 237)" stopOpacity="0.3"/>
-                  <stop offset="100%" stopColor="rgb(124, 58, 237)" stopOpacity="0.05"/>
+                  <stop offset="0%" stopColor="rgb(147, 51, 234)" stopOpacity="0.3"/>
+                  <stop offset="100%" stopColor="rgb(147, 51, 234)" stopOpacity="0.05"/>
                 </linearGradient>
               </defs>
               <polyline 
                 fill="url(#chartGradient)" 
-                stroke="rgb(124, 58, 237)" 
+                stroke="rgb(147, 51, 234)" 
                 strokeWidth="3" 
                 points={`0,100 ${points} 100,100`}
                 className="drop-shadow-md"
               />
               <polyline 
                 fill="none" 
-                stroke="rgb(124, 58, 237)" 
+                stroke="rgb(147, 51, 234)" 
                 strokeWidth="3" 
                 points={points} 
                 strokeLinecap="round"
@@ -299,13 +301,13 @@ export default async function DashboardPage() {
                   cy={100 - (d.count / max) * 100}
                   r="4"
                   fill="white"
-                  stroke="rgb(124, 58, 237)"
+                  stroke="rgb(147, 51, 234)"
                   strokeWidth="2"
                   className="drop-shadow-sm"
                 />
               ))}
             </svg>
-            <div className="absolute bottom-4 left-4 right-4 flex justify-between text-xs text-gray-600 font-medium">
+            <div className="absolute bottom-6 left-6 right-6 flex justify-between text-xs text-gray-600 font-medium">
               {dayCounts.map((d, i) => (
                 <div key={i} className="text-center">
                   <div className="font-bold text-gray-900">{d.count}</div>
@@ -320,7 +322,7 @@ export default async function DashboardPage() {
         <Section 
           title="Recent Campaigns" 
           actions={
-            <a href="/campaigns" className="text-sm text-primary hover:text-primary-dark font-semibold transition-colors inline-flex items-center gap-1">
+            <a href="/campaigns" className="text-sm text-purple-600 hover:text-purple-700 font-semibold transition-colors inline-flex items-center gap-1">
               View all 
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -330,8 +332,8 @@ export default async function DashboardPage() {
         >
           {recentCampaigns.length === 0 ? (
             <Card className="p-16 text-center bg-gradient-to-br from-gray-50 to-white">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-slow">
-                <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-slow">
+                <svg className="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                 </svg>
@@ -340,7 +342,7 @@ export default async function DashboardPage() {
               <p className="text-gray-600 mb-8 max-w-md mx-auto">Create your first campaign to get started with email marketing and reach your audience effectively.</p>
               <a 
                 href="/campaigns/new" 
-                className="inline-flex items-center gap-2 px-6 py-3 gradient-primary text-white rounded-xl font-semibold hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 shadow-lg"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -352,10 +354,10 @@ export default async function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {recentCampaigns.map((c: any) => (
                 <a key={c.id} href={`/campaigns/${c.id}`} className="block group">
-                  <Card className="p-6 h-full card-hover group-hover:border-primary/20 border-2 border-transparent transition-all duration-300">
+                  <Card className="p-6 h-full bg-white hover:shadow-lg group-hover:border-purple-200 border-2 border-transparent transition-all duration-300">
                     <div className="flex items-start justify-between gap-3 mb-4">
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-gray-900 text-lg truncate mb-2 group-hover:text-primary transition-colors">
+                        <div className="font-semibold text-gray-900 text-lg truncate mb-2 group-hover:text-purple-600 transition-colors">
                           {c.name || `Campaign ${c.id.slice(0, 8)}`}
                         </div>
                         <div className="text-sm text-gray-500 flex items-center gap-1">
@@ -374,8 +376,8 @@ export default async function DashboardPage() {
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-500">View details</span>
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all">
-                        <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition-all">
+                        <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
@@ -388,7 +390,7 @@ export default async function DashboardPage() {
         </Section>
 
         {/* Quick Actions */}
-        <Card className="p-10 bg-gradient-to-br from-primary/5 via-white to-secondary/5 border-2 border-primary/10 animate-fadeInUp" style={{ animationDelay: '600ms' }}>
+        <Card className="p-10 bg-gradient-to-br from-purple-50 via-white to-blue-50 border-2 border-purple-100 animate-fadeInUp" style={{ animationDelay: '350ms' }}>
           <div className="text-center mb-10">
             <h3 className="text-3xl font-bold text-gray-900 mb-3">Ready to grow your reach?</h3>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">Quick actions to help you manage your email campaigns effectively and reach your audience.</p>
@@ -396,7 +398,7 @@ export default async function DashboardPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a 
               href="/campaigns/new" 
-              className="inline-flex items-center gap-3 px-8 py-4 gradient-primary text-white rounded-xl font-semibold hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 shadow-lg text-lg"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 text-lg"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -405,7 +407,7 @@ export default async function DashboardPage() {
             </a>
             <a 
               href="/uploads" 
-              className="inline-flex items-center gap-3 px-8 py-4 bg-white text-gray-700 rounded-xl font-semibold border-2 border-gray-200 hover:border-primary/30 hover:bg-primary/5 hover:-translate-y-0.5 transition-all duration-200 shadow-button text-lg"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-white text-gray-700 rounded-xl font-semibold border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 hover:-translate-y-0.5 transition-all duration-200 shadow-sm hover:shadow-lg text-lg"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -414,7 +416,7 @@ export default async function DashboardPage() {
             </a>
             <a 
               href="/templates" 
-              className="inline-flex items-center gap-3 px-8 py-4 bg-white text-gray-700 rounded-xl font-semibold border-2 border-gray-200 hover:border-primary/30 hover:bg-primary/5 hover:-translate-y-0.5 transition-all duration-200 shadow-button text-lg"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-white text-gray-700 rounded-xl font-semibold border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 hover:-translate-y-0.5 transition-all duration-200 shadow-sm hover:shadow-lg text-lg"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
