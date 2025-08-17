@@ -10,6 +10,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       defaultTheme="system"
       enableSystem={true}
       disableTransitionOnChange={false}
+      storageKey="mailweaver-theme"
     >
       <SessionProvider>{children}</SessionProvider>
     </ThemeProvider>
