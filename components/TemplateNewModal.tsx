@@ -10,7 +10,12 @@ function extractVars(s: string): string[] {
   return Array.from(out);
 }
 
-export function TemplateNewModal({ onClose }: { onClose: () => void }) {
+interface TemplateNewModalProps {
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+export function TemplateNewModal({ onClose, onSuccess }: TemplateNewModalProps) {
   const [name, setName] = useState('');
   const [subject, setSubject] = useState('');
   const [html, setHtml] = useState('<p>Hello {{ first_name }}</p>');
@@ -55,15 +60,28 @@ export function TemplateNewModal({ onClose }: { onClose: () => void }) {
       
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
+        
+        // Handle plan limit error specifically
+        if (res.status === 402 && errorData.upgradeRequired) {
+          if (confirm(errorData.error + '\n\nWould you like to view upgrade options?')) {
+            window.location.href = '/pricing';
+          }
+          return;
+        }
+        
         throw new Error(errorData.error || `Failed to save template: ${res.status}`);
       }
       
       const json = await res.json();
       if (json.template) {
         alert('Template saved successfully');
+        
+        // Call onSuccess callback if provided
+        if (onSuccess) {
+          onSuccess();
+        }
+        
         onClose();
-        // Refresh the page to show the new template
-        window.location.reload();
       } else {
         throw new Error('Invalid response from server');
       }

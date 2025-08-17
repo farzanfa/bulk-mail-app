@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { extractVariables } from '@/lib/render';
-import { getPlanLimits } from '@/lib/plan';
+import { getPlanLimits, getUserPlan } from '@/lib/plan';
 import { ensureUserIdFromSession } from '@/lib/user';
 
 const createSchema = z.object({
@@ -25,12 +25,26 @@ export async function GET() {
   const planLimits = await getPlanLimits(userId);
   const templateCount = templates.length;
   
+  // Get current plan type
+  const planType = await getUserPlan(userId);
+  
+  // Get subscription details if available
+  const subscription = await prisma.user_subscriptions.findUnique({
+    where: { user_id: userId },
+    include: { plan: true }
+  });
+  
   return NextResponse.json({ 
     templates,
     limits: {
       used: templateCount,
       total: planLimits.maxTemplates,
       remaining: planLimits.maxTemplates === -1 ? -1 : Math.max(0, planLimits.maxTemplates - templateCount)
+    },
+    plan: {
+      type: planType,
+      name: subscription?.plan?.name || planType.charAt(0).toUpperCase() + planType.slice(1),
+      isSubscribed: !!subscription && subscription.status === 'active'
     }
   });
 }
