@@ -10,6 +10,25 @@ function isBetaEmail(email: string | null | undefined): boolean {
 }
 
 export async function getUserPlan(userId: string): Promise<Plan> {
+  // First check if user has a subscription
+  const subscription = await prisma.user_subscriptions.findUnique({
+    where: { user_id: userId },
+    include: { plan: true }
+  });
+
+  if (subscription && subscription.status === 'active') {
+    // Map database plan types to our internal plan types
+    switch (subscription.plan.type) {
+      case 'starter':
+      case 'professional':
+      case 'enterprise':
+        return 'pro';
+      default:
+        return 'free';
+    }
+  }
+
+  // Fall back to email-based plan determination
   const user = await prisma.users.findUnique({ where: { id: userId }, select: { email: true } });
   const email = user?.email;
   if (!email) return 'free';
@@ -18,6 +37,7 @@ export async function getUserPlan(userId: string): Promise<Plan> {
   return 'free';
 }
 
+// Legacy constants for backward compatibility
 export const FREE_LIMITS = {
   maxTemplates: 2,
   maxUploads: 2,
@@ -25,6 +45,7 @@ export const FREE_LIMITS = {
   maxMailsPerCampaign: 100
 };
 
+// Legacy plan features - these will be replaced by database values
 export const PLAN_FEATURES = {
   free: {
     maxGmailAccounts: 1,
@@ -63,6 +84,47 @@ export const PLAN_FEATURES = {
     support: 'priority'
   }
 };
+
+// New function to get plan limits from database
+export async function getPlanLimits(userId: string) {
+  const subscription = await prisma.user_subscriptions.findUnique({
+    where: { user_id: userId },
+    include: { plan: true }
+  });
+
+  if (subscription && subscription.status === 'active') {
+    const plan = subscription.plan;
+    return {
+      maxTemplates: plan.templates_limit,
+      maxUploads: -1, // Not specified in DB, using unlimited
+      maxContacts: plan.contacts_limit,
+      maxMailsPerCampaign: plan.emails_per_month,
+      maxCampaigns: plan.campaigns_limit,
+      teamMembers: plan.team_members,
+      customBranding: plan.custom_branding,
+      prioritySupport: plan.priority_support,
+      apiAccess: plan.api_access,
+      advancedAnalytics: plan.advanced_analytics
+    };
+  }
+
+  // Fall back to legacy system
+  const planType = await getUserPlan(userId);
+  const features = PLAN_FEATURES[planType];
+  
+  return {
+    maxTemplates: features.maxTemplates,
+    maxUploads: features.maxUploads,
+    maxContacts: features.maxContacts,
+    maxMailsPerCampaign: features.maxMailsPerCampaign,
+    maxCampaigns: planType === 'free' ? 5 : -1,
+    teamMembers: 1,
+    customBranding: false,
+    prioritySupport: planType === 'pro' || planType === 'admin',
+    apiAccess: false,
+    advancedAnalytics: features.analytics === 'advanced'
+  };
+}
 
 export async function canConnectGmailAccount(userId: string): Promise<boolean> {
   const plan = await getUserPlan(userId);
