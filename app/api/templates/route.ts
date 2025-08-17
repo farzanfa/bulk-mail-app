@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { extractVariables } from '@/lib/render';
-import { getUserPlan, FREE_LIMITS } from '@/lib/plan';
+import { getPlanLimits } from '@/lib/plan';
 import { ensureUserIdFromSession } from '@/lib/user';
 
 const createSchema = z.object({
@@ -18,8 +18,21 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   const userId = await ensureUserIdFromSession(session).catch(() => '');
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  
   const templates = await prisma.templates.findMany({ where: { user_id: userId }, orderBy: { updated_at: 'desc' } });
-  return NextResponse.json({ templates });
+  
+  // Get plan limits to show remaining quota
+  const planLimits = await getPlanLimits(userId);
+  const templateCount = templates.length;
+  
+  return NextResponse.json({ 
+    templates,
+    limits: {
+      used: templateCount,
+      total: planLimits.maxTemplates,
+      remaining: planLimits.maxTemplates === -1 ? -1 : Math.max(0, planLimits.maxTemplates - templateCount)
+    }
+  });
 }
 
 export async function POST(req: Request) {
@@ -28,11 +41,20 @@ export async function POST(req: Request) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
   const { name, subject, html, text } = createSchema.parse(body);
-  const plan = await getUserPlan(userId);
-  if (plan === 'free') {
+  
+  // Get plan limits from database
+  const planLimits = await getPlanLimits(userId);
+  
+  if (planLimits.maxTemplates !== -1) {
     const count = await prisma.templates.count({ where: { user_id: userId } });
-    if (count >= FREE_LIMITS.maxTemplates) return NextResponse.json({ error: 'Free plan limit: 2 templates' }, { status: 402 });
+    if (count >= planLimits.maxTemplates) {
+      return NextResponse.json({ 
+        error: `Template limit reached. Your plan allows ${planLimits.maxTemplates} templates.`,
+        upgradeRequired: true 
+      }, { status: 402 });
+    }
   }
+  
   const variables = Array.from(new Set([...extractVariables(subject), ...extractVariables(html), ...extractVariables(text || '')]));
   const created = await prisma.templates.create({ data: { user_id: userId, name, subject, html, text, variables: variables as any } });
   return NextResponse.json({ template: created });

@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db';
 import { head } from '@vercel/blob';
 import { parse as parseSync } from 'csv-parse/sync';
 import { ensureUserIdFromSession } from '@/lib/user';
-import { getUserPlan, FREE_LIMITS } from '@/lib/plan';
+import { getPlanLimits } from '@/lib/plan';
 
 export const runtime = 'nodejs';
 
@@ -37,10 +37,16 @@ export async function POST(req: Request) {
     relax_column_count: true,
     delimiter: [',', ';', '\t']
   }) as Array<Record<string, unknown>>;
-  const plan = await getUserPlan(sessionUserId);
-  const maxContacts = plan === 'free' ? FREE_LIMITS.maxContacts : Number.POSITIVE_INFINITY;
+  
+  // Get plan limits and current contact count
+  const planLimits = await getPlanLimits(sessionUserId);
+  const currentContactCount = await prisma.contacts.count({ where: { user_id: sessionUserId } });
+  const maxContacts = planLimits.maxContacts === -1 ? Number.POSITIVE_INFINITY : planLimits.maxContacts;
+  const remainingContacts = maxContacts === Number.POSITIVE_INFINITY ? Number.POSITIVE_INFINITY : Math.max(0, maxContacts - currentContactCount);
+  
   const batch: Array<{ email: string; fields: Record<string, unknown> }> = [];
   let totalProcessed = 0;
+  let skippedDueToLimit = 0;
   let columns: string[] | null = null;
   const normalizeKey = (k: string) => String(k)
     .trim()
@@ -54,6 +60,7 @@ export async function POST(req: Request) {
   const emailKey = (normalizedKeys.find(k => k.norm === 'email')
     || normalizedKeys.find(k => k.norm.includes('email')))?.raw;
   const seenEmails = new Set<string>();
+  
   for (const record of rows) {
     const rec: Record<string, unknown> = { ...record };
     const email = String((emailKey ? rec[emailKey] : (rec.email || rec.Email || rec.EMAIL)) ?? '').trim().toLowerCase();
@@ -67,7 +74,14 @@ export async function POST(req: Request) {
     for (const [key, value] of Object.entries(rec)) {
       normalized[normalizeKey(key)] = value;
     }
-    if (batch.length < maxContacts) batch.push({ email, fields: normalized });
+    
+    // Check if we've reached the contact limit
+    if (totalProcessed >= remainingContacts) {
+      skippedDueToLimit++;
+      continue;
+    }
+    
+    batch.push({ email, fields: normalized });
     if (batch.length >= 500) {
       // Upsert-like behavior: attach existing contacts to this upload, insert new ones
       const chunk = batch.splice(0, batch.length);
@@ -102,8 +116,16 @@ export async function POST(req: Request) {
     totalProcessed += chunk.length;
   }
 
-  await prisma.uploads.update({ where: { id: upload_id }, data: { row_count: Math.min(totalProcessed, maxContacts), ...(columns ? { columns: columns as any } : {}) } });
-  return NextResponse.json({ ok: true, total: totalProcessed });
+  await prisma.uploads.update({ where: { id: upload_id }, data: { row_count: totalProcessed, ...(columns ? { columns: columns as any } : {}) } });
+  
+  const response: any = { ok: true, total: totalProcessed };
+  if (skippedDueToLimit > 0) {
+    response.warning = `Contact limit reached. ${skippedDueToLimit} contacts were skipped. Your plan allows ${maxContacts} total contacts.`;
+    response.upgradeRequired = true;
+    response.skipped = skippedDueToLimit;
+  }
+  
+  return NextResponse.json(response);
 }
 
 

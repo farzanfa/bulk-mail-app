@@ -39,6 +39,12 @@ enum SubscriptionStatus {
   trialing
 }
 
+enum TeamRole {
+  owner
+  admin
+  member
+}
+
 // Models
 model users {
   id               String    @id @default(cuid())
@@ -61,6 +67,10 @@ model users {
   audit_logs       audit_logs[]
   email_verifications email_verifications[]
   subscription     user_subscriptions?
+  email_usage      email_usage[]
+  api_keys         api_keys[]
+  team_memberships team_members[] @relation("TeamMember")
+  owned_teams      team_members[] @relation("TeamOwner")
 }
 
 model google_accounts {
@@ -236,6 +246,52 @@ model user_subscriptions {
 
   @@index([user_id])
   @@index([plan_id])
+}
+
+model email_usage {
+  id          String   @id @default(cuid())
+  user_id     String
+  user        users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  year        Int
+  month       Int
+  emails_sent Int      @default(0)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@unique([user_id, year, month])
+  @@index([user_id])
+}
+
+model api_keys {
+  id            String    @id @default(cuid())
+  user_id       String
+  user          users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  name          String
+  key_hash      String    @unique
+  last_used_at  DateTime?
+  expires_at    DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  @@index([user_id])
+}
+
+model team_members {
+  id            String    @id @default(cuid())
+  team_owner_id String
+  team_owner    users     @relation("TeamOwner", fields: [team_owner_id], references: [id], onDelete: Cascade)
+  user_id       String
+  user          users     @relation("TeamMember", fields: [user_id], references: [id], onDelete: Cascade)
+  role          TeamRole  @default(member)
+  invited_at    DateTime  @default(now())
+  accepted_at   DateTime?
+  invite_token  String?   @unique
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  @@unique([team_owner_id, user_id])
+  @@index([team_owner_id])
+  @@index([user_id])
 }
 
 

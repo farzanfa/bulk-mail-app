@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import { getPlanLimits } from '@/lib/plan';
+import { getCurrentMonthEmailUsage } from '@/lib/email-usage';
 
 const schema = z.object({
   name: z.string().min(1),
@@ -16,14 +18,48 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session || !(session as any).user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const userId = (session as any).user.id as string;
+  
   const items = await prisma.campaigns.findMany({ where: { user_id: userId }, orderBy: { created_at: 'desc' } });
-  return NextResponse.json({ campaigns: items });
+  
+  // Get plan limits and usage
+  const planLimits = await getPlanLimits(userId);
+  const campaignCount = items.length;
+  const emailUsage = await getCurrentMonthEmailUsage(userId);
+  
+  return NextResponse.json({ 
+    campaigns: items,
+    limits: {
+      campaigns: {
+        used: campaignCount,
+        total: planLimits.maxCampaigns,
+        remaining: planLimits.maxCampaigns === -1 ? -1 : Math.max(0, planLimits.maxCampaigns - campaignCount)
+      },
+      emails: {
+        used: emailUsage.used,
+        total: emailUsage.limit,
+        remaining: emailUsage.remaining
+      }
+    }
+  });
 }
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session || !(session as any).user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const userId = (session as any).user.id as string;
+  
+  // Check campaign limits
+  const planLimits = await getPlanLimits(userId);
+  if (planLimits.maxCampaigns !== -1) {
+    const campaignCount = await prisma.campaigns.count({ where: { user_id: userId } });
+    if (campaignCount >= planLimits.maxCampaigns) {
+      return NextResponse.json({ 
+        error: `Campaign limit reached. Your plan allows ${planLimits.maxCampaigns} campaigns.`,
+        upgradeRequired: true 
+      }, { status: 402 });
+    }
+  }
+  
   const body = await req.json();
   const data = schema.parse(body);
   const created = await prisma.campaigns.create({

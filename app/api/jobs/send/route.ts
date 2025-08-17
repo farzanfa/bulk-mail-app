@@ -6,6 +6,8 @@ import { renderTemplateString } from '@/lib/render';
 import { sendGmailMessage } from '@/lib/gmail';
 import { createUnsubscribeToken, appendUnsubscribeFooter } from '@/lib/unsubscribe';
 import { getBaseUrl } from '@/lib/baseUrl';
+import { incrementEmailUsage } from '@/lib/email-usage';
+import { getPlanLimits } from '@/lib/plan';
 
 export const runtime = 'nodejs';
 
@@ -24,6 +26,10 @@ export async function POST(req: Request) {
   const template = await prisma.templates.findUnique({ where: { id: campaign.template_id } });
   const account = await prisma.google_accounts.findUnique({ where: { id: campaign.google_account_id } });
   if (!template || !account) return NextResponse.json({ error: 'Missing template/google account' }, { status: 400 });
+
+  // Get plan limits to check for custom branding
+  const planLimits = await getPlanLimits(campaign.user_id);
+  const hasCustomBranding = planLimits.customBranding;
 
   const cursorKey = `camp:${campaignId}:cursor`;
   const cursor = await kv.get<{ lastId: string | null }>(cursorKey);
@@ -67,8 +73,12 @@ export async function POST(req: Request) {
     let text = renderTemplateString(template.text, contact.fields as any);
     const token = createUnsubscribeToken(campaign.user_id, contact.id);
     const link = `${getBaseUrl(req.url)}/u/${token}`;
-    html = appendUnsubscribeFooter(html, link);
+    html = appendUnsubscribeFooter(html, link, hasCustomBranding);
     text = text + `\n\nTo unsubscribe, visit: ${link}`;
+    
+    if (!hasCustomBranding) {
+      text = text + `\n\nSent with MailWeaver - Professional Email Campaigns`;
+    }
 
     let attempts = r.attempts;
     let sentId: string | null = null;
@@ -84,6 +94,10 @@ export async function POST(req: Request) {
         });
         await prisma.campaign_recipients.update({ where: { id: r.id }, data: { status: 'sent', gmail_message_id: sentId, rendered_subject: subject, rendered_html: html, rendered_text: text, attempts: attempts + 1, last_attempt_at: new Date() } });
         await kv.set(idempotentKey, true, { ex: 60 * 60 * 24 * 30 });
+        
+        // Track email usage
+        await incrementEmailUsage(campaign.user_id, 1);
+        
         break;
       } catch (err: any) {
         attempts += 1;
