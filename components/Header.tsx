@@ -149,12 +149,7 @@ export default function Header({ isAdmin }: HeaderProps) {
                       Dashboard
                     </a>
                   ) : (
-                    <button 
-                      onClick={() => signIn('google', { callbackUrl: '/dashboard' })} 
-                      className="inline-flex sm:hidden items-center justify-center border border-gray-200 px-3 py-2 rounded-lg text-xs font-medium hover:bg-gray-50"
-                    >
-                      Sign in
-                    </button>
+                    null
                   )}
                 </>
               ) : (
