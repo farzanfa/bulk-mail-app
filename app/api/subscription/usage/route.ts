@@ -7,8 +7,13 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.id) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = (session as any).user.id;
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
     }
 
     // Get current month's start date
@@ -19,7 +24,7 @@ export async function GET(request: NextRequest) {
     const emailsSentThisMonth = await prisma.campaign_recipients.count({
       where: {
         campaign: {
-          user_id: session.user.id,
+          user_id: userId,
         },
         status: 'sent',
         created_at: {
@@ -31,21 +36,21 @@ export async function GET(request: NextRequest) {
     // Count total contacts
     const contactsCount = await prisma.contacts.count({
       where: {
-        user_id: session.user.id,
+        user_id: userId,
       },
     });
 
     // Count total templates
     const templatesCount = await prisma.templates.count({
       where: {
-        user_id: session.user.id,
+        user_id: userId,
       },
     });
 
     // Count total campaigns
     const campaignsCount = await prisma.campaigns.count({
       where: {
-        user_id: session.user.id,
+        user_id: userId,
       },
     });
 

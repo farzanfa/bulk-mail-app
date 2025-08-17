@@ -7,13 +7,18 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.id) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = (session as any).user.id;
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
     }
 
     // First check if user has a subscription
     const subscription = await prisma.user_subscriptions.findUnique({
-      where: { user_id: session.user.id },
+      where: { user_id: userId },
       include: {
         plan: true,
       },
@@ -34,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     const newSubscription = await prisma.user_subscriptions.create({
       data: {
-        user_id: session.user.id,
+        user_id: userId,
         plan_id: freePlan.id,
         status: 'active',
         current_period_start: new Date(),
