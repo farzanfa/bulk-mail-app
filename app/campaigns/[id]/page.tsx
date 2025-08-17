@@ -185,27 +185,36 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-4 mb-4">
+            <a
+              href="/campaigns"
+              className="inline-flex items-center gap-2 px-4 py-2 text-white/90 hover:text-white bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg transition-all duration-200"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Campaigns
+            </a>
+          </div>
+          <h1 className="text-4xl font-bold text-white mb-2">
+            {c.name || `Campaign ${id}`}
+          </h1>
+          <p className="text-purple-100 text-lg">Manage and monitor your email campaign performance</p>
+        </div>
+      </div>
+      
+      <div className="max-w-7xl mx-auto px-6 -mt-6 pb-12 space-y-6">
+        {/* Status and Actions Bar */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <a
-                href="/campaigns"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200 border border-gray-300"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Back to Campaigns
-              </a>
-              
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  {c.name || `Campaign ${id}`}
-                </h1>
-                <p className="text-gray-600">Manage and monitor your email campaign</p>
+              <StatusBadge value={c.status} />
+              <div className="text-sm text-gray-600">
+                ID: <span className="font-mono text-gray-700">{id}</span>
               </div>
             </div>
             
@@ -214,9 +223,21 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
                 <button
                   onClick={launch}
                   disabled={busyLaunch}
-                  className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow"
+                  className="px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {busyLaunch ? 'Launching...' : 'Launch Campaign'}
+                  {busyLaunch ? (
+                    <span className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      Launching...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      Launch Campaign
+                    </span>
+                  )}
                 </button>
               )}
               
@@ -254,47 +275,105 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
 
         {/* Campaign Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">{c.recipients?.length || 0}</div>
-            <div className="text-sm text-gray-600">Total Recipients</div>
+          <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 hover:shadow-lg transition-shadow duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-gray-900">{c.recipients?.length || 0}</div>
+                <div className="text-sm text-gray-600 mt-1">Total Recipients</div>
+              </div>
+            </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">{sentCount}</div>
-            <div className="text-sm text-gray-600">Emails Sent</div>
+          <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 hover:shadow-lg transition-shadow duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-green-100 rounded-lg">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-gray-900">{sentCount}</div>
+                <div className="text-sm text-gray-600 mt-1">Emails Sent</div>
+              </div>
+            </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
-            <div className="text-3xl font-bold text-yellow-600 mb-2">{pendingCount}</div>
-            <div className="text-sm text-gray-600">Pending</div>
+          <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 hover:shadow-lg transition-shadow duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-yellow-100 rounded-lg">
+                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-gray-900">{pendingCount}</div>
+                <div className="text-sm text-gray-600 mt-1">Pending</div>
+              </div>
+            </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
-            <div className="text-3xl font-bold text-red-600 mb-2">{failedCount}</div>
-            <div className="text-sm text-gray-600">Failed</div>
+          <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 hover:shadow-lg transition-shadow duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-red-100 rounded-lg">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-gray-900">{failedCount}</div>
+                <div className="text-sm text-gray-600 mt-1">Failed</div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Progress Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Campaign Progress</h2>
-            <div className="text-sm text-gray-600">
-              {completed} of {c.recipients?.length || 0} completed
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              Campaign Progress
+            </h2>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-gray-900">{progress}%</div>
+              <div className="text-sm text-gray-600">{completed} of {c.recipients?.length || 0} completed</div>
             </div>
           </div>
           
-          <div className="space-y-3">
-            <div className="w-full bg-gray-200 rounded-full h-4">
-              <div 
-                className="bg-gradient-to-r from-green-500 to-blue-500 h-4 rounded-full transition-all duration-500 ease-out"
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-            
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Progress</span>
-              <span className="font-medium text-gray-900">{progress}%</span>
+          <div className="space-y-4">
+            <div className="relative">
+              <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
+                <div 
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 h-full rounded-full transition-all duration-500 relative"
+                  style={{ width: `${progress}%` }}
+                >
+                  <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-4 mt-6">
+                <div className="text-center">
+                  <div className="text-sm text-gray-600">Sent</div>
+                  <div className="text-lg font-semibold text-green-600">{sentCount}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-600">Pending</div>
+                  <div className="text-lg font-semibold text-yellow-600">{pendingCount}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-600">Failed</div>
+                  <div className="text-lg font-semibold text-red-600">{failedCount}</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
