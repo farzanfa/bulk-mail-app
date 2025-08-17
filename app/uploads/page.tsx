@@ -214,7 +214,7 @@ export default function UploadsPage() {
                   accept=".csv" 
                   onChange={onFileChange} 
                   className="hidden" 
-                  disabled={busy || (limits && limits.remaining === 0)}
+                  disabled={busy || (limits !== null && limits.remaining === 0)}
                 />
               </label>
             </div>
@@ -343,7 +343,7 @@ export default function UploadsPage() {
                     accept=".csv" 
                     onChange={onFileChange} 
                     className="hidden" 
-                    disabled={busy || (limits && limits.remaining === 0)}
+                    disabled={busy || (limits !== null && limits.remaining === 0)}
                   />
                 </label>
               )}
