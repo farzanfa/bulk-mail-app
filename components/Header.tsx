@@ -49,12 +49,20 @@ export default function Header({ isAdmin }: HeaderProps) {
     if (open) {
       // Store the current scroll position
       const scrollY = window.scrollY;
+      const documentWidth = document.documentElement.clientWidth;
       
       // Apply styles to prevent scrolling
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
+      document.body.style.overflowY = 'scroll'; // Prevent layout shift
+      document.documentElement.style.scrollBehavior = 'auto';
       document.body.classList.add('menu-open');
+      
+      // Prevent scrollbar layout shift
+      if (document.body.scrollHeight > window.innerHeight) {
+        document.body.style.paddingRight = `${window.innerWidth - documentWidth}px`;
+      }
       
       // Focus the close button when menu opens
       setTimeout(() => {
@@ -63,12 +71,20 @@ export default function Header({ isAdmin }: HeaderProps) {
       
       return () => {
         // Remove the styles and restore scroll position
-        const storedScrollY = parseInt(document.body.style.top || '0') * -1;
+        const storedScrollY = Math.abs(parseInt(document.body.style.top || '0'));
         document.body.style.position = '';
         document.body.style.top = '';
         document.body.style.width = '';
+        document.body.style.overflowY = '';
+        document.body.style.paddingRight = '';
+        document.documentElement.style.scrollBehavior = '';
         document.body.classList.remove('menu-open');
-        window.scrollTo(0, storedScrollY);
+        
+        // Restore scroll position
+        window.scrollTo({
+          top: storedScrollY,
+          behavior: 'instant'
+        });
         
         // Return focus to menu button when menu closes
         menuButtonRef.current?.focus();
@@ -95,17 +111,17 @@ export default function Header({ isAdmin }: HeaderProps) {
       ];
   
   return (
-    <header className={`sticky top-0 z-50 glass border-b border-gray-100 transition-all duration-300 ${scrolled ? 'shadow-lg' : ''}`}>
-      <div className="w-full px-3 sm:px-4 lg:px-8">
+    <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'glass-scrolled shadow-lg' : 'glass'}`}>
+      <div className="w-full px-3 sm:px-4 lg:px-8 safe-padding-top">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
             {/* Logo */}
-            <a href="/" aria-label="MailWeaver home" className="font-bold inline-flex items-center gap-2 group flex-shrink-0">
+            <a href="/" aria-label="MailWeaver home" className="font-bold inline-flex items-center gap-1.5 sm:gap-2 group flex-shrink-0">
               <div className="relative">
-                <img src="/icon.svg?v=2" alt="MailWeaver" className="h-6 w-6 sm:h-7 sm:w-7 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12"/>
+                <img src="/icon.svg?v=2" alt="MailWeaver" className="h-7 w-7 sm:h-8 sm:w-8 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12"/>
                 <div className="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
-              <span className="hidden sm:inline text-lg font-display text-gradient">MailWeaver</span>
+              <span className="hidden xs:inline text-base sm:text-lg font-display text-gradient">MailWeaver</span>
             </a>
             
             {/* Desktop Navigation */}
@@ -171,13 +187,13 @@ export default function Header({ isAdmin }: HeaderProps) {
                   
                   {/* Mobile CTA Button */}
                   {session?.user ? (
-                    <a href="/dashboard" className="inline-flex sm:hidden items-center justify-center gradient-primary text-white px-3 py-2 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200">
+                    <a href="/dashboard" className="inline-flex sm:hidden items-center justify-center gradient-primary text-white px-4 py-2.5 rounded-lg text-sm font-semibold active:scale-95 transition-all duration-200 touch-manipulation">
                       Dashboard
                     </a>
                   ) : (
                     <button 
                       onClick={() => signIn('google', { callbackUrl: '/dashboard' })} 
-                      className="inline-flex sm:hidden items-center justify-center border border-gray-200 px-3 py-2 rounded-lg text-xs font-medium hover:bg-gray-50 transition-all duration-200"
+                      className="inline-flex sm:hidden items-center justify-center border-2 border-gray-200 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 active:bg-gray-100 active:scale-95 transition-all duration-200 touch-manipulation"
                     >
                       Sign in
                     </button>
@@ -188,11 +204,11 @@ export default function Header({ isAdmin }: HeaderProps) {
                   {/* User Profile Button - Only visible when logged in */}
                   {session?.user && (
                     <div className="relative group">
-                      <button className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-gray-100/80 transition-all duration-200">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+                      <button className="flex items-center gap-2 rounded-lg px-2 sm:px-3 py-2 hover:bg-gray-100/80 active:bg-gray-200/80 transition-all duration-200 touch-manipulation">
+                        <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-sm font-semibold shadow-sm">
                           {(session.user.name?.[0] || session.user.email?.[0] || '?').toUpperCase()}
                         </div>
-                        <svg className="w-4 h-4 text-gray-500 group-hover:text-gray-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-500 group-hover:text-gray-700 transition-colors hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </button>
@@ -236,12 +252,12 @@ export default function Header({ isAdmin }: HeaderProps) {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setOpen(!open)}
-                className="inline-flex md:hidden items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                className="inline-flex md:hidden items-center justify-center p-2.5 rounded-lg text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors duration-200 touch-manipulation"
                 aria-expanded={open}
                 aria-label="Toggle navigation menu"
                 ref={menuButtonRef}
               >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path 
                     strokeLinecap="round" 
                     strokeLinejoin="round" 
@@ -260,33 +276,37 @@ export default function Header({ isAdmin }: HeaderProps) {
         className={`md:hidden fixed inset-0 z-50 ${
           open ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
+        aria-hidden={!open}
       >
         {/* Overlay */}
         <div 
-          className={`absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${
-            open ? 'opacity-100' : 'opacity-0'
+          className={`absolute inset-0 bg-black transition-all duration-300 ${
+            open ? 'bg-opacity-50' : 'bg-opacity-0'
           }`} 
-          onClick={() => setOpen(false)} 
+          onClick={() => setOpen(false)}
+          aria-label="Close menu"
         />
         
         {/* Menu Panel */}
         <nav 
-          className={`absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl transition-transform duration-300 ease-out ${
+          className={`absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl transition-transform duration-300 ease-out overflow-hidden ${
             open ? 'translate-x-0' : 'translate-x-full'
           }`}
+          role="navigation"
+          aria-label="Mobile navigation"
         >
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full relative bg-white">
             {/* Menu Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-3 mobile-menu-header">
+            <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-4 safe-padding-top">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
+                <h2 className="text-xl font-semibold text-gray-900">Menu</h2>
                 <button
                   onClick={() => setOpen(false)}
-                  className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                  className="p-2.5 -mr-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors duration-200 touch-manipulation"
                   aria-label="Close menu"
                   ref={closeButtonRef}
                 >
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -294,18 +314,19 @@ export default function Header({ isAdmin }: HeaderProps) {
             </div>
             
             {/* Menu Content */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto overscroll-contain">
               <div className="py-4">
                 <div className="space-y-1 px-3">
                   {links.map((l) => (
                     <a
                       key={l.href}
                       href={l.href}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 touch-manipulation ${
                         pathname === l.href
                           ? 'bg-primary/10 text-primary'
-                          : 'text-gray-700 hover:bg-gray-100'
+                          : 'text-gray-700 hover:bg-gray-100 active:bg-gray-100'
                       }`}
+                      onClick={() => setOpen(false)}
                     >
                       <span className="text-xl flex-shrink-0">{l.icon}</span>
                       <span>{l.label}</span>
@@ -320,11 +341,11 @@ export default function Header({ isAdmin }: HeaderProps) {
                     </div>
                     
                     <div className="space-y-1 px-3">
-                      <a href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
+                      <a href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 active:bg-gray-100 transition-all duration-200 touch-manipulation" onClick={() => setOpen(false)}>
                         <span className="text-xl flex-shrink-0">👤</span>
                         <span>Profile</span>
                       </a>
-                      <a href="/pricing" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
+                      <a href="/pricing" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 active:bg-gray-100 transition-all duration-200 touch-manipulation" onClick={() => setOpen(false)}>
                         <span className="text-xl flex-shrink-0">💎</span>
                         <span>Subscription</span>
                       </a>
@@ -335,17 +356,17 @@ export default function Header({ isAdmin }: HeaderProps) {
             </div>
             
             {/* Mobile Menu Footer */}
-            <div className="border-t border-gray-100 p-4 space-y-3 mobile-menu-footer">
+            <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 space-y-3 safe-padding-bottom">
               {isMarketing ? (
                 <>
                   {session?.user ? (
-                    <a href="/dashboard" className="block w-full text-center gradient-primary text-white px-4 py-3 rounded-xl text-base font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+                    <a href="/dashboard" className="block w-full text-center gradient-primary text-white px-4 py-3.5 rounded-xl text-base font-semibold shadow-lg active:shadow-md transition-all duration-200 touch-manipulation">
                       Go to Dashboard
                     </a>
                   ) : (
                     <button 
                       onClick={() => signIn('google', { callbackUrl: '/dashboard' })} 
-                      className="flex items-center justify-center gap-2 w-full bg-white border border-gray-200 px-4 py-3 rounded-xl text-base font-medium hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md"
+                      className="flex items-center justify-center gap-3 w-full bg-white border-2 border-gray-200 px-4 py-3.5 rounded-xl text-base font-medium hover:bg-gray-50 hover:border-gray-300 active:bg-gray-100 transition-all duration-200 shadow-sm active:shadow-none touch-manipulation"
                     >
                       <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
                         <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
@@ -362,7 +383,7 @@ export default function Header({ isAdmin }: HeaderProps) {
               ) : (
                 <button 
                   onClick={() => signOut({ callbackUrl: '/' })} 
-                  className="flex items-center justify-center gap-2 w-full bg-red-50 text-red-600 px-4 py-3 rounded-xl text-base font-medium hover:bg-red-100 transition-all duration-200"
+                  className="flex items-center justify-center gap-3 w-full bg-red-50 text-red-600 px-4 py-3.5 rounded-xl text-base font-medium hover:bg-red-100 active:bg-red-200 transition-all duration-200 touch-manipulation"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
