@@ -35,6 +35,7 @@ export const config = {
     '/uploads/:path*',
     '/campaigns/:path*',
     '/admin/:path*',
-    '/onboarding/:path*'
+    '/onboarding/:path*',
+    '/profile/:path*'
   ]
 };
