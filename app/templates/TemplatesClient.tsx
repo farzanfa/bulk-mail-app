@@ -174,55 +174,56 @@ export default function TemplatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="text-center sm:text-left">
-            <div className="flex items-center gap-3 justify-center sm:justify-start mb-2">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
-                Email Templates
-              </h1>
-              {planInfo && (
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                  planInfo.type === 'admin' 
-                    ? 'bg-red-100 text-red-800 border border-red-200' 
-                    : planInfo.type === 'pro' || planInfo.isSubscribed
-                    ? 'bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 border border-purple-200'
-                    : planInfo.type === 'beta'
-                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                    : 'bg-gray-100 text-gray-800 border border-gray-200'
-                }`}>
-                  {planInfo.name} Plan
-                </span>
-              )}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Header Section with consistent styling */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 animate-fadeInUp">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Email Templates
+                </h1>
+                {planInfo && (
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                    planInfo.type === 'admin' 
+                      ? 'bg-gradient-to-r from-red-50 to-pink-50 text-red-700 border border-red-200' 
+                      : planInfo.type === 'pro' || planInfo.isSubscribed
+                      ? 'bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border border-purple-200'
+                      : planInfo.type === 'beta'
+                      ? 'bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 border border-blue-200'
+                      : 'bg-gray-100 text-gray-700 border border-gray-200'
+                  }`}>
+                    {planInfo.name} Plan
+                  </span>
+                )}
+              </div>
+              <p className="text-gray-600">
+                Create and manage your email templates with personalized variables
+              </p>
             </div>
-            <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto sm:mx-0">
-              Create and manage your email templates with personalized variables
-            </p>
-          </div>
-          <div className="flex justify-center sm:justify-end">
-            <PrimaryButton 
-              onClick={handleCreateClick}
-              className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 ${
-                canCreateTemplate 
-                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' 
-                  : 'bg-gray-400 cursor-not-allowed'
-              } text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base`}
-              disabled={!canCreateTemplate}
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              <span className="hidden sm:inline">New Template</span>
-              <span className="sm:hidden">New</span>
-            </PrimaryButton>
+            <div className="flex justify-center sm:justify-end">
+              <PrimaryButton 
+                onClick={handleCreateClick}
+                className={`inline-flex items-center justify-center gap-2 px-5 py-3 ${
+                  canCreateTemplate 
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' 
+                    : 'bg-gray-400 cursor-not-allowed'
+                } text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200`}
+                disabled={!canCreateTemplate}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                New Template
+              </PrimaryButton>
+            </div>
           </div>
         </div>
 
         {/* Plan Limits Display */}
         {planLimits && planLimits.total !== -1 && (
-          <Card className="p-4 sm:p-6 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+          <Card className="p-6 bg-gradient-to-br from-purple-50 via-white to-blue-50 border-2 border-purple-100 animate-fadeInUp" style={{ animationDelay: '50ms' }}>
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Template Usage</h3>
@@ -245,7 +246,7 @@ export default function TemplatesPage() {
                 {planLimits.remaining === 0 && (
                   <Button
                     onClick={() => window.location.href = '/pricing'}
-                    className="text-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                    className="text-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 px-4 py-2 rounded-lg font-semibold"
                   >
                     Upgrade Plan
                   </Button>
@@ -256,75 +257,76 @@ export default function TemplatesPage() {
         )}
 
         {/* Search and Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-          <div className="relative w-full sm:w-80">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 animate-fadeInUp" style={{ animationDelay: '100ms' }}>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="relative w-full sm:w-80">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <Input
+                type="text"
+                placeholder="Search templates..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-full"
+              />
             </div>
-            <Input
-              type="text"
-              placeholder="Search templates..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-full"
-            />
-          </div>
-          
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Button
-              onClick={selectAll}
-              className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white font-medium rounded-lg transition-all duration-200"
-            >
-              <div className="flex items-center gap-2">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span>{selected.length === filteredTemplates.length ? 'Deselect All' : 'Select All'}</span>
-              </div>
-            </Button>
             
-            <button
-              onClick={bulkDelete}
-              disabled={selected.length === 0}
-              className={`px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border-2 ${
-                selected.length === 0 
-                  ? 'bg-gray-400 text-gray-200 border-gray-400 cursor-not-allowed' 
-                  : 'bg-red-600 hover:bg-red-700 text-white border-red-700 hover:shadow-red-500/25'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                <span>
-                  {selected.length === 0 
-                    ? 'No Templates Selected' 
-                    : `Delete Selected (${selected.length})`
-                  }
-                </span>
-              </div>
-            </button>
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={selectAll}
+                className="px-5 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:border-purple-300 hover:bg-purple-50 hover:-translate-y-0.5 transition-all duration-200 shadow-sm hover:shadow-lg"
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <span>{selected.length === filteredTemplates.length ? 'Deselect All' : 'Select All'}</span>
+                </div>
+              </Button>
+              
+              <button
+                onClick={bulkDelete}
+                disabled={selected.length === 0}
+                className={`px-5 py-3 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 ${
+                  selected.length === 0 
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white hover:-translate-y-0.5'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>
+                    {selected.length === 0 
+                      ? 'Delete' 
+                      : `Delete (${selected.length})`
+                    }
+                  </span>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Templates Grid */}
         <Section title="Your Templates">
           {loading ? (
-            <Card className="p-8 sm:p-16 text-center">
-              <div className="w-6 h-6 sm:w-8 sm:w-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-sm sm:text-base text-gray-600">Loading templates...</p>
-            </Card>
+            <div className="flex items-center justify-center p-16">
+              <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
           ) : filteredTemplates.length === 0 ? (
-            <Card className="p-8 sm:p-16 text-center bg-gradient-to-br from-white to-purple-50 border-purple-200">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <Card className="p-16 text-center bg-gradient-to-br from-gray-50 to-white">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-slow">
+                <svg className="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                 </svg>
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">No templates yet</h3>
-              <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 max-w-md mx-auto px-4">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No templates yet</h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
                 {searchTerm 
                   ? `No templates match "${searchTerm}". Try a different search term.`
                   : 'Create your first email template to start building personalized campaigns. Templates support variables like {{ first_name }} for dynamic content.'
@@ -333,35 +335,34 @@ export default function TemplatesPage() {
               {!searchTerm && (
                 <PrimaryButton 
                   onClick={handleCreateClick}
-                  className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 ${
+                  className={`inline-flex items-center justify-center gap-2 px-6 py-3 ${
                     canCreateTemplate 
                       ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' 
                       : 'bg-gray-400 cursor-not-allowed'
-                  } text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base`}
+                  } text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200`}
                   disabled={!canCreateTemplate}
                 >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
-                  <span className="hidden sm:inline">Create Your First Template</span>
-                  <span className="sm:hidden">Create Template</span>
+                  Create Your First Template
                 </PrimaryButton>
               )}
             </Card>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTemplates.map((t) => (
                 <div
                   key={t.id}
                   className="group relative"
                   onClick={() => openTemplateModal(t.id)}
                 >
-                  <Card className="h-full p-6 cursor-pointer bg-white hover:bg-gray-50/50 hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-purple-300 hover:-translate-y-1">
+                  <Card className="h-full p-6 cursor-pointer bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border-2 border-transparent hover:border-purple-200">
                     {/* Template Header */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1 min-w-0">
                         <label 
-                          className="inline-flex items-center gap-2 cursor-pointer group/checkbox"
+                          className="inline-flex items-center gap-2 cursor-pointer"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <input 
@@ -393,7 +394,7 @@ export default function TemplatesPage() {
                         </svg>
                         SUBJECT LINE
                       </div>
-                      <div className="text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 truncate">
+                      <div className="text-sm text-gray-700 bg-gradient-to-br from-gray-50 to-white rounded-lg px-3 py-2 border border-gray-200 truncate">
                         {render(t.subject || '') || 'No subject'}
                       </div>
                     </div>
@@ -487,8 +488,7 @@ export default function TemplatesPage() {
                       </button>
                     </div>
 
-                    {/* Hover indicator */}
-                    <div className="absolute inset-0 rounded-lg ring-2 ring-purple-400 ring-opacity-0 group-hover:ring-opacity-100 pointer-events-none transition-all duration-300"></div>
+                    {/* Hover indicator - removed as we have border on hover */}
                   </Card>
                 </div>
               ))}
@@ -504,7 +504,7 @@ export default function TemplatesPage() {
         {/* Template Details Modal */}
         {openView && currentTemplate && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden animate-fadeInUp">
               {/* Modal Header */}
               <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-8 py-6">
                 <div className="flex items-center justify-between">
