@@ -4,6 +4,17 @@ import { toast } from 'sonner';
 import { Section, Input, PrimaryButton, Button, Card } from '@/components/ui';
 import ConfirmModal from '@/components/ConfirmModal';
 
+interface UploadLimits {
+  used: number;
+  total: number;
+  remaining: number;
+}
+
+interface UserPlan {
+  planName: string;
+  planType: string;
+}
+
 export default function UploadsPage() {
   const [uploads, setUploads] = useState<any[]>([]);
   const [busy, setBusy] = useState(false);
@@ -15,16 +26,34 @@ export default function UploadsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteAction, setDeleteAction] = useState<(() => void) | null>(null);
   const [deleteMessage, setDeleteMessage] = useState('');
+  const [limits, setLimits] = useState<UploadLimits | null>(null);
+  const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
 
   async function refresh() {
     try {
       setLoading(true);
-      const res = await fetch('/api/uploads', { cache: 'no-store' });
-      if (!res.ok) {
-        throw new Error(`Failed to fetch uploads: ${res.status}`);
+      const [uploadsRes, meRes] = await Promise.all([
+        fetch('/api/uploads', { cache: 'no-store' }),
+        fetch('/api/me', { cache: 'no-store' })
+      ]);
+      
+      if (!uploadsRes.ok) {
+        throw new Error(`Failed to fetch uploads: ${uploadsRes.status}`);
       }
-      const json = await res.json();
-      setUploads(json.uploads || []);
+      
+      const uploadsJson = await uploadsRes.json();
+      setUploads(uploadsJson.uploads || []);
+      setLimits(uploadsJson.limits || null);
+      
+      if (meRes.ok) {
+        const meData = await meRes.json();
+        if (meData.subscription && meData.subscription.plan) {
+          setUserPlan({
+            planName: meData.subscription.plan.name,
+            planType: meData.subscription.plan.type
+          });
+        }
+      }
     } catch (err: any) {
       console.error('Failed to refresh uploads:', err);
       toast.error('Failed to load uploads');
@@ -38,6 +67,13 @@ export default function UploadsPage() {
   async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    // Check if upload limit is reached
+    if (limits && limits.remaining === 0) {
+      toast.error('Upload limit reached. Please upgrade your plan.');
+      e.target.value = '';
+      return;
+    }
     
     setBusy(true);
     try {
@@ -155,27 +191,78 @@ export default function UploadsPage() {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div className="text-center sm:text-left">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 leading-tight">
-              CSV Uploads
-            </h1>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-600 mt-1 sm:mt-2 leading-relaxed">
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 leading-tight">
+                {userPlan ? `${userPlan.planName} Uploads` : 'CSV Uploads'}
+              </h1>
+              {userPlan && (
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                  userPlan.planType === 'enterprise' ? 'bg-purple-100 text-purple-800' :
+                  userPlan.planType === 'professional' ? 'bg-blue-100 text-blue-800' :
+                  userPlan.planType === 'starter' ? 'bg-green-100 text-green-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {userPlan.planType.toUpperCase()}
+                </span>
+              )}
+            </div>
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed">
               Upload and manage your contact lists for email campaigns
             </p>
+            {limits && limits.total !== -1 && (
+              <div className="mt-2 flex items-center gap-4">
+                <div className="text-sm">
+                  <span className="text-gray-500">Usage:</span>{' '}
+                  <span className={`font-medium ${
+                    limits.remaining === 0 ? 'text-red-600' :
+                    limits.remaining <= 2 ? 'text-orange-600' :
+                    'text-gray-900'
+                  }`}>
+                    {limits.used} / {limits.total} uploads
+                  </span>
+                </div>
+                {limits.remaining <= 2 && limits.remaining > 0 && (
+                  <span className="text-xs text-orange-600 font-medium">
+                    ⚡ Only {limits.remaining} upload{limits.remaining === 1 ? '' : 's'} left
+                  </span>
+                )}
+                {limits.remaining === 0 && (
+                  <a 
+                    href="/pricing" 
+                    className="text-xs text-purple-600 hover:text-purple-700 font-medium underline"
+                  >
+                    Upgrade for more
+                  </a>
+                )}
+              </div>
+            )}
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
-            <label className="inline-flex items-center justify-center gap-2 text-sm sm:text-base bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            <label className={`inline-flex items-center justify-center gap-2 text-sm sm:text-base ${
+              limits && limits.remaining === 0 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 cursor-pointer hover:shadow-xl'
+            } text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}>
               <input 
                 type="file" 
                 accept=".csv" 
                 className="hidden" 
                 onChange={onFileChange} 
-                disabled={busy} 
+                disabled={busy || (limits?.remaining === 0)} 
               />
               {busy ? (
                 <span className="inline-flex items-center gap-2">
                   <span className="animate-spin inline-block h-4 w-4 border-2 border-white/60 border-t-white rounded-full" /> 
                   Processing...
                 </span>
+              ) : limits && limits.remaining === 0 ? (
+                <>
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <span className="hidden sm:inline">Limit Reached</span>
+                  <span className="sm:hidden">Limit</span>
+                </>
               ) : (
                 <>
                   <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,6 +273,14 @@ export default function UploadsPage() {
                 </>
               )}
             </label>
+            {limits && limits.remaining === 0 && (
+              <a 
+                href="/pricing" 
+                className="text-sm text-purple-600 hover:text-purple-700 font-medium underline"
+              >
+                Upgrade Plan
+              </a>
+            )}
           </div>
         </div>
 
@@ -246,6 +341,48 @@ export default function UploadsPage() {
           </div>
         </div>
 
+        {/* Plan Usage Card - Show when user has upload limits */}
+        {limits && limits.total !== -1 && (
+          <Card className="p-6 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Usage</h3>
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-600">Used</span>
+                      <span className="font-medium text-gray-900">{limits.used} / {limits.total}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        className={`h-2.5 rounded-full transition-all duration-300 ${
+                          limits.remaining === 0 ? 'bg-red-500' :
+                          limits.remaining <= 2 ? 'bg-orange-500' :
+                          'bg-green-500'
+                        }`}
+                        style={{ width: `${Math.min(100, (limits.used / limits.total) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  {limits.remaining < limits.total && (
+                    <a 
+                      href="/pricing" 
+                      className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors"
+                    >
+                      Upgrade
+                    </a>
+                  )}
+                </div>
+                {limits.remaining === 0 && (
+                  <p className="text-sm text-red-600 mt-2">
+                    ⚠️ You've reached your upload limit. Upgrade to upload more files.
+                  </p>
+                )}
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Uploads Grid */}
         <Section title="Your Uploads">
           {loading ? (
@@ -266,18 +403,32 @@ export default function UploadsPage() {
               <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 max-w-md mx-auto px-4">
                 {searchTerm 
                   ? `No uploads match "${searchTerm}". Try a different search term.`
+                  : limits && limits.remaining === 0
+                  ? 'You\'ve reached your upload limit. Upgrade your plan to upload more CSV files.'
                   : 'Upload your first CSV file to start building your contact lists. Supported formats: .csv files with headers.'
                 }
               </p>
               {!searchTerm && (
-                <label className="inline-flex items-center justify-center gap-2 text-sm sm:text-base bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
-                  <input type="file" accept=".csv" className="hidden" onChange={onFileChange} />
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  <span className="hidden sm:inline">Upload Your First CSV</span>
-                  <span className="sm:hidden">Upload CSV</span>
-                </label>
+                limits && limits.remaining === 0 ? (
+                  <a 
+                    href="/pricing" 
+                    className="inline-flex items-center justify-center gap-2 text-sm sm:text-base bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>Upgrade Plan</span>
+                  </a>
+                ) : (
+                  <label className="inline-flex items-center justify-center gap-2 text-sm sm:text-base bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                    <input type="file" accept=".csv" className="hidden" onChange={onFileChange} />
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <span className="hidden sm:inline">Upload Your First CSV</span>
+                    <span className="sm:hidden">Upload CSV</span>
+                  </label>
+                )
               )}
             </Card>
           ) : (
