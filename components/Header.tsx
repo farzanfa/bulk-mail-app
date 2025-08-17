@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { IconButton } from './ui';
+import { createPortal } from 'react-dom';
 
 interface HeaderProps {
   isAdmin: boolean;
@@ -208,8 +209,11 @@ export default function Header({ isAdmin }: HeaderProps) {
               
               {/* Mobile Menu Button */}
               <button
-                onClick={() => setOpen(!open)}
-                className="inline-flex md:hidden items-center justify-center p-2.5 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200 min-w-[44px] min-h-[44px]"
+                onClick={() => {
+                  console.log('Mobile menu button clicked, current state:', open);
+                  setOpen(!open);
+                }}
+                className="inline-flex md:hidden items-center justify-center p-2.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors duration-200 min-w-[44px] min-h-[44px] relative z-50"
                 aria-expanded={open}
                 aria-label="Toggle navigation menu"
                 aria-controls="mobile-menu"
@@ -228,111 +232,113 @@ export default function Header({ isAdmin }: HeaderProps) {
       </div>
       
       {/* Mobile Navigation */}
-      <div 
-        className={`md:hidden fixed inset-0 z-50 ${
-          open ? 'pointer-events-auto' : 'pointer-events-none'
-        }`}
-      >
-        {/* Backdrop */}
-        <div 
-          className={`absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${
-            open ? 'opacity-100' : 'opacity-0'
-          }`} 
-          onClick={() => setOpen(false)} 
-        />
-        
-        {/* Menu Panel */}
-        <div 
-          id="mobile-menu"
-          className={`absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-2xl transition-transform duration-300 ease-out ${
-            open ? 'translate-x-0' : 'translate-x-full'
-          }`}
-        >
-          <div className="flex flex-col h-full">
-            {/* Header space to account for fixed header */}
-            <div className="h-[57px] sm:h-[65px]"></div>
-            
-            {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="py-4">
-                <div className="space-y-1 px-3">
-                  {links.map((l) => (
-                    <a
-                      key={l.href}
-                      href={l.href}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
-                        pathname === l.href
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      <span className="text-xl">{l.icon}</span>
-                      {l.label}
-                    </a>
-                  ))}
+      {open && typeof document !== 'undefined' && createPortal(
+        <div className="md:hidden">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 z-[100] bg-black/20 backdrop-blur-sm animate-fadeIn"
+            onClick={() => setOpen(false)} 
+          />
+          
+          {/* Menu Panel */}
+          <div 
+            id="mobile-menu"
+            className="fixed right-0 top-0 bottom-0 z-[101] w-full max-w-xs bg-white shadow-2xl animate-slideInRight"
+          >
+            <div className="flex flex-col h-full">
+              {/* Header space to account for fixed header */}
+              <div className="h-[57px] sm:h-[65px]"></div>
+              
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="py-4">
+                  <div className="space-y-1 px-3">
+                    {links.map((l) => (
+                      <a
+                        key={l.href}
+                        href={l.href}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
+                          pathname === l.href
+                            ? 'bg-primary/10 text-primary'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                        onClick={() => setOpen(false)}
+                      >
+                        <span className="text-xl">{l.icon}</span>
+                        {l.label}
+                      </a>
+                    ))}
+                  </div>
+                  
+                  {!isMarketing && session?.user && (
+                    <>
+                      <div className="my-4 px-6">
+                        <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+                      </div>
+                      
+                      <div className="space-y-1 px-3">
+                        <a href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200" onClick={() => setOpen(false)}>
+                          <span className="text-xl">👤</span>
+                          Profile
+                        </a>
+                        <a href="/pricing" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200" onClick={() => setOpen(false)}>
+                          <span className="text-xl">💎</span>
+                          Subscription
+                        </a>
+                      </div>
+                    </>
+                  )}
                 </div>
-                
-                {!isMarketing && session?.user && (
+              </div>
+              
+              {/* Mobile Menu Footer */}
+              <div className="border-t border-gray-100 p-4 space-y-3 safe-padding-bottom">
+                {isMarketing ? (
                   <>
-                    <div className="my-4 px-6">
-                      <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
-                    </div>
-                    
-                    <div className="space-y-1 px-3">
-                      <a href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
-                        <span className="text-xl">👤</span>
-                        Profile
+                    {session?.user ? (
+                      <a href="/dashboard" className="block w-full text-center gradient-primary text-white px-4 py-3 rounded-xl text-base font-semibold shadow-lg" onClick={() => setOpen(false)}>
+                        Go to Dashboard
                       </a>
-                      <a href="/pricing" className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
-                        <span className="text-xl">💎</span>
-                        Subscription
-                      </a>
-                    </div>
+                    ) : (
+                      <button 
+                        onClick={() => {
+                          setOpen(false);
+                          signIn('google', { callbackUrl: '/dashboard' });
+                        }} 
+                        className="flex items-center justify-center gap-2 w-full bg-white border border-gray-200 px-4 py-3 rounded-xl text-base font-medium hover:bg-gray-50 transition-all duration-200 shadow-button"
+                      >
+                        <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                          <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
+                            <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
+                            <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/>
+                            <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/>
+                            <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/>
+                          </g>
+                        </svg>
+                        Sign in with Google
+                      </button>
+                    )}
                   </>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      setOpen(false);
+                      signOut({ callbackUrl: '/' });
+                    }} 
+                    className="flex items-center justify-center gap-2 w-full bg-red-50 text-red-600 px-4 py-3 rounded-xl text-base font-medium hover:bg-red-100 transition-all duration-200"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Sign out
+                  </button>
                 )}
               </div>
             </div>
-            
-            {/* Mobile Menu Footer */}
-            <div className="border-t border-gray-100 p-4 space-y-3 safe-padding-bottom">
-              {isMarketing ? (
-                <>
-                  {session?.user ? (
-                    <a href="/dashboard" className="block w-full text-center gradient-primary text-white px-4 py-3 rounded-xl text-base font-semibold shadow-lg">
-                      Go to Dashboard
-                    </a>
-                  ) : (
-                    <button 
-                      onClick={() => signIn('google', { callbackUrl: '/dashboard' })} 
-                      className="flex items-center justify-center gap-2 w-full bg-white border border-gray-200 px-4 py-3 rounded-xl text-base font-medium hover:bg-gray-50 transition-all duration-200 shadow-button"
-                    >
-                      <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-                        <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
-                          <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
-                          <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/>
-                          <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/>
-                          <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/>
-                        </g>
-                      </svg>
-                      Sign in with Google
-                    </button>
-                  )}
-                </>
-              ) : (
-                <button 
-                  onClick={() => signOut({ callbackUrl: '/' })} 
-                  className="flex items-center justify-center gap-2 w-full bg-red-50 text-red-600 px-4 py-3 rounded-xl text-base font-medium hover:bg-red-100 transition-all duration-200"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  Sign out
-                </button>
-              )}
-            </div>
           </div>
-        </div>
-      </div>
+        </div>,
+        document.body
+      )}
     </header>
   );
 }
