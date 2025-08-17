@@ -14,8 +14,10 @@ export default function Header({ isAdmin }: HeaderProps) {
   const isMarketing = pathname === '/' || pathname === '/home' || pathname === '/login' || pathname === '/about' || pathname === '/privacy' || pathname === '/terms' || pathname === '/why-us' || pathname === '/pricing';
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,21 +30,37 @@ export default function Header({ isAdmin }: HeaderProps) {
   // Close mobile menu when route changes
   useEffect(() => {
     setOpen(false);
+    setProfileOpen(false);
   }, [pathname]);
+
+  // Handle clicks outside profile dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+
+    if (profileOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [profileOpen]);
 
   // Handle Escape key to close menu
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) {
-        setOpen(false);
+      if (e.key === 'Escape') {
+        if (open) setOpen(false);
+        if (profileOpen) setProfileOpen(false);
       }
     };
 
-    if (open) {
+    if (open || profileOpen) {
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [open]);
+  }, [open, profileOpen]);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
@@ -125,12 +143,12 @@ export default function Header({ isAdmin }: HeaderProps) {
             </a>
             
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1 text-sm flex-1 justify-center">
+            <nav className="hidden md:flex items-center gap-1 text-sm flex-1 justify-center max-w-2xl mx-auto">
               {links.map((l) => (
                 <a 
                   key={l.href} 
                   href={l.href} 
-                  className={`px-4 py-2.5 rounded-xl transition-all duration-200 whitespace-nowrap font-medium ${
+                  className={`px-3 lg:px-4 py-2.5 rounded-xl transition-all duration-200 whitespace-nowrap font-medium ${
                     pathname === l.href 
                       ? 'bg-primary/10 text-primary shadow-sm' 
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/80'
@@ -187,13 +205,13 @@ export default function Header({ isAdmin }: HeaderProps) {
                   
                   {/* Mobile CTA Button */}
                   {session?.user ? (
-                    <a href="/dashboard" className="inline-flex sm:hidden items-center justify-center gradient-primary text-white px-4 py-2.5 rounded-lg text-sm font-semibold active:scale-95 transition-all duration-200 touch-manipulation">
+                    <a href="/dashboard" className="inline-flex sm:hidden items-center justify-center gradient-primary text-white px-3 py-2 rounded-lg text-sm font-semibold active:scale-95 transition-all duration-200 touch-manipulation shadow-md">
                       Dashboard
                     </a>
                   ) : (
                     <button 
                       onClick={() => signIn('google', { callbackUrl: '/dashboard' })} 
-                      className="inline-flex sm:hidden items-center justify-center border-2 border-gray-200 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 active:bg-gray-100 active:scale-95 transition-all duration-200 touch-manipulation"
+                      className="inline-flex sm:hidden items-center justify-center border border-gray-300 bg-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 active:bg-gray-100 active:scale-95 transition-all duration-200 touch-manipulation shadow-sm"
                     >
                       Sign in
                     </button>
@@ -203,19 +221,28 @@ export default function Header({ isAdmin }: HeaderProps) {
                 <>
                   {/* User Profile Button - Only visible when logged in */}
                   {session?.user && (
-                    <div className="relative group">
-                      <button className="flex items-center gap-2 rounded-lg px-2 sm:px-3 py-2 hover:bg-gray-100/80 active:bg-gray-200/80 transition-all duration-200 touch-manipulation">
+                    <div className="relative" ref={profileRef}>
+                      <button 
+                        onClick={() => setProfileOpen(!profileOpen)} 
+                        className="flex items-center gap-2 rounded-lg px-2 sm:px-3 py-2 hover:bg-gray-100/80 active:bg-gray-200/80 transition-all duration-200 touch-manipulation"
+                        aria-expanded={profileOpen}
+                        aria-haspopup="true"
+                      >
                         <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-sm font-semibold shadow-sm">
                           {(session.user.name?.[0] || session.user.email?.[0] || '?').toUpperCase()}
                         </div>
-                        <svg className="w-4 h-4 text-gray-500 group-hover:text-gray-700 transition-colors hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className={`w-4 h-4 text-gray-500 transition-transform duration-200 hidden sm:block ${profileOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </button>
                       
                       {/* Dropdown Menu */}
-                      <div className="absolute right-0 mt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right scale-95 group-hover:scale-100">
-                        <div className="bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden animate-fadeIn">
+                      <div className={`absolute right-0 mt-2 w-56 transition-all duration-200 transform origin-top-right ${
+                        profileOpen 
+                          ? 'opacity-100 visible scale-100' 
+                          : 'opacity-0 invisible scale-95'
+                      }`}>
+                        <div className="bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden">
                           <div className="p-4 border-b border-gray-100">
                             <p className="text-sm font-semibold text-gray-900 truncate">{session.user.name || 'User'}</p>
                             <p className="text-xs text-gray-500 truncate">{session.user.email}</p>
@@ -252,7 +279,7 @@ export default function Header({ isAdmin }: HeaderProps) {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setOpen(!open)}
-                className="inline-flex md:hidden items-center justify-center p-2.5 rounded-lg text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors duration-200 touch-manipulation"
+                className="inline-flex md:hidden items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors duration-200 touch-manipulation touch-target"
                 aria-expanded={open}
                 aria-label="Toggle navigation menu"
                 ref={menuButtonRef}
@@ -273,15 +300,15 @@ export default function Header({ isAdmin }: HeaderProps) {
       
       {/* Mobile Navigation */}
       <div 
-        className={`md:hidden fixed inset-0 z-50 ${
+        className={`md:hidden fixed inset-0 z-[100] ${
           open ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
         aria-hidden={!open}
       >
         {/* Overlay */}
         <div 
-          className={`absolute inset-0 bg-black transition-all duration-300 ${
-            open ? 'bg-opacity-50' : 'bg-opacity-0'
+          className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-all duration-300 ${
+            open ? 'opacity-100' : 'opacity-0'
           }`} 
           onClick={() => setOpen(false)}
           aria-label="Close menu"
@@ -289,7 +316,7 @@ export default function Header({ isAdmin }: HeaderProps) {
         
         {/* Menu Panel */}
         <nav 
-          className={`absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl transition-transform duration-300 ease-out overflow-hidden ${
+          className={`absolute right-0 top-0 h-full w-full max-w-[320px] bg-white shadow-2xl transition-transform duration-300 ease-out overflow-hidden ${
             open ? 'translate-x-0' : 'translate-x-full'
           }`}
           role="navigation"
@@ -297,12 +324,12 @@ export default function Header({ isAdmin }: HeaderProps) {
         >
           <div className="flex flex-col h-full relative bg-white">
             {/* Menu Header */}
-            <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-4 safe-padding-top">
+            <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3 safe-padding-top">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">Menu</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
                 <button
                   onClick={() => setOpen(false)}
-                  className="p-2.5 -mr-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors duration-200 touch-manipulation"
+                  className="p-2 -mr-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors duration-200 touch-manipulation touch-target"
                   aria-label="Close menu"
                   ref={closeButtonRef}
                 >

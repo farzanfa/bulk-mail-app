@@ -629,20 +629,43 @@ button {
   .touch-manipulation {
     min-height: 44px;
     min-width: 44px;
+    position: relative;
   }
   
-  /* Remove tap highlight on touch devices */
+  /* Ensure touch targets have adequate padding */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Remove tap highlight for all interactive elements */
   button,
   a,
   .touch-manipulation {
     -webkit-tap-highlight-color: transparent;
   }
   
-  /* Better active states for touch */
+  /* Instant feedback on touch */
   button:active,
   a:active,
   .touch-manipulation:active {
     transition-duration: 0ms;
+  }
+  
+  /* Mobile header adjustments */
+  header {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  /* Mobile menu panel max width on very small screens */
+  @media (max-width: 360px) {
+    nav[role="navigation"] {
+      max-width: 100% !important;
+    }
   }
 }
 
