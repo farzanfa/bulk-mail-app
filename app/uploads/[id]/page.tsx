@@ -132,282 +132,353 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-6 sm:py-8 lg:py-10 space-y-6 sm:space-y-8">
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-2">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-blue-600/10 blur-3xl" />
+          <div className="relative">
+            <div className="flex items-center gap-3 mb-4">
               <button 
                 onClick={() => router.back()}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 hover:text-gray-900"
+                className="p-2.5 hover:bg-white/80 backdrop-blur-sm rounded-xl transition-all duration-200 text-gray-600 hover:text-gray-900 border border-gray-200 hover:border-gray-300 bg-white shadow-sm hover:shadow-md"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Upload Details</h1>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Upload Details</h1>
             </div>
             {upload && (
-              <p className="text-sm sm:text-base text-gray-600">
-                {upload.filename} • {new Date(upload.created_at).toLocaleDateString('en-US', { 
-                  year: 'numeric',
-                  month: 'long', 
-                  day: 'numeric',
-                  hour: '2-digit', 
-                  minute: '2-digit' 
-                })} • {upload.row_count?.toLocaleString() || '0'} contacts
-              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <p className="text-lg sm:text-xl text-gray-600 mb-2">{upload.filename}</p>
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                      {upload.row_count?.toLocaleString() || '0'} contacts
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {new Date(upload.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <a 
+                    href={`/api/uploads/${id}/export`} 
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export CSV
+                  </a>
+                  <button 
+                    onClick={handleDeleteUpload}
+                    disabled={deleting}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Delete Upload
+                  </button>
+                </div>
+              </div>
             )}
-          </div>
-          
-          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
-            <a 
-              href={`/api/uploads/${id}/export`} 
-              className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 inline-flex items-center gap-2"
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span className="hidden sm:inline">Export CSV</span>
-              <span className="sm:hidden">Export</span>
-            </a>
-            
-            <button
-              onClick={handleDeleteUpload}
-              disabled={deleting}
-              className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {deleting ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Deleting...</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                  <span>Delete Upload</span>
-                </div>
-              )}
-            </button>
           </div>
         </div>
 
-        {/* Search and Actions */}
-        <Card className="p-4 sm:p-6">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
-            {/* Search Section */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-              <div className="relative w-full sm:w-80">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        {/* Upload Stats Cards */}
+        {upload && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-3 bg-purple-100 rounded-xl">
+                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <Input
-                  type="text"
-                  placeholder="Search contacts by email..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="pl-10 w-full"
-                />
               </div>
-              <button 
-                onClick={handleSearch}
-                className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow"
-              >
-                Search
-              </button>
+              <h3 className="text-sm text-gray-500 font-medium mb-1">File Name</h3>
+              <p className="text-lg font-semibold text-gray-900 truncate">{upload.filename}</p>
             </div>
             
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto justify-center lg:justify-end">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-3 bg-blue-100 rounded-xl">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-sm text-gray-500 font-medium mb-1">Total Contacts</h3>
+              <p className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{upload.row_count?.toLocaleString() || '0'}</p>
+            </div>
+            
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-3 bg-green-100 rounded-xl">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-sm text-gray-500 font-medium mb-1">Columns</h3>
+              <p className="text-2xl font-bold text-gray-900">{upload.columns?.length || 0}</p>
+            </div>
+            
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-3 bg-orange-100 rounded-xl">
+                  <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-sm text-gray-500 font-medium mb-1">Upload Date</h3>
+              <p className="text-lg font-semibold text-gray-900">{new Date(upload.created_at).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+              })}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Search and Actions Bar */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="relative w-full sm:w-96">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <Input
+                type="text"
+                placeholder="Search contacts by email..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                className="pl-11 pr-4 py-3 w-full border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 rounded-xl transition-all duration-200"
+              />
+            </div>
+            
+            <div className="flex items-center gap-3">
               <button
                 onClick={selectAll}
-                className="px-4 sm:px-5 py-2.5 text-sm border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow"
+                className="group px-5 py-2.5 text-sm font-medium border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 bg-white rounded-xl transition-all duration-200 flex items-center gap-2"
               >
-                {selected.length === items.length ? 'Deselect All' : 'Select All'}
+                <div className={`w-4 h-4 rounded border-2 ${selected.length === items.length ? 'bg-purple-600 border-purple-600' : 'border-gray-300 group-hover:border-gray-400'} transition-colors`}>
+                  {selected.length === items.length && (
+                    <svg className="w-full h-full text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </div>
+                <span>{selected.length === items.length && items.length > 0 ? 'Deselect All' : 'Select All'}</span>
               </button>
               
               <button
                 onClick={handleDeletePageContacts}
                 disabled={items.length === 0}
-                className="px-4 sm:px-5 py-2.5 text-sm bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow"
+                className={`px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 flex items-center gap-2 ${
+                  items.length === 0 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                }`}
               >
-                Delete Page ({items.length})
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span>Delete Page</span>
               </button>
               
               <button
                 onClick={handleDeleteSelected}
                 disabled={selected.length === 0}
-                className="px-4 sm:px-5 py-2.5 text-sm bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow"
+                className={`px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 flex items-center gap-2 ${
+                  selected.length === 0 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                }`}
               >
-                Delete Selected ({selected.length})
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span>Delete {selected.length > 0 && `(${selected.length})`}</span>
               </button>
             </div>
           </div>
+        </div>
 
-          {/* Results Summary */}
-          <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-            <div>
-              Showing {((page - 1) * pageSize) + 1} to {Math.min(page * pageSize, total)} of {total.toLocaleString()} contacts
-            </div>
-            {search && (
-              <div className="text-blue-600">
-                Search results for: "{search}"
-              </div>
-            )}
-          </div>
-          
-
-
-          {/* Contacts Table */}
+        {/* Contacts Table */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           {loading ? (
-            <div className="text-center py-8">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-sm sm:text-base text-gray-600">Loading contacts...</p>
+            <div className="p-16 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                <div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin" />
+              </div>
+              <p className="text-lg text-gray-600 font-medium">Loading contacts...</p>
             </div>
           ) : items.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            <div className="p-16 text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
-                {search ? 'No contacts found' : 'No contacts yet'}
-              </h3>
-              <p className="text-sm sm:text-base text-gray-600">
-                {search 
-                  ? `No contacts match "${search}". Try a different search term.`
-                  : 'This upload contains no contacts.'
-                }
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">No contacts found</h3>
+              <p className="text-gray-600">
+                {search ? `No contacts match "${search}"` : 'No contacts in this upload'}
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="p-3 text-left">
-                      <input 
-                        type="checkbox" 
-                        aria-label="Select all" 
-                        checked={selected.length > 0 && selected.length === items.length} 
-                        onChange={selectAll}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                    </th>
-                    <th 
-                      className="p-3 text-left cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => setSort(s => ({ key: 'email', dir: s.dir === 'asc' ? 'desc' : 'asc' }))}
-                    >
-                      <div className="flex items-center gap-2">
-                        Email
-                        <svg className={`w-4 h-4 transition-transform ${sort.key === 'email' && sort.dir === 'desc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                        </svg>
-                      </div>
-                    </th>
-                    <th className="p-3 text-left">First Name</th>
-                    <th 
-                      className="p-3 text-left cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => setSort(s => ({ key: 'created', dir: s.dir === 'asc' ? 'desc' : 'asc' }))}
-                    >
-                      <div className="flex items-center gap-2">
-                        Created
-                        <svg className={`w-4 h-4 transition-transform ${sort.key === 'created' && sort.dir === 'desc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                        </svg>
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...items].sort((a: any, b: any) => {
-                    if (sort.key === 'email') {
-                      return sort.dir === 'asc' ? a.email.localeCompare(b.email) : b.email.localeCompare(a.email);
-                    }
-                    const at = new Date(a.created_at).getTime();
-                    const bt = new Date(b.created_at).getTime();
-                    return sort.dir === 'asc' ? at - bt : bt - at;
-                  }).map((c: any) => (
-                    <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                      <td className="p-3">
-                        <input 
-                          type="checkbox" 
-                          aria-label="Select row" 
-                          checked={selected.includes(c.id)} 
-                          onChange={(e) => setSelected(e.target.checked ? [...selected, c.id] : selected.filter(id => id !== c.id))}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                      </td>
-                      <td className="p-3 font-medium text-gray-900">{c.email}</td>
-                      <td className="p-3 text-gray-700">{c.fields?.first_name || '-'}</td>
-                      <td className="p-3 text-gray-600">{new Date(c.created_at).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric', 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}</td>
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-4 text-left">
+                        <div className={`w-5 h-5 rounded border-2 ${selected.length === items.length ? 'bg-purple-600 border-purple-600' : 'border-gray-300'} transition-colors cursor-pointer`} onClick={selectAll}>
+                          {selected.length === items.length && (
+                            <svg className="w-full h-full text-white p-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Created</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Source</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Pagination */}
-          {total > pageSize && (
-            <div className="flex items-center justify-between text-sm text-gray-600 mt-4 pt-4 border-t border-gray-200">
-              <button 
-                disabled={page <= 1} 
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                className="px-3 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                Previous
-              </button>
-              
-              <div className="flex items-center gap-2">
-                <span>Page {page} of {totalPages}</span>
-                {totalPages > 1 && (
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      const pageNum = Math.max(1, Math.min(totalPages, page - 2 + i));
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => setPage(pageNum)}
-                          className={`px-2 py-1 rounded text-xs ${
-                            pageNum === page 
-                              ? 'bg-blue-600 text-white' 
-                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                          } transition-colors`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {items.map((contact: any) => (
+                      <tr key={contact.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <input 
+                            type="checkbox" 
+                            checked={selected.includes(contact.id)} 
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelected([...selected, contact.id]);
+                              } else {
+                                setSelected(selected.filter(id => id !== contact.id));
+                              }
+                            }} 
+                            className="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 focus:ring-2"
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-gray-900">{contact.email}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                            contact.unsubscribed 
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-green-100 text-green-700'
+                          }`}>
+                            {contact.unsubscribed ? 'Unsubscribed' : 'Active'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          {new Date(contact.created_at).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex items-center px-2.5 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium">
+                            CSV Upload
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              
-              <button 
-                disabled={page >= totalPages} 
-                onClick={() => setPage(p => p + 1)}
-                className="px-3 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                Next
-              </button>
-            </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Showing <span className="font-semibold">{(page - 1) * pageSize + 1}</span> to{' '}
+                      <span className="font-semibold">{Math.min(page * pageSize, total)}</span> of{' '}
+                      <span className="font-semibold">{total}</span> contacts
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setPage(Math.max(1, page - 1))}
+                        disabled={page === 1}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                          page === 1
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        Previous
+                      </button>
+                      
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          let pageNum;
+                          if (totalPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (page <= 3) {
+                            pageNum = i + 1;
+                          } else if (page >= totalPages - 2) {
+                            pageNum = totalPages - 4 + i;
+                          } else {
+                            pageNum = page - 2 + i;
+                          }
+                          
+                          return (
+                            <button
+                              key={i}
+                              onClick={() => setPage(pageNum)}
+                              className={`w-10 h-10 text-sm font-medium rounded-lg transition-all duration-200 ${
+                                page === pageNum
+                                  ? 'bg-purple-600 text-white'
+                                  : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 hover:border-gray-400'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      
+                      <button
+                        onClick={() => setPage(Math.min(totalPages, page + 1))}
+                        disabled={page === totalPages}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                          page === totalPages
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
-        </Card>
+        </div>
       </div>
-      
-      {/* Confirmation Modals */}
+
+      {/* Delete Modals */}
       <ConfirmModal
         isOpen={showDeleteUploadModal}
         onClose={() => setShowDeleteUploadModal(false)}
@@ -416,13 +487,13 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
             deleteAction();
           }
         }}
-        title="Confirm Upload Deletion"
+        title="Delete Upload"
         message={deleteMessage}
-        confirmText="Delete Upload"
+        confirmText="Delete"
         cancelText="Cancel"
         variant="danger"
       />
-      
+
       <ConfirmModal
         isOpen={showDeleteContactsModal}
         onClose={() => setShowDeleteContactsModal(false)}
@@ -431,13 +502,13 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
             deleteAction();
           }
         }}
-        title="Confirm Contacts Deletion"
+        title="Delete Contacts"
         message={deleteMessage}
-        confirmText="Delete Contacts"
+        confirmText="Delete"
         cancelText="Cancel"
         variant="danger"
       />
-      
+
       <ConfirmModal
         isOpen={showDeleteSelectedModal}
         onClose={() => setShowDeleteSelectedModal(false)}
@@ -446,9 +517,9 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
             deleteAction();
           }
         }}
-        title="Confirm Selected Contacts Deletion"
+        title="Delete Selected Contacts"
         message={deleteMessage}
-        confirmText="Delete Selected"
+        confirmText="Delete"
         cancelText="Cancel"
         variant="danger"
       />
