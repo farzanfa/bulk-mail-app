@@ -5,7 +5,7 @@ import crypto from 'crypto';
  */
 
 // Validate Razorpay webhook IP addresses (if needed)
-const RAZORPAY_WEBHOOK_IPS = [
+const RAZORPAY_WEBHOOK_IPS: string[] = [
   // Add Razorpay's webhook IP addresses here if they provide a whitelist
 ];
 
