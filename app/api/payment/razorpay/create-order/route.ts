@@ -224,11 +224,17 @@ export async function POST(request: NextRequest) {
     // Return more specific error message for debugging
     const errorMessage = error?.message || 'Unknown error';
     const errorDescription = error?.error?.description || errorMessage;
-    const isEnvError = errorMessage.includes('key_id') || errorMessage.includes('key_secret');
+    const isEnvError = errorMessage.includes('key_id') || errorMessage.includes('key_secret') || 
+                       errorMessage.includes('Missing Razorpay configuration');
+    
+    // Check for specific Razorpay API errors
+    const isAuthError = error?.statusCode === 401 || error?.error?.code === 'BAD_REQUEST_ERROR';
     
     return NextResponse.json({ 
-      error: isEnvError ? 'Payment configuration error' : 'Failed to create order',
-      details: errorDescription,
+      error: isEnvError ? 'Payment service not configured. Please contact support.' : 
+             isAuthError ? 'Invalid payment credentials. Please contact support.' :
+             'Failed to create payment order. Please try again.',
+      details: process.env.NODE_ENV === 'development' ? errorDescription : undefined,
       code: error?.code || error?.error?.code,
       field: error?.error?.field,
     }, { status: 500 });
