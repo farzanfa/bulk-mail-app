@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { cancelRazorpaySubscription } from '@/lib/razorpay';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,14 +22,27 @@ export async function POST(request: NextRequest) {
     // Get the user's subscription
     const subscription = await prisma.user_subscriptions.findUnique({
       where: { user_id: userId },
+      include: { plan: true },
     });
 
     if (!subscription) {
       return NextResponse.json({ error: 'No subscription found' }, { status: 404 });
     }
 
+    if (subscription.payment_gateway !== 'razorpay' || !subscription.razorpay_subscription_id) {
+      return NextResponse.json({ error: 'Not a Razorpay subscription' }, { status: 400 });
+    }
+
     if (subscription.status !== 'active') {
       return NextResponse.json({ error: 'Subscription is not active' }, { status: 400 });
+    }
+
+    // Cancel subscription in Razorpay
+    try {
+      await cancelRazorpaySubscription(subscription.razorpay_subscription_id);
+    } catch (error: any) {
+      console.error('Error cancelling Razorpay subscription:', error);
+      // Continue even if Razorpay cancellation fails - we'll still mark it for cancellation in our DB
     }
 
     // Update subscription to cancel at period end
@@ -42,22 +56,6 @@ export async function POST(request: NextRequest) {
         plan: true,
       },
     });
-
-    // Cancel subscription based on payment gateway
-    if (subscription.payment_gateway === 'razorpay' && subscription.razorpay_subscription_id) {
-      try {
-        const { cancelRazorpaySubscription } = await import('@/lib/razorpay');
-        await cancelRazorpaySubscription(subscription.razorpay_subscription_id);
-      } catch (error) {
-        console.error('Error cancelling Razorpay subscription:', error);
-        // Continue even if cancellation fails
-      }
-    } else if (subscription.stripe_subscription_id) {
-      // TODO: Cancel Stripe subscription
-      // await stripe.subscriptions.update(subscription.stripe_subscription_id, {
-      //   cancel_at_period_end: true,
-      // });
-    }
 
     return NextResponse.json({
       message: 'Subscription will be cancelled at the end of the billing period',
