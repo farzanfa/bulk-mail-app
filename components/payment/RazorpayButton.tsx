@@ -1,8 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { useRazorpay } from 'react-razorpay';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 interface RazorpayButtonProps {
   planId: string;
@@ -25,10 +30,32 @@ export function RazorpayButton({
   className = '',
   children,
 }: RazorpayButtonProps) {
-  const { error, isLoading, Razorpay } = useRazorpay();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+
+  useEffect(() => {
+    // Load Razorpay script
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => setIsScriptLoaded(true);
+    script.onerror = () => {
+      console.error('Failed to load Razorpay script');
+      toast.error('Payment system unavailable');
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const handlePayment = async () => {
+    if (!isScriptLoaded || !window.Razorpay) {
+      toast.error('Payment system is not ready. Please try again.');
+      return;
+    }
+
     try {
       setIsProcessing(true);
 
@@ -52,7 +79,7 @@ export function RazorpayButton({
       const orderData = await response.json();
 
       // Initialize Razorpay
-      const rzp = new Razorpay({
+      const options = {
         key: orderData.key,
         amount: orderData.amount,
         currency: orderData.currency,
@@ -61,7 +88,7 @@ export function RazorpayButton({
         order_id: orderData.orderId,
         prefill: orderData.prefill,
         theme: orderData.theme,
-        handler: async (response: any) => {
+        handler: async function (response: any) {
           // Verify payment
           try {
             const verifyResponse = await fetch('/api/payment/razorpay/verify', {
@@ -93,13 +120,14 @@ export function RazorpayButton({
           }
         },
         modal: {
-          ondismiss: () => {
+          ondismiss: function() {
             setIsProcessing(false);
             toast.info('Payment cancelled');
           },
         },
-      });
+      };
 
+      const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error: any) {
       console.error('Payment error:', error);
@@ -109,21 +137,12 @@ export function RazorpayButton({
     }
   };
 
-  if (error) {
-    console.error('Razorpay error:', error);
-    return (
-      <div className="text-red-500 text-sm">
-        Payment system unavailable. Please try again later.
-      </div>
-    );
-  }
-
   return (
     <button
       onClick={handlePayment}
-      disabled={isLoading || isProcessing}
+      disabled={!isScriptLoaded || isProcessing}
       className={`${className} ${
-        isLoading || isProcessing ? 'opacity-50 cursor-not-allowed' : ''
+        !isScriptLoaded || isProcessing ? 'opacity-50 cursor-not-allowed' : ''
       }`}
     >
       {isProcessing ? 'Processing...' : children || `Subscribe for ₹${amount}`}

@@ -1,15 +1,13 @@
 'use client';
 
-import { RazorpayProvider as ReactRazorpayProvider } from 'react-razorpay';
+import React from 'react';
 
 interface RazorpayProviderProps {
   children: React.ReactNode;
 }
 
 export function RazorpayProvider({ children }: RazorpayProviderProps) {
-  return (
-    <ReactRazorpayProvider>
-      {children}
-    </ReactRazorpayProvider>
-  );
+  // react-razorpay doesn't require a provider wrapper
+  // The useRazorpay hook can be used directly in components
+  return <>{children}</>;
 }
