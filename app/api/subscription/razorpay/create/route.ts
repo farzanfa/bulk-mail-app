@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
     // Create Razorpay subscription
     const razorpaySubscription = await createRazorpaySubscription({
       planId: razorpayPlanId,
-      customerId: razorpayCustomerId,
+      customerId: razorpayCustomerId || undefined,
       totalCount: billingCycle === 'yearly' ? 12 : 120, // 1 year or 10 years max
       notes: {
         userId,
