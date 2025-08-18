@@ -18,17 +18,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
     }
 
-    // Get the user's subscription to find Stripe customer ID
+    // Get the user's subscription to find Razorpay customer ID
     const subscription = await prisma.user_subscriptions.findUnique({
       where: { user_id: userId },
     });
 
-    // TODO: Integrate with Stripe to fetch actual payment methods
-    // if (subscription?.stripe_customer_id) {
-    //   const paymentMethods = await stripe.paymentMethods.list({
-    //     customer: subscription.stripe_customer_id,
-    //     type: 'card',
-    //   });
+    // TODO: Integrate with Razorpay to fetch actual payment methods
+    // if (subscription?.razorpay_customer_id && subscription.payment_gateway === 'razorpay') {
+    //   // Implement Razorpay payment methods fetch logic here
     //   
     //   return NextResponse.json({
     //     paymentMethods: paymentMethods.data.map(pm => ({
