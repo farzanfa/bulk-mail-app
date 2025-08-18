@@ -2,10 +2,33 @@ import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { handleRazorpayError } from './razorpay-errors';
 
-// Initialize Razorpay instance
-export const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
+// Lazy initialization of Razorpay instance
+let razorpayInstance: Razorpay | null = null;
+
+function getRazorpayInstance(): Razorpay {
+  if (!razorpayInstance) {
+    // Validate environment variables
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      throw new Error(
+        'Missing Razorpay configuration. Please ensure RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are set in your environment variables.'
+      );
+    }
+
+    razorpayInstance = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+  }
+  
+  return razorpayInstance;
+}
+
+// Export for backward compatibility
+export const razorpay = new Proxy({} as Razorpay, {
+  get(target, prop) {
+    const instance = getRazorpayInstance();
+    return (instance as any)[prop];
+  }
 });
 
 // Verify Razorpay payment signature

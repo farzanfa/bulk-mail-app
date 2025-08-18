@@ -15,7 +15,18 @@ const createOrderSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  console.log('Razorpay create-order endpoint called');
+  
   try {
+    // Check if Razorpay is properly configured
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      console.error('Razorpay environment variables not configured');
+      return NextResponse.json(
+        { error: 'Payment service not configured. Please contact support.' },
+        { status: 503 }
+      );
+    }
+
     const session = await getServerSession(authOptions);
     
     if (!session?.user) {
@@ -152,7 +163,21 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error creating Razorpay order:', error);
-    return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
+    console.error('Error creating Razorpay order:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      razorpayKeyId: process.env.RAZORPAY_KEY_ID ? 'Set' : 'Not set',
+      razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET ? 'Set' : 'Not set',
+    });
+    
+    // Return more specific error message for debugging
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const isEnvError = errorMessage.includes('key_id') || errorMessage.includes('key_secret');
+    
+    return NextResponse.json({ 
+      error: isEnvError ? 'Payment configuration error' : 'Failed to create order',
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+    }, { status: 500 });
   }
 }
