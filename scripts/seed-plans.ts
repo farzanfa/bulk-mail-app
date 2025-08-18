@@ -40,8 +40,8 @@ async function main() {
     {
       name: 'Professional Plan',
       type: PlanType.professional,
-      price_monthly: 79,
-      price_yearly: 790,
+      price_monthly: 75,
+      price_yearly: 750,
       emails_per_month: 25000,
       contacts_limit: 10000,
       templates_limit: 50,
@@ -55,8 +55,8 @@ async function main() {
     {
       name: 'Enterprise Plan',
       type: PlanType.enterprise,
-      price_monthly: 199,
-      price_yearly: 1990,
+      price_monthly: 100,
+      price_yearly: 1000,
       emails_per_month: 100000,
       contacts_limit: 50000,
       templates_limit: -1, // unlimited
