@@ -69,10 +69,19 @@ export async function POST(request: NextRequest) {
     console.log('Fetching plan:', planId);
     let plan;
     try {
+      // First try to find by ID
       plan = await prisma.plans.findUnique({
         where: { id: planId },
       });
-      console.log('Plan found:', { planId, found: !!plan, planName: plan?.name });
+      
+      // If not found by ID, try to find by type (for backward compatibility)
+      if (!plan) {
+        plan = await prisma.plans.findFirst({
+          where: { type: planId as any },
+        });
+      }
+      
+      console.log('Plan found:', { planId, found: !!plan, planName: plan?.name, planType: plan?.type });
     } catch (dbError: any) {
       console.error('Database error while fetching plan:', {
         error: dbError,
@@ -205,6 +214,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('Error creating Razorpay order - Full details:', {
+      timestamp: new Date().toISOString(),
       error,
       errorType: error?.constructor?.name,
       message: error?.message,
@@ -216,9 +226,14 @@ export async function POST(request: NextRequest) {
       step: error?.error?.step,
       reason: error?.error?.reason,
       metadata: error?.error?.metadata,
-      stack: error?.stack,
+      stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined,
       razorpayKeyId: process.env.RAZORPAY_KEY_ID ? 'Set' : 'Not set',
       razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET ? 'Set' : 'Not set',
+      requestDetails: {
+        planId: body?.planId,
+        billingCycle: body?.billingCycle,
+        userId: userId,
+      },
     });
     
     // Return more specific error message for debugging
