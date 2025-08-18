@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/support',
     '/privacy',
     '/terms',
+    '/refund',
   ];
   
   // Generate sitemap entries for static routes
