@@ -65,12 +65,18 @@ export async function createRazorpaySubscription({
   notes?: Record<string, string>;
 }) {
   try {
-    const subscription = await razorpay.subscriptions.create({
+    const subscriptionData: any = {
       plan_id: planId,
-      customer_id: customerId,
       total_count: totalCount,
       notes,
-    });
+    };
+    
+    // Add customer_id only if provided
+    if (customerId) {
+      subscriptionData.customer_id = customerId;
+    }
+    
+    const subscription = await razorpay.subscriptions.create(subscriptionData);
     return subscription;
   } catch (error) {
     console.error('Error creating Razorpay subscription:', error);
