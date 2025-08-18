@@ -10,8 +10,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/pricing',
     '/templates',
     '/why-us',
+    '/support',
     '/privacy',
     '/terms',
+    '/refund',
   ];
   
   // Generate sitemap entries for static routes

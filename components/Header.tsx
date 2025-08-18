@@ -12,7 +12,7 @@ interface HeaderProps {
 export default function Header({ isAdmin }: HeaderProps) {
   const pathname = usePathname();
   const { data: session, status } = useSession();
-  const isMarketing = pathname === '/' || pathname === '/home' || pathname === '/login' || pathname === '/about' || pathname === '/privacy' || pathname === '/terms' || pathname === '/why-us' || pathname === '/pricing';
+  const isMarketing = pathname === '/' || pathname === '/home' || pathname === '/login' || pathname === '/about' || pathname === '/privacy' || pathname === '/terms' || pathname === '/why-us' || pathname === '/pricing' || pathname === '/support' || pathname === '/refund';
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -57,8 +57,10 @@ export default function Header({ isAdmin }: HeaderProps) {
         { href: '/why-us', label: 'Why us?', icon: '✨' },
         { href: '/pricing', label: 'Pricing', icon: '💎' },
         { href: '/about', label: 'About', icon: '👋' },
+        { href: '/support', label: 'Support', icon: '💬' },
         { href: '/privacy', label: 'Privacy Policy', icon: '🔒' },
-        { href: '/terms', label: 'Terms & Conditions', icon: '📄' }
+        { href: '/terms', label: 'Terms & Conditions', icon: '📄' },
+        { href: '/refund', label: 'Refund Policy', icon: '💳' }
       ]
     : [
         { href: '/dashboard', label: 'Dashboard', icon: '📊' },
