@@ -49,11 +49,14 @@ export default async function DashboardPage() {
     prisma.templates.count({ where: { user_id: userId! } }),
     prisma.campaigns.count({ where: { user_id: userId! } }),
     prisma.campaigns.findMany({ where: { user_id: userId! }, orderBy: { created_at: 'desc' }, take: 6 }),
-    prisma.campaign_recipients.groupBy({
-      by: ['created_at'],
-      _count: { _all: true },
-      where: { status: 'sent', campaign: { user_id: userId! }, created_at: { gte: since } }
-    }),
+    prisma.$queryRaw`
+      SELECT DATE(created_at) as created_at, COUNT(*)::int as _count
+      FROM campaign_recipients
+      WHERE status = 'sent'
+        AND campaign_id IN (SELECT id FROM campaigns WHERE user_id = ${userId})
+        AND created_at >= ${since}
+      GROUP BY DATE(created_at)
+    `,
     prisma.campaign_recipients.count({ where: { status: 'sent', campaign: { user_id: userId! }, created_at: { gte: since24h } } }),
     prisma.campaign_recipients.count({ where: { status: 'failed', campaign: { user_id: userId! }, created_at: { gte: since24h } } }),
     prisma.campaign_recipients.count({ where: { status: 'pending', campaign: { user_id: userId!, status: 'running' } } })
@@ -69,11 +72,11 @@ export default async function DashboardPage() {
     d.setUTCDate(d.getUTCDate() - (6 - i));
     return { day: new Date(d), count: 0 };
   });
-  for (const row of sentByDay) {
-    const d = new Date(row.created_at as unknown as Date);
+  for (const row of sentByDay as any[]) {
+    const d = new Date(row.created_at);
     d.setUTCHours(0, 0, 0, 0);
     const idx = dayCounts.findIndex(x => x.day.getTime() === d.getTime());
-    if (idx >= 0) dayCounts[idx].count += (row._count as any)._all as number;
+    if (idx >= 0) dayCounts[idx].count += Number(row._count);
   }
 
   const max = Math.max(1, ...dayCounts.map(d => d.count));
