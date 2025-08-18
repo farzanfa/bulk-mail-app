@@ -1,5 +1,6 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
+import { handleRazorpayError } from './razorpay-errors';
 
 // Initialize Razorpay instance
 export const razorpay = new Razorpay({
@@ -46,9 +47,9 @@ export async function createRazorpayOrder({
       notes,
     });
     return order;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating Razorpay order:', error);
-    throw error;
+    throw handleRazorpayError(error);
   }
 }
 
@@ -78,9 +79,9 @@ export async function createRazorpaySubscription({
     
     const subscription = await razorpay.subscriptions.create(subscriptionData);
     return subscription;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating Razorpay subscription:', error);
-    throw error;
+    throw handleRazorpayError(error);
   }
 }
 
@@ -104,9 +105,9 @@ export async function createRazorpayCustomer({
       notes,
     });
     return customer;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating Razorpay customer:', error);
-    throw error;
+    throw handleRazorpayError(error);
   }
 }
 
@@ -144,9 +145,9 @@ export async function createRazorpayPlan({
       notes,
     });
     return plan;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating Razorpay plan:', error);
-    throw error;
+    throw handleRazorpayError(error);
   }
 }
 
@@ -155,9 +156,9 @@ export async function cancelRazorpaySubscription(subscriptionId: string) {
   try {
     const subscription = await razorpay.subscriptions.cancel(subscriptionId);
     return subscription;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error cancelling Razorpay subscription:', error);
-    throw error;
+    throw handleRazorpayError(error);
   }
 }
 
@@ -166,9 +167,9 @@ export async function fetchRazorpaySubscription(subscriptionId: string) {
   try {
     const subscription = await razorpay.subscriptions.fetch(subscriptionId);
     return subscription;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching Razorpay subscription:', error);
-    throw error;
+    throw handleRazorpayError(error);
   }
 }
 
