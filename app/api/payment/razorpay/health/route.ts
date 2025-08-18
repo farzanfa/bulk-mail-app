@@ -9,31 +9,26 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     
     // Basic health check info
-    const health = {
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      razorpay: {
-        keyIdConfigured: !!process.env.RAZORPAY_KEY_ID,
-        keySecretConfigured: !!process.env.RAZORPAY_KEY_SECRET,
-        webhookSecretConfigured: !!process.env.RAZORPAY_WEBHOOK_SECRET,
-      },
+    const razorpayConfig: any = {
+      keyIdConfigured: !!process.env.RAZORPAY_KEY_ID,
+      keySecretConfigured: !!process.env.RAZORPAY_KEY_SECRET,
+      webhookSecretConfigured: !!process.env.RAZORPAY_WEBHOOK_SECRET,
     };
 
     // If user is authenticated and is admin, show more details
     if (session?.user?.email && process.env.ADMIN_EMAILS?.includes(session.user.email)) {
-      health.razorpay = {
-        ...health.razorpay,
-        keyIdPrefix: process.env.RAZORPAY_KEY_ID?.substring(0, 8) + '...',
-        mode: process.env.RAZORPAY_KEY_ID?.startsWith('rzp_test_') ? 'test' : 
-               process.env.RAZORPAY_KEY_ID?.startsWith('rzp_live_') ? 'live' : 'unknown',
-      };
+      razorpayConfig.keyIdPrefix = process.env.RAZORPAY_KEY_ID?.substring(0, 8) + '...';
+      razorpayConfig.mode = process.env.RAZORPAY_KEY_ID?.startsWith('rzp_test_') ? 'test' : 
+                            process.env.RAZORPAY_KEY_ID?.startsWith('rzp_live_') ? 'live' : 'unknown';
     }
 
     // Check if configuration is complete
-    const isConfigured = health.razorpay.keyIdConfigured && health.razorpay.keySecretConfigured;
+    const isConfigured = razorpayConfig.keyIdConfigured && razorpayConfig.keySecretConfigured;
     
     return NextResponse.json({
-      ...health,
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      razorpay: razorpayConfig,
       configured: isConfigured,
       message: isConfigured ? 'Razorpay payment service is configured' : 
                              'Razorpay payment service is not properly configured',
