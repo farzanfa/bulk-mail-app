@@ -52,12 +52,8 @@ export async function POST(request: NextRequest) {
         console.error('Error cancelling Razorpay subscription:', error);
         // Continue even if cancellation fails
       }
-    } else if (subscription.stripe_subscription_id) {
-      // TODO: Cancel Stripe subscription
-      // await stripe.subscriptions.update(subscription.stripe_subscription_id, {
-      //   cancel_at_period_end: true,
-      // });
     }
+    // Note: Stripe support has been removed as we're using Razorpay only
 
     return NextResponse.json({
       message: 'Subscription will be cancelled at the end of the billing period',
