@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
       name: 'MailApp',
       description: `${plan.name} - ${billingCycle} subscription`,
       prefill: {
-        name: user.name || '',
+        name: user.full_name || user.email,
         email: user.email,
       },
       theme: {

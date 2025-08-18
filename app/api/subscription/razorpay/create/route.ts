@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     
     if (!razorpayCustomerId) {
       const customer = await createRazorpayCustomer({
-        name: user.name || user.email,
+        name: user.full_name || user.email,
         email: user.email,
         notes: {
           userId: user.id,
