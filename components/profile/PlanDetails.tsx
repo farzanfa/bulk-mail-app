@@ -279,9 +279,9 @@ export default function PlanDetails({ userEmail }: PlanDetailsProps) {
 
         {/* Manage Subscription Button */}
         <div className="border-t pt-4">
-          <button className="w-full text-center text-blue-600 hover:text-blue-700 font-medium text-sm">
+          <a href="/subscription" className="block w-full text-center text-blue-600 hover:text-blue-700 font-medium text-sm">
             Manage Subscription
-          </button>
+          </a>
         </div>
       </div>
     </div>
