@@ -222,6 +222,17 @@ async function handleSubscriptionResumed(subscription: any) {
   }
 }
 
+async function handlePaymentAuthorized(payment: any) {
+  try {
+    // Handle authorized payments (2-step payment flow)
+    console.log('Payment authorized:', payment.id);
+    // You can capture this payment later using payment.capture API
+  } catch (error) {
+    console.error('Error handling payment authorized:', error);
+    throw error;
+  }
+}
+
 async function handleOrderPaid(order: any) {
   try {
     // Update payment record when order is paid
@@ -234,6 +245,71 @@ async function handleOrderPaid(order: any) {
     });
   } catch (error) {
     console.error('Error handling order paid:', error);
+    throw error;
+  }
+}
+
+async function handleInvoicePaid(invoice: any) {
+  try {
+    // Handle subscription invoice payment
+    if (invoice.subscription_id) {
+      // Update subscription status based on invoice payment
+      await prisma.user_subscriptions.updateMany({
+        where: { razorpay_subscription_id: invoice.subscription_id },
+        data: {
+          status: SubscriptionStatus.active,
+          updated_at: new Date(),
+        },
+      });
+      
+      // Create payment record for the invoice
+      const subscription = await prisma.user_subscriptions.findFirst({
+        where: { razorpay_subscription_id: invoice.subscription_id },
+      });
+      
+      if (subscription) {
+        await prisma.payments.create({
+          data: {
+            subscription_id: subscription.id,
+            razorpay_payment_id: invoice.payment_id,
+            amount: invoice.amount_paid / 100, // Convert from paise to rupees
+            currency: invoice.currency,
+            status: 'paid',
+            payment_gateway: 'razorpay',
+          },
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error handling invoice paid:', error);
+    throw error;
+  }
+}
+
+async function handleInvoicePartiallyPaid(invoice: any) {
+  try {
+    console.log('Invoice partially paid:', invoice.id);
+    // Handle partial payments if needed
+  } catch (error) {
+    console.error('Error handling invoice partially paid:', error);
+    throw error;
+  }
+}
+
+async function handleInvoiceExpired(invoice: any) {
+  try {
+    // Handle expired invoices (subscription payment failed)
+    if (invoice.subscription_id) {
+      await prisma.user_subscriptions.updateMany({
+        where: { razorpay_subscription_id: invoice.subscription_id },
+        data: {
+          status: SubscriptionStatus.expired,
+          updated_at: new Date(),
+        },
+      });
+    }
+  } catch (error) {
+    console.error('Error handling invoice expired:', error);
     throw error;
   }
 }
