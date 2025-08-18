@@ -4,7 +4,7 @@
  * Script to test Razorpay configuration
  */
 
-require('dotenv').config();
+require('dotenv').config({ path: '.env.local' });
 
 console.log('Testing Razorpay Configuration...\n');
 

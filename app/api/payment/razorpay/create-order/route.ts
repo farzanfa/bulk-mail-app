@@ -16,6 +16,11 @@ const createOrderSchema = z.object({
 
 export async function POST(request: NextRequest) {
   console.log('Razorpay create-order endpoint called');
+  console.log('Environment check:', {
+    hasKeyId: !!process.env.RAZORPAY_KEY_ID,
+    hasKeySecret: !!process.env.RAZORPAY_KEY_SECRET,
+    keyIdPrefix: process.env.RAZORPAY_KEY_ID?.substring(0, 8) + '...',
+  });
   
   try {
     // Check if Razorpay is properly configured
@@ -28,12 +33,14 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await getServerSession(authOptions);
+    console.log('Session check:', { hasSession: !!session, hasUser: !!session?.user });
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const userId = (session as any).user.id;
+    console.log('User ID:', userId);
     if (!userId) {
       return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
     }
@@ -59,9 +66,21 @@ export async function POST(request: NextRequest) {
     const { planId, billingCycle } = validation.data;
 
     // Get the plan details
-    const plan = await prisma.plans.findUnique({
-      where: { id: planId },
-    });
+    console.log('Fetching plan:', planId);
+    let plan;
+    try {
+      plan = await prisma.plans.findUnique({
+        where: { id: planId },
+      });
+      console.log('Plan found:', { planId, found: !!plan, planName: plan?.name });
+    } catch (dbError: any) {
+      console.error('Database error while fetching plan:', {
+        error: dbError,
+        message: dbError?.message,
+        code: dbError?.code,
+      });
+      return NextResponse.json({ error: 'Database connection error' }, { status: 500 });
+    }
 
     if (!plan) {
       return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
@@ -73,9 +92,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user details
-    const user = await prisma.users.findUnique({
-      where: { id: userId },
-    });
+    console.log('Fetching user:', userId);
+    let user;
+    try {
+      user = await prisma.users.findUnique({
+        where: { id: userId },
+      });
+      console.log('User found:', { userId, found: !!user, email: user?.email });
+    } catch (dbError: any) {
+      console.error('Database error while fetching user:', {
+        error: dbError,
+        message: dbError?.message,
+        code: dbError?.code,
+      });
+      return NextResponse.json({ error: 'Database connection error' }, { status: 500 });
+    }
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -98,6 +129,14 @@ export async function POST(request: NextRequest) {
 
     // Create Razorpay order
     const receipt = sanitizeReceipt(`sub_${userId}_${Date.now()}`);
+    console.log('Creating Razorpay order:', {
+      amount: amountInPaise,
+      currency: 'INR',
+      receipt,
+      planName: plan.name,
+      billingCycle,
+    });
+    
     const razorpayOrder = await createRazorpayOrder({
       amount: amountInPaise,
       currency: 'INR',
@@ -109,6 +148,8 @@ export async function POST(request: NextRequest) {
         planName: plan.name,
       },
     });
+    
+    console.log('Razorpay order created:', { orderId: razorpayOrder.id, status: razorpayOrder.status });
 
     // Create or update subscription record
     const subscriptionData = {
@@ -162,22 +203,34 @@ export async function POST(request: NextRequest) {
         color: '#3B82F6',
       },
     });
-  } catch (error) {
-    console.error('Error creating Razorpay order:', {
+  } catch (error: any) {
+    console.error('Error creating Razorpay order - Full details:', {
       error,
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
+      errorType: error?.constructor?.name,
+      message: error?.message,
+      code: error?.code,
+      statusCode: error?.statusCode,
+      description: error?.error?.description,
+      field: error?.error?.field,
+      source: error?.error?.source,
+      step: error?.error?.step,
+      reason: error?.error?.reason,
+      metadata: error?.error?.metadata,
+      stack: error?.stack,
       razorpayKeyId: process.env.RAZORPAY_KEY_ID ? 'Set' : 'Not set',
       razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET ? 'Set' : 'Not set',
     });
     
     // Return more specific error message for debugging
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage = error?.message || 'Unknown error';
+    const errorDescription = error?.error?.description || errorMessage;
     const isEnvError = errorMessage.includes('key_id') || errorMessage.includes('key_secret');
     
     return NextResponse.json({ 
       error: isEnvError ? 'Payment configuration error' : 'Failed to create order',
-      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      details: errorDescription,
+      code: error?.code || error?.error?.code,
+      field: error?.error?.field,
     }, { status: 500 });
   }
 }
