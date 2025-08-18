@@ -9,11 +9,16 @@ function getRazorpayInstance(): Razorpay {
   if (!razorpayInstance) {
     // Validate environment variables
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      console.error('Razorpay environment variables missing:', {
+        hasKeyId: !!process.env.RAZORPAY_KEY_ID,
+        hasKeySecret: !!process.env.RAZORPAY_KEY_SECRET,
+      });
       throw new Error(
         'Missing Razorpay configuration. Please ensure RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are set in your environment variables.'
       );
     }
 
+    console.log('Initializing Razorpay with key:', process.env.RAZORPAY_KEY_ID?.substring(0, 8) + '...');
     razorpayInstance = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -62,16 +67,28 @@ export async function createRazorpayOrder({
   receipt: string;
   notes?: Record<string, string>;
 }) {
+  console.log('createRazorpayOrder called with:', { amount, currency, receipt, notes });
+  
   try {
-    const order = await razorpay.orders.create({
+    const orderData = {
       amount,
       currency,
       receipt,
       notes,
-    });
+    };
+    console.log('Creating order with Razorpay API:', orderData);
+    
+    const order = await razorpay.orders.create(orderData);
+    console.log('Razorpay order created successfully:', { id: order.id, status: order.status });
     return order;
   } catch (error: any) {
-    console.error('Error creating Razorpay order:', error);
+    console.error('Error creating Razorpay order:', {
+      error,
+      message: error?.message,
+      description: error?.error?.description,
+      code: error?.error?.code,
+      statusCode: error?.statusCode,
+    });
     throw handleRazorpayError(error);
   }
 }
