@@ -18,17 +18,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
     }
 
-    // Get the user's subscription
+    // Get user's subscription
     const subscription = await prisma.user_subscriptions.findUnique({
       where: { user_id: userId },
+      include: { plan: true },
     });
 
     if (!subscription) {
-      return NextResponse.json({ error: 'No subscription found' }, { status: 404 });
+      return NextResponse.json({ error: 'No active subscription found' }, { status: 404 });
     }
 
-    if (subscription.status !== 'active') {
-      return NextResponse.json({ error: 'Subscription is not active' }, { status: 400 });
+    // Can't cancel free plan
+    if (subscription.plan.type === 'free') {
+      return NextResponse.json({ error: 'Cannot cancel free plan' }, { status: 400 });
     }
 
     // Update subscription to cancel at period end
@@ -38,29 +40,15 @@ export async function POST(request: NextRequest) {
         cancel_at_period_end: true,
         updated_at: new Date(),
       },
-      include: {
-        plan: true,
-      },
     });
 
-    // Cancel subscription based on payment gateway
-    if (subscription.payment_gateway === 'razorpay' && subscription.razorpay_subscription_id) {
-      try {
-        const { cancelRazorpaySubscription } = await import('@/lib/razorpay');
-        await cancelRazorpaySubscription(subscription.razorpay_subscription_id);
-      } catch (error) {
-        console.error('Error cancelling Razorpay subscription:', error);
-        // Continue even if cancellation fails
-      }
-    }
-    // Note: Stripe support has been removed as we're using Razorpay only
-
     return NextResponse.json({
-      message: 'Subscription will be cancelled at the end of the billing period',
-      subscription: updatedSubscription,
+      success: true,
+      message: 'Subscription scheduled for cancellation',
+      cancel_at: updatedSubscription.current_period_end,
     });
   } catch (error) {
     console.error('Error cancelling subscription:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to cancel subscription' }, { status: 500 });
   }
 }
