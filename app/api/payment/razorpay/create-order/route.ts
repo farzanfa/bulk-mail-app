@@ -22,6 +22,9 @@ export async function POST(request: NextRequest) {
     keyIdPrefix: process.env.RAZORPAY_KEY_ID?.substring(0, 8) + '...',
   });
   
+  let body: any;
+  let userId: string | undefined;
+  
   try {
     // Check if Razorpay is properly configured
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
@@ -39,7 +42,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = (session as any).user.id;
+    userId = (session as any).user.id;
     console.log('User ID:', userId);
     if (!userId) {
       return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
@@ -53,7 +56,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    body = await request.json();
     const validation = createOrderSchema.safeParse(body);
     
     if (!validation.success) {
