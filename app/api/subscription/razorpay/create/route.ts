@@ -9,6 +9,7 @@ import {
   amountToPaise 
 } from '@/lib/razorpay';
 import { z } from 'zod';
+import { SubscriptionStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
     const subscriptionData = {
       user_id: userId,
       plan_id: planId,
-      status: 'pending',
+      status: SubscriptionStatus.trialing, // Subscription pending payment
       payment_gateway: 'razorpay',
       razorpay_customer_id: razorpayCustomerId,
       razorpay_subscription_id: razorpaySubscription.id,

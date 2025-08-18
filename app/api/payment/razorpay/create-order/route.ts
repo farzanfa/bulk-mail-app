@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { createRazorpayOrder, amountToPaise } from '@/lib/razorpay';
 import { checkRateLimit, sanitizeReceipt, validateAmount } from '@/lib/razorpay-security';
 import { z } from 'zod';
+import { SubscriptionStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
     const subscriptionData = {
       user_id: userId,
       plan_id: planId,
-      status: 'pending',
+      status: SubscriptionStatus.active, // Will be verified after payment
       payment_gateway: 'razorpay',
       updated_at: new Date(),
     };
@@ -130,7 +131,7 @@ export async function POST(request: NextRequest) {
         razorpay_order_id: razorpayOrder.id,
         amount,
         currency: 'INR',
-        status: 'pending',
+        status: 'pending' as const,
         payment_gateway: 'razorpay',
       },
     });

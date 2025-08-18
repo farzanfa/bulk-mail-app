@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { verifyRazorpaySignature } from '@/lib/razorpay';
 import { z } from 'zod';
+import { SubscriptionStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
     await prisma.user_subscriptions.update({
       where: { id: payment.subscription.id },
       data: {
-        status: 'active',
+        status: SubscriptionStatus.active,
         current_period_start: now,
         current_period_end: periodEnd,
         cancel_at_period_end: false,
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Payment verified successfully',
       subscription: {
-        status: 'active',
+        status: SubscriptionStatus.active,
         planName: payment.subscription.plan.name,
         validUntil: periodEnd,
       },

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { SubscriptionStatus } from '@prisma/client';
 
 // Mark route as dynamic since it uses authentication
 export const dynamic = 'force-dynamic';
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
       data: {
         user_id: userId,
         plan_id: freePlan.id,
-        status: 'active',
+        status: SubscriptionStatus.active,
         current_period_start: new Date(),
         current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
       },

@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { prisma } from '@/lib/db';
 import { headers } from 'next/headers';
 import { isValidWebhookSource, maskSensitiveData } from '@/lib/razorpay-security';
+import { SubscriptionStatus, RecipientStatus } from '@prisma/client';
 
 // Disable body parsing to access raw body for signature verification
 export const runtime = 'nodejs';
@@ -104,7 +105,7 @@ async function handlePaymentCaptured(payment: any) {
       await prisma.user_subscriptions.update({
         where: { id: paymentRecord.subscription.id },
         data: {
-          status: 'active',
+          status: SubscriptionStatus.active,
           updated_at: new Date(),
         },
       });
@@ -170,7 +171,7 @@ async function handleSubscriptionPending(subscription: any) {
     await prisma.user_subscriptions.updateMany({
       where: { razorpay_subscription_id: subscription.id },
       data: {
-        status: 'pending',
+        status: SubscriptionStatus.trialing, // Using trialing for pending payment
         updated_at: new Date(),
       },
     });
