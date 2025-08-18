@@ -8,16 +8,22 @@ MailWeaver is a modern bulk email platform built on Next.js 14 with Google Sign�
 - `npx prisma migrate deploy`
 - `npm run dev`
 
-## Env Vars
-- NEXTAUTH_URL, NEXTAUTH_SECRET
-- POSTGRES_URL
-- KV_REST_API_URL, KV_REST_API_TOKEN
-- BLOB_READ_WRITE_TOKEN
-- GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
-- CRON_SECRET (protects cron/worker endpoints)
-- ENCRYPTION_KEY (32‑byte)
-- RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET (for payment processing)
-- RAZORPAY_WEBHOOK_SECRET (optional, for webhook verification)
+## Environment Variables
+
+### Required
+- `POSTGRES_URL` - PostgreSQL database connection string
+- `NEXTAUTH_URL` - Your application URL (e.g., http://localhost:3000)
+- `NEXTAUTH_SECRET` - Random secret for NextAuth.js session encryption
+
+### Optional Services
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` - For Google OAuth integration
+- `EMAIL_SERVER_*` - SMTP configuration for email sending
+- `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` - For payment processing
+- `RAZORPAY_WEBHOOK_SECRET` - For secure webhook verification
+- `BLOB_STORE_URL`, `BLOB_STORE_KEY` - For file uploads
+- `KV_REST_API_URL`, `KV_REST_API_TOKEN` - Redis/KV store for rate limiting
+- `CRON_SECRET` - Protects cron/worker endpoints
+- `ENCRYPTION_KEY` - 32-byte key for encrypting sensitive data
 
 ## Features
 - Google Sign‑In with Gmail send (scopes: gmail.send, openid, email, profile)
