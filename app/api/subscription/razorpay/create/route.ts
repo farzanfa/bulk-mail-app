@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
         currency: 'INR',
         period: billingCycle === 'yearly' ? 'yearly' : 'monthly',
         interval: 1,
-        description: plan.features.join(', '),
+        description: `${plan.name} Plan - ${plan.emails_per_month} emails/month`,
         notes: {
           planId,
           billingCycle,
