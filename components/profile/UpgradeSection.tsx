@@ -71,7 +71,7 @@ export default function UpgradeSection({ userEmail }: UpgradeSectionProps) {
   };
 
   const handleUpgrade = (planType: string) => {
-    // TODO: Implement Stripe checkout
+    // TODO: Implement Razorpay checkout
     console.log('Upgrading to:', planType, billingPeriod);
   };
 

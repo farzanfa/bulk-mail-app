@@ -43,12 +43,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: If using Stripe, also cancel the subscription in Stripe
-    // if (subscription.stripe_subscription_id) {
-    //   await stripe.subscriptions.update(subscription.stripe_subscription_id, {
-    //     cancel_at_period_end: true,
-    //   });
-    // }
+    // Handle Razorpay subscription cancellation if needed
+    // Razorpay subscriptions can be cancelled using the Razorpay API
 
     return NextResponse.json({
       message: 'Subscription will be cancelled at the end of the billing period',

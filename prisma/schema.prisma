@@ -239,11 +239,9 @@ model user_subscriptions {
   current_period_start   DateTime
   current_period_end     DateTime
   cancel_at_period_end   Boolean  @default(false)
-  stripe_customer_id     String?  @unique
-  stripe_subscription_id String?  @unique
   razorpay_customer_id   String?  @unique
   razorpay_subscription_id String? @unique
-  payment_gateway        String?  @default("stripe") // "stripe" or "razorpay"
+  payment_gateway        String?  @default("razorpay") // only "razorpay"
   created_at             DateTime @default(now())
   updated_at             DateTime @updatedAt
   payments               payments[]
@@ -307,16 +305,14 @@ model payments {
   razorpay_order_id     String?  @unique
   razorpay_payment_id   String?  @unique
   razorpay_signature    String?
-  stripe_payment_intent String?  @unique
   amount                Float
   currency              String   @default("INR")
   status                String   // "created", "authorized", "captured", "failed", "refunded"
   payment_method        String?  // "card", "upi", "netbanking", etc.
-  payment_gateway       String   // "razorpay" or "stripe"
+  payment_gateway       String   // only "razorpay"
   created_at            DateTime @default(now())
   updated_at            DateTime @updatedAt
 
   @@index([subscription_id])
   @@index([razorpay_order_id])
-  @@index([stripe_payment_intent])
 }
