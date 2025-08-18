@@ -237,30 +237,7 @@ export default function AdminPage() {
     setShowDeleteModal(true);
   };
 
-  const filteredUsers = users.filter(user =>
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (user.full_name && user.full_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (user.company && user.company.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  if (loading && !stats) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col items-center justify-center min-h-[60vh]">
-            <div className="relative">
-              <div className="w-16 h-16 border-4 border-purple-200 rounded-full"></div>
-              <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
-            </div>
-            <p className="text-lg font-medium text-gray-700 mt-6">Loading admin dashboard</p>
-            <p className="text-sm text-gray-500 mt-1">Please wait while we fetch the latest data...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Export functions
+  // Export functions - must be defined before any conditional returns
   const exportUserData = useCallback(() => {
     const csvContent = [
       ['Email', 'Name', 'Company', 'Role', 'Status', 'Uploads', 'Templates', 'Campaigns', 'Contacts', 'Joined'],
@@ -287,6 +264,29 @@ export default function AdminPage() {
     window.URL.revokeObjectURL(url);
     toast.success('User data exported successfully');
   }, [users]);
+
+  const filteredUsers = users.filter(user =>
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.full_name && user.full_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (user.company && user.company.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  if (loading && !stats) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col items-center justify-center min-h-[60vh]">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-purple-200 rounded-full"></div>
+              <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+            </div>
+            <p className="text-lg font-medium text-gray-700 mt-6">Loading admin dashboard</p>
+            <p className="text-sm text-gray-500 mt-1">Please wait while we fetch the latest data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
