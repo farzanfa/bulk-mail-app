@@ -62,13 +62,26 @@ export async function POST(request: NextRequest) {
         await handleSubscriptionActivated(event.payload.subscription.entity);
         break;
       
+      case 'subscription.charged':
+        await handleSubscriptionCharged(event.payload.subscription.entity);
+        break;
+      
       case 'subscription.halted':
       case 'subscription.cancelled':
+      case 'subscription.paused':
         await handleSubscriptionCancelled(event.payload.subscription.entity);
         break;
       
       case 'subscription.pending':
         await handleSubscriptionPending(event.payload.subscription.entity);
+        break;
+      
+      case 'subscription.resumed':
+        await handleSubscriptionResumed(event.payload.subscription.entity);
+        break;
+      
+      case 'order.paid':
+        await handleOrderPaid(event.payload.order.entity);
         break;
       
       default:
@@ -177,6 +190,56 @@ async function handleSubscriptionPending(subscription: any) {
     });
   } catch (error) {
     console.error('Error handling subscription pending:', error);
+    throw error;
+  }
+}
+
+async function handleSubscriptionCharged(subscription: any) {
+  try {
+    // Update subscription period when charged
+    await prisma.user_subscriptions.updateMany({
+      where: { razorpay_subscription_id: subscription.id },
+      data: {
+        status: SubscriptionStatus.active,
+        current_period_start: new Date(subscription.current_start * 1000),
+        current_period_end: new Date(subscription.current_end * 1000),
+        updated_at: new Date(),
+      },
+    });
+  } catch (error) {
+    console.error('Error handling subscription charged:', error);
+    throw error;
+  }
+}
+
+async function handleSubscriptionResumed(subscription: any) {
+  try {
+    await prisma.user_subscriptions.updateMany({
+      where: { razorpay_subscription_id: subscription.id },
+      data: {
+        status: SubscriptionStatus.active,
+        cancel_at_period_end: false,
+        updated_at: new Date(),
+      },
+    });
+  } catch (error) {
+    console.error('Error handling subscription resumed:', error);
+    throw error;
+  }
+}
+
+async function handleOrderPaid(order: any) {
+  try {
+    // Update payment record when order is paid
+    await prisma.payments.updateMany({
+      where: { razorpay_order_id: order.id },
+      data: {
+        status: 'paid',
+        updated_at: new Date(),
+      },
+    });
+  } catch (error) {
+    console.error('Error handling order paid:', error);
     throw error;
   }
 }
