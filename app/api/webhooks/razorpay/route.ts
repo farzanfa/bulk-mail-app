@@ -58,30 +58,24 @@ export async function POST(request: NextRequest) {
         await handlePaymentFailed(event.payload.payment.entity);
         break;
       
-      case 'subscription.activated':
-        await handleSubscriptionActivated(event.payload.subscription.entity);
-        break;
-      
-      case 'subscription.charged':
-        await handleSubscriptionCharged(event.payload.subscription.entity);
-        break;
-      
-      case 'subscription.halted':
-      case 'subscription.cancelled':
-      case 'subscription.paused':
-        await handleSubscriptionCancelled(event.payload.subscription.entity);
-        break;
-      
-      case 'subscription.pending':
-        await handleSubscriptionPending(event.payload.subscription.entity);
-        break;
-      
-      case 'subscription.resumed':
-        await handleSubscriptionResumed(event.payload.subscription.entity);
+      case 'payment.authorized':
+        await handlePaymentAuthorized(event.payload.payment.entity);
         break;
       
       case 'order.paid':
         await handleOrderPaid(event.payload.order.entity);
+        break;
+      
+      case 'invoice.paid':
+        await handleInvoicePaid(event.payload.invoice.entity);
+        break;
+      
+      case 'invoice.partially_paid':
+        await handleInvoicePartiallyPaid(event.payload.invoice.entity);
+        break;
+      
+      case 'invoice.expired':
+        await handleInvoiceExpired(event.payload.invoice.entity);
         break;
       
       default:
