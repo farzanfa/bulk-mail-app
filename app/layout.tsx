@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Metadata, Viewport } from 'next';
 import HeaderWrapper from '@/components/HeaderWrapper';
 import Footer from '@/components/Footer';
-import PWAInstaller from '@/components/PWAInstaller';
+import PWAInstallerWrapper from '@/components/PWAInstallerWrapper';
 import Providers from '@/components/Providers';
 
 export const metadata: Metadata = {
@@ -93,7 +93,7 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
   colorScheme: 'light dark',
 };
-import { Toaster } from 'sonner';
+import ToasterWrapper from '@/components/ToasterWrapper';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -144,15 +144,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             {children}
           </main>
           <Footer />
-          <PWAInstaller />
-          <Toaster 
-            richColors 
-            position="top-right" 
-            toastOptions={{
-              className: 'touch-target',
-              duration: 4000,
-            }}
-          />
+          <PWAInstallerWrapper />
+          <ToasterWrapper />
         </Providers>
       </body>
     </html>
