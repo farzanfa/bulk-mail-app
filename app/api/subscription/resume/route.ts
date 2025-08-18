@@ -48,12 +48,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: If using Stripe, also resume the subscription in Stripe
-    // if (subscription.stripe_subscription_id) {
-    //   await stripe.subscriptions.update(subscription.stripe_subscription_id, {
-    //     cancel_at_period_end: false,
-    //   });
-    // }
+    // Handle Razorpay subscription resumption if needed
+    // Razorpay subscriptions can be resumed using the Razorpay API
 
     return NextResponse.json({
       message: 'Subscription has been resumed',

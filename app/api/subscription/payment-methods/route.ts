@@ -18,29 +18,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
     }
 
-    // Get the user's subscription to find Stripe customer ID
+    // Get the user's subscription to find Razorpay customer ID
     const subscription = await prisma.user_subscriptions.findUnique({
       where: { user_id: userId },
     });
 
-    // TODO: Integrate with Stripe to fetch actual payment methods
-    // if (subscription?.stripe_customer_id) {
-    //   const paymentMethods = await stripe.paymentMethods.list({
-    //     customer: subscription.stripe_customer_id,
-    //     type: 'card',
-    //   });
-    //   
-    //   return NextResponse.json({
-    //     paymentMethods: paymentMethods.data.map(pm => ({
-    //       id: pm.id,
-    //       type: pm.type,
-    //       last4: pm.card?.last4,
-    //       brand: pm.card?.brand,
-    //       exp_month: pm.card?.exp_month,
-    //       exp_year: pm.card?.exp_year,
-    //       is_default: pm.id === defaultPaymentMethodId,
-    //     }))
-    //   });
+    // TODO: Integrate with Razorpay to fetch actual payment methods
+    // Razorpay provides APIs to fetch saved payment methods for a customer
+    // if (subscription?.razorpay_customer_id) {
+    //   // Fetch payment methods using Razorpay API
+    //   // const paymentMethods = await razorpay.customers.fetchPaymentMethods(subscription.razorpay_customer_id);
     // }
 
     // For now, return mock data or empty array
