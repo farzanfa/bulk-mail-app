@@ -9,9 +9,8 @@ ALTER TABLE "user_subscriptions" ADD COLUMN IF NOT EXISTS "razorpay_customer_id"
 ALTER TABLE "user_subscriptions" ADD COLUMN IF NOT EXISTS "razorpay_subscription_id" TEXT;
 ALTER TABLE "user_subscriptions" ADD COLUMN IF NOT EXISTS "payment_gateway" TEXT DEFAULT 'razorpay';
 
--- AlterTable
-ALTER TABLE "payments" DROP COLUMN IF EXISTS "stripe_payment_intent";
-
 -- CreateIndex
-CREATE UNIQUE INDEX "user_subscriptions_razorpay_customer_id_key" ON "user_subscriptions"("razorpay_customer_id");
-CREATE UNIQUE INDEX "user_subscriptions_razorpay_subscription_id_key" ON "user_subscriptions"("razorpay_subscription_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "user_subscriptions_razorpay_customer_id_key" ON "user_subscriptions"("razorpay_customer_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "user_subscriptions_razorpay_subscription_id_key" ON "user_subscriptions"("razorpay_subscription_id");
+
+-- Note: The payments table will be created in a future migration with only Razorpay fields
