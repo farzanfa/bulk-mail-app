@@ -606,6 +606,16 @@ button {
   }
 }
 
+/* Logo specific styles */
+header img[alt="MailWeaver"] {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  min-width: 24px;
+  min-height: 24px;
+}
+
 /* Improve header layout on tablets */
 @media (min-width: 640px) and (max-width: 1023px) {
   /* Ensure proper spacing */

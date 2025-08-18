@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { IconButton } from './ui';
@@ -15,6 +15,7 @@ export default function Header({ isAdmin }: HeaderProps) {
   const isMarketing = pathname === '/' || pathname === '/home' || pathname === '/login' || pathname === '/about' || pathname === '/privacy' || pathname === '/terms' || pathname === '/why-us' || pathname === '/pricing' || pathname === '/support' || pathname === '/refund';
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,8 +78,21 @@ export default function Header({ isAdmin }: HeaderProps) {
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
             <a href="/" aria-label="MailWeaver home" className="font-bold inline-flex items-center gap-2 group flex-shrink-0">
-              <div className="relative">
-                <img src="/icon.svg?v=2" alt="MailWeaver" className="h-6 w-6 sm:h-7 sm:w-7 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12"/>
+              <div className="relative flex-shrink-0">
+                {!logoError ? (
+                  <img 
+                    src="/icon.svg?v=3" 
+                    alt="MailWeaver" 
+                    className="h-6 w-6 sm:h-7 sm:w-7 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 object-contain"
+                    loading="eager"
+                    decoding="async"
+                    onError={() => setLogoError(true)}
+                  />
+                ) : (
+                  <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center shadow-sm">
+                    <span className="text-xs sm:text-sm font-bold text-gray-900">M</span>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               <span className="hidden sm:inline text-base sm:text-lg font-display text-gradient">MailWeaver</span>
