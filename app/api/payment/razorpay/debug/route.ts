@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const debug = {
+    const debug: any = {
       timestamp: new Date().toISOString(),
       environment: {
         nodeEnv: process.env.NODE_ENV,
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { planId, billingCycle } = body;
 
-    const debugInfo = {
+    const debugInfo: any = {
       timestamp: new Date().toISOString(),
       request: { planId, billingCycle },
       checks: {},
