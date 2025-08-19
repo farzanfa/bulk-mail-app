@@ -3,9 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createRazorpayOrder, RAZORPAY_PLANS } from '@/lib/razorpay';
 import { convertUSDtoINR, getFormattedPrices } from '@/lib/currency-converter';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
+import { withRetry } from '@/lib/prisma-retry';
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,11 +40,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get plan details from database
+    // Get plan details from database with retry logic
     console.log(`🔍 Looking for plan with ID: ${planId}`);
-    const plan = await prisma.plans.findUnique({
-      where: { id: planId },
-    });
+    const plan = await withRetry(
+      () => prisma.plans.findUnique({
+        where: { id: planId },
+      }),
+      { maxRetries: 3, initialDelay: 200 }
+    );
 
     if (!plan) {
       console.error(`❌ Plan not found: ${planId}`);
@@ -93,23 +95,29 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    // Get or create user subscription record
-    const existingSubscription = await prisma.user_subscriptions.findUnique({
-      where: { user_id: userId },
-    });
+    // Get or create user subscription record with retry logic
+    const existingSubscription = await withRetry(
+      () => prisma.user_subscriptions.findUnique({
+        where: { user_id: userId },
+      }),
+      { maxRetries: 3, initialDelay: 200 }
+    );
 
     if (!existingSubscription) {
       // Create a new subscription record with pending status
-      await prisma.user_subscriptions.create({
-        data: {
-          user_id: userId,
-          plan_id: planId,
-          status: 'trialing', // Will be updated to active after payment
-          current_period_start: new Date(),
-          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-          payment_gateway: 'razorpay',
-        },
-      });
+      await withRetry(
+        () => prisma.user_subscriptions.create({
+          data: {
+            user_id: userId,
+            plan_id: planId,
+            status: 'trialing', // Will be updated to active after payment
+            current_period_start: new Date(),
+            current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+            payment_gateway: 'razorpay',
+          },
+        }),
+        { maxRetries: 3, initialDelay: 200 }
+      );
     }
 
     // Return order details for frontend
@@ -156,6 +164,7 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
+    // Don't disconnect the shared Prisma instance
+    // The global instance manages its own connections
   }
 }
