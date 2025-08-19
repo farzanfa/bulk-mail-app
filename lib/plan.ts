@@ -87,14 +87,14 @@ export const PLAN_FEATURES = {
 
 // New function to get plan limits from database
 export async function getPlanLimits(userId: string) {
-  // First check if user is admin - admins bypass all limits
+  // First check if user is admin or beta - they bypass all limits
   const user = await prisma.users.findUnique({ 
     where: { id: userId }, 
     select: { email: true } 
   });
   
-  if (user?.email && isAdminEmail(user.email)) {
-    // Return unlimited values for all limits for admin users
+  if (user?.email && (isAdminEmail(user.email) || isBetaEmail(user.email))) {
+    // Return unlimited values for all limits for admin and beta users
     return {
       maxTemplates: -1,
       maxUploads: -1,
@@ -162,14 +162,14 @@ export function formatPlanName(plan: Plan): string {
 }
 
 export async function canConnectGmailAccount(userId: string): Promise<boolean> {
-  // Check if user is admin first
+  // Check if user is admin or beta first
   const user = await prisma.users.findUnique({ 
     where: { id: userId }, 
     select: { email: true } 
   });
   
-  if (user?.email && isAdminEmail(user.email)) {
-    return true; // Admins can always connect more accounts
+  if (user?.email && (isAdminEmail(user.email) || isBetaEmail(user.email))) {
+    return true; // Admins and beta users can always connect more accounts
   }
   
   const plan = await getUserPlan(userId);
