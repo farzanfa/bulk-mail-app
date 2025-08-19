@@ -29,7 +29,6 @@ pnpm-debug.log*
 Thumbs.db
 
 # Env files
-.env
 .env.local
 .env.*.local
 .env.development.local
