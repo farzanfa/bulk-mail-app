@@ -87,6 +87,28 @@ export const PLAN_FEATURES = {
 
 // New function to get plan limits from database
 export async function getPlanLimits(userId: string) {
+  // First check if user is admin - admins bypass all limits
+  const user = await prisma.users.findUnique({ 
+    where: { id: userId }, 
+    select: { email: true } 
+  });
+  
+  if (user?.email && isAdminEmail(user.email)) {
+    // Return unlimited values for all limits for admin users
+    return {
+      maxTemplates: -1,
+      maxUploads: -1,
+      maxContacts: -1,
+      maxMailsPerCampaign: -1,
+      maxCampaigns: -1,
+      teamMembers: -1,
+      customBranding: true,
+      prioritySupport: true,
+      apiAccess: true,
+      advancedAnalytics: true
+    };
+  }
+
   const subscription = await prisma.user_subscriptions.findUnique({
     where: { user_id: userId },
     include: { plan: true }
@@ -127,6 +149,16 @@ export async function getPlanLimits(userId: string) {
 }
 
 export async function canConnectGmailAccount(userId: string): Promise<boolean> {
+  // Check if user is admin first
+  const user = await prisma.users.findUnique({ 
+    where: { id: userId }, 
+    select: { email: true } 
+  });
+  
+  if (user?.email && isAdminEmail(user.email)) {
+    return true; // Admins can always connect more accounts
+  }
+  
   const plan = await getUserPlan(userId);
   const currentAccounts = await prisma.google_accounts.count({ where: { user_id: userId } });
   const maxAccounts = PLAN_FEATURES[plan].maxGmailAccounts;
