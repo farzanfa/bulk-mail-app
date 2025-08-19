@@ -47,7 +47,12 @@ export default function UploadsPage() {
       
       if (meRes.ok) {
         const meData = await meRes.json();
-        if (meData.subscription && meData.subscription.plan) {
+        if (meData.user) {
+          setUserPlan({
+            planName: meData.user.planName || 'Free',
+            planType: meData.user.plan || 'free'
+          });
+        } else if (meData.subscription && meData.subscription.plan) {
           setUserPlan({
             planName: meData.subscription.plan.name,
             planType: meData.subscription.plan.type
@@ -188,7 +193,7 @@ export default function UploadsPage() {
                 {userPlan && (
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                     userPlan.planType === 'admin' 
-                      ? 'bg-gradient-to-r from-red-50 to-pink-50 text-red-700 border border-red-200' 
+                      ? 'bg-gradient-to-r from-amber-50 to-orange-50 text-orange-700 border border-orange-300 shadow-sm' 
                       : userPlan.planType === 'pro'
                       ? 'bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border border-purple-200'
                       : userPlan.planType === 'beta'

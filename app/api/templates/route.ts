@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { extractVariables } from '@/lib/render';
-import { getPlanLimits, getUserPlan } from '@/lib/plan';
+import { getPlanLimits, getUserPlan, formatPlanName } from '@/lib/plan';
 import { ensureUserIdFromSession } from '@/lib/user';
 
 const createSchema = z.object({
@@ -43,7 +43,7 @@ export async function GET() {
     },
     plan: {
       type: planType,
-      name: subscription?.plan?.name || planType.charAt(0).toUpperCase() + planType.slice(1),
+      name: subscription?.plan?.name || formatPlanName(planType),
       isSubscribed: !!subscription && subscription.status === 'active'
     }
   });
