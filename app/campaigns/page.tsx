@@ -31,7 +31,7 @@ export default function CampaignsPage() {
 
   async function fetchUserPlan() {
     try {
-      const res = await fetch('/api/me', { cache: 'no-store' });
+      const res = await fetch('/api/me', { cache: 'no-store', credentials: 'include' });
       const json = await res.json();
       if (json.user?.plan) {
         setUserPlan(json.user.plan);

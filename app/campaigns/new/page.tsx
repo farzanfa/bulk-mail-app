@@ -19,7 +19,7 @@ export default function CampaignNewPage() {
 
   useEffect(() => {
     (async () => {
-      const me = await fetch('/api/me', { cache: 'no-store' }).then(r => r.json());
+      const me = await fetch('/api/me', { cache: 'no-store', credentials: 'include' }).then(r => r.json());
       setGoogle(me.googleAccounts || []);
       setFromEmail(me.user?.email || '');
       if (me.googleAccounts && me.googleAccounts.length > 0) setGoogleId(me.googleAccounts[0].id);
