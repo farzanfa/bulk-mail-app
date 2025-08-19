@@ -148,6 +148,21 @@ export async function getPlanLimits(userId: string) {
   };
 }
 
+export function formatPlanName(plan: Plan): string {
+  switch (plan) {
+    case 'admin':
+      return 'Admin';
+    case 'pro':
+      return 'Pro';
+    case 'beta':
+      return 'Beta';
+    case 'free':
+      return 'Free';
+    default:
+      return plan.charAt(0).toUpperCase() + plan.slice(1);
+  }
+}
+
 export async function canConnectGmailAccount(userId: string): Promise<boolean> {
   // Check if user is admin first
   const user = await prisma.users.findUnique({ 

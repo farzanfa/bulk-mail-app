@@ -2,7 +2,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { getUserPlan } from '@/lib/plan';
+import { getUserPlan, formatPlanName } from '@/lib/plan';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -17,7 +17,7 @@ export async function GET() {
   ]);
   
   return NextResponse.json({ 
-    user: { ...user, plan }, 
+    user: { ...user, plan, planName: formatPlanName(plan) }, 
     googleAccounts: google 
   });
 }
