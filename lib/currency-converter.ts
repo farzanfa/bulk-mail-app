@@ -12,7 +12,8 @@ let cachedRate: ConversionRate | null = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 // Fallback rate in case all API calls fail
-const FALLBACK_RATE = 83.50; // 1 USD = 83.50 INR (update this periodically)
+// Updated: August 2024 - check current rates periodically
+const FALLBACK_RATE = 83.50; // 1 USD = 83.50 INR
 
 /**
  * Get live USD to INR conversion rate
@@ -27,15 +28,24 @@ export async function getUSDtoINRRate(): Promise<number> {
 
   // Try primary provider: ExchangeRate-API (free tier)
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
     const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD', {
-      signal: AbortSignal.timeout(5000), // 5 second timeout
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'MailWeaver/1.0'
+      },
     });
+    
+    clearTimeout(timeoutId);
     
     if (response.ok) {
       const data = await response.json();
-      const rate = data.rates.INR;
+      const rate = data.rates?.INR;
       
-      if (rate && typeof rate === 'number') {
+      if (rate && typeof rate === 'number' && rate > 0) {
         cachedRate = {
           rate,
           timestamp: new Date(),
@@ -44,22 +54,33 @@ export async function getUSDtoINRRate(): Promise<number> {
         console.log(`Fresh rate from ExchangeRate-API: 1 USD = ${rate} INR`);
         return rate;
       }
+    } else {
+      console.error(`ExchangeRate-API returned status: ${response.status}`);
     }
   } catch (error) {
-    console.error('ExchangeRate-API failed:', error);
+    console.error('ExchangeRate-API failed:', error instanceof Error ? error.message : error);
   }
 
   // Try secondary provider: Fixer.io alternative (no API key required)
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
     const response = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json', {
-      signal: AbortSignal.timeout(5000),
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'MailWeaver/1.0'
+      },
     });
+    
+    clearTimeout(timeoutId);
     
     if (response.ok) {
       const data = await response.json();
-      const rate = data.usd.inr;
+      const rate = data?.usd?.inr;
       
-      if (rate && typeof rate === 'number') {
+      if (rate && typeof rate === 'number' && rate > 0) {
         cachedRate = {
           rate,
           timestamp: new Date(),
@@ -68,9 +89,11 @@ export async function getUSDtoINRRate(): Promise<number> {
         console.log(`Fresh rate from Currency-API: 1 USD = ${rate} INR`);
         return rate;
       }
+    } else {
+      console.error(`Currency-API returned status: ${response.status}`);
     }
   } catch (error) {
-    console.error('Currency-API failed:', error);
+    console.error('Currency-API failed:', error instanceof Error ? error.message : error);
   }
 
   // If all APIs fail, use fallback rate
