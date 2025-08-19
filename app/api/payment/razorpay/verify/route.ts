@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         razorpay_payment_id,
         razorpay_signature,
         amount: paymentAmount,
-        currency: 'USD',
+        currency: 'INR',
         status: 'captured',
         created_at: new Date(),
       },

@@ -63,7 +63,7 @@ export const verifyWebhookSignature = (
 // Create order helper
 export const createRazorpayOrder = async (
   amount: number,
-  currency: string = 'USD',
+  currency: string = 'INR',
   receipt: string,
   notes?: Record<string, string>
 ) => {
