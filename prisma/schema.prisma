@@ -191,17 +191,21 @@ model plans {
 }
 
 model user_subscriptions {
-  id                   String             @id @default(cuid())
-  user_id              String             @unique
-  plan_id              String
-  status               SubscriptionStatus
-  current_period_start DateTime
-  current_period_end   DateTime
-  cancel_at_period_end Boolean            @default(false)
-  created_at           DateTime           @default(now())
-  updated_at           DateTime           @updatedAt
-  plan                 plans              @relation(fields: [plan_id], references: [id])
-  user                 users              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id                       String             @id @default(cuid())
+  user_id                  String             @unique
+  plan_id                  String
+  status                   SubscriptionStatus
+  current_period_start     DateTime
+  current_period_end       DateTime
+  cancel_at_period_end     Boolean            @default(false)
+  created_at               DateTime           @default(now())
+  updated_at               DateTime           @updatedAt
+  razorpay_customer_id     String?
+  razorpay_subscription_id String?            @unique
+  payment_gateway          String?            @default("razorpay")
+  payments                 payments[]
+  plan                     plans              @relation(fields: [plan_id], references: [id])
+  user                     users              @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
   @@index([plan_id])
@@ -251,6 +255,24 @@ model team_members {
   @@unique([team_owner_id, user_id])
   @@index([team_owner_id])
   @@index([user_id])
+}
+
+model payments {
+  id                  String             @id @default(cuid())
+  subscription_id     String
+  razorpay_order_id   String?            @unique
+  razorpay_payment_id String?            @unique
+  razorpay_signature  String?
+  amount              Float
+  currency            String             @default("INR")
+  status              String
+  payment_method      String?
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @updatedAt
+  subscription        user_subscriptions @relation(fields: [subscription_id], references: [id], onDelete: Cascade)
+
+  @@index([subscription_id])
+  @@index([razorpay_order_id])
 }
 
 enum CampaignStatus {

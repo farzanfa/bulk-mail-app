@@ -1,0 +1,193 @@
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
+
+// Initialize Razorpay instance
+const initRazorpay = () => {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error('Razorpay credentials not found in environment variables');
+  }
+
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+};
+
+// Singleton instance
+let razorpayInstance: Razorpay | null = null;
+
+export const getRazorpayInstance = () => {
+  if (!razorpayInstance) {
+    razorpayInstance = initRazorpay();
+  }
+  return razorpayInstance;
+};
+
+// Verify payment signature
+export const verifyPaymentSignature = (
+  orderId: string,
+  paymentId: string,
+  signature: string
+): boolean => {
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!secret) {
+    throw new Error('Razorpay secret not found');
+  }
+
+  const generatedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(`${orderId}|${paymentId}`)
+    .digest('hex');
+
+  return generatedSignature === signature;
+};
+
+// Verify webhook signature
+export const verifyWebhookSignature = (
+  body: string,
+  signature: string
+): boolean => {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  if (!secret) {
+    throw new Error('Razorpay webhook secret not found');
+  }
+
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(body)
+    .digest('hex');
+
+  return expectedSignature === signature;
+};
+
+// Create order helper
+export const createRazorpayOrder = async (
+  amount: number,
+  currency: string = 'INR',
+  receipt: string,
+  notes?: Record<string, string>
+) => {
+  const razorpay = getRazorpayInstance();
+  
+  const options = {
+    amount: amount * 100, // Razorpay expects amount in paise
+    currency,
+    receipt,
+    notes,
+  };
+
+  try {
+    const order = await razorpay.orders.create(options);
+    return order;
+  } catch (error) {
+    console.error('Error creating Razorpay order:', error);
+    throw error;
+  }
+};
+
+// Create subscription helper
+export const createRazorpaySubscription = async (
+  planId: string,
+  customerId: string,
+  totalCount: number,
+  notes?: Record<string, string>
+) => {
+  const razorpay = getRazorpayInstance();
+  
+  const options = {
+    plan_id: planId,
+    customer_id: customerId,
+    total_count: totalCount,
+    notes,
+  };
+
+  try {
+    const subscription = await razorpay.subscriptions.create(options);
+    return subscription;
+  } catch (error) {
+    console.error('Error creating Razorpay subscription:', error);
+    throw error;
+  }
+};
+
+// Cancel subscription helper
+export const cancelRazorpaySubscription = async (
+  subscriptionId: string,
+  cancelAtCycleEnd: boolean = true
+) => {
+  const razorpay = getRazorpayInstance();
+  
+  try {
+    const subscription = await razorpay.subscriptions.cancel(
+      subscriptionId,
+      cancelAtCycleEnd
+    );
+    return subscription;
+  } catch (error) {
+    console.error('Error cancelling Razorpay subscription:', error);
+    throw error;
+  }
+};
+
+// Resume subscription helper
+export const resumeRazorpaySubscription = async (subscriptionId: string) => {
+  const razorpay = getRazorpayInstance();
+  
+  try {
+    const subscription = await razorpay.subscriptions.resume(
+      subscriptionId,
+      { resume_at: 'now' }
+    );
+    return subscription;
+  } catch (error) {
+    console.error('Error resuming Razorpay subscription:', error);
+    throw error;
+  }
+};
+
+// Fetch subscription details
+export const fetchRazorpaySubscription = async (subscriptionId: string) => {
+  const razorpay = getRazorpayInstance();
+  
+  try {
+    const subscription = await razorpay.subscriptions.fetch(subscriptionId);
+    return subscription;
+  } catch (error) {
+    console.error('Error fetching Razorpay subscription:', error);
+    throw error;
+  }
+};
+
+// Plan pricing configuration
+export const RAZORPAY_PLANS = {
+  starter: {
+    monthly: {
+      id: process.env.RAZORPAY_PLAN_STARTER_MONTHLY || '',
+      amount: 2900, // ₹29.00
+    },
+    yearly: {
+      id: process.env.RAZORPAY_PLAN_STARTER_YEARLY || '',
+      amount: 29000, // ₹290.00
+    },
+  },
+  professional: {
+    monthly: {
+      id: process.env.RAZORPAY_PLAN_PROFESSIONAL_MONTHLY || '',
+      amount: 7500, // ₹75.00
+    },
+    yearly: {
+      id: process.env.RAZORPAY_PLAN_PROFESSIONAL_YEARLY || '',
+      amount: 75000, // ₹750.00
+    },
+  },
+  enterprise: {
+    monthly: {
+      id: process.env.RAZORPAY_PLAN_ENTERPRISE_MONTHLY || '',
+      amount: 10000, // ₹100.00
+    },
+    yearly: {
+      id: process.env.RAZORPAY_PLAN_ENTERPRISE_YEARLY || '',
+      amount: 100000, // ₹1000.00
+    },
+  },
+};
