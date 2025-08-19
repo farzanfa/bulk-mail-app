@@ -4,7 +4,9 @@ import crypto from 'crypto';
 // Initialize Razorpay instance
 const initRazorpay = () => {
   if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-    throw new Error('Razorpay credentials not found in environment variables');
+    console.error('❌ Razorpay credentials not found in environment variables');
+    console.error('Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your .env file');
+    throw new Error('Razorpay credentials not found. Please check your .env file.');
   }
 
   return new Razorpay({
