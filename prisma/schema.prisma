@@ -8,22 +8,30 @@ datasource db {
 }
 
 model users {
-  id                  String                @id @default(cuid())
-  email               String                @unique
-  password_hash       String
-  email_verified_at   DateTime?
-  created_at          DateTime              @default(now())
-  api_keys            api_keys[]
-  audit_logs          audit_logs[]
-  campaigns           campaigns[]
-  contacts            contacts[]
-  email_usage         email_usage[]
-  email_verifications email_verifications[]
-  google_accounts     google_accounts[]
-  owned_teams         team_members[]        @relation("TeamOwner")
-  team_memberships    team_members[]        @relation("TeamMember")
-  templates           templates[]
-  uploads             uploads[]
+  id                      String                @id @default(cuid())
+  email                   String                @unique
+  password_hash           String
+  email_verified_at       DateTime?
+  created_at              DateTime              @default(now())
+  company                 String?
+  full_name               String?
+  onboarding_completed_at DateTime?
+  phone                   String?
+  purpose                 String?
+  role                    String?
+  website                 String?
+  api_keys                api_keys[]
+  audit_logs              audit_logs[]
+  campaigns               campaigns[]
+  contacts                contacts[]
+  email_usage             email_usage[]
+  email_verifications     email_verifications[]
+  google_accounts         google_accounts[]
+  owned_teams             team_members[]        @relation("TeamOwner")
+  team_memberships        team_members[]        @relation("TeamMember")
+  templates               templates[]
+  uploads                 uploads[]
+  subscription            user_subscriptions?
 }
 
 model google_accounts {
@@ -84,7 +92,7 @@ model contacts {
   unsubscribed Boolean               @default(false)
   created_at   DateTime              @default(now())
   recipients   campaign_recipients[]
-  upload       uploads?              @relation(fields: [upload_id], references: [id])
+  upload       uploads?              @relation(fields: [upload_id], references: [id], onDelete: Cascade)
   user         users                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, email])
@@ -105,10 +113,11 @@ model campaigns {
   created_at        DateTime              @default(now())
   started_at        DateTime?
   completed_at      DateTime?
+  name              String
   recipients        campaign_recipients[]
   google_account    google_accounts       @relation(fields: [google_account_id], references: [id])
   template          templates             @relation(fields: [template_id], references: [id])
-  upload            uploads               @relation(fields: [upload_id], references: [id])
+  upload            uploads               @relation(fields: [upload_id], references: [id], onDelete: Cascade)
   user              users                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
@@ -129,7 +138,7 @@ model campaign_recipients {
   last_attempt_at  DateTime?
   created_at       DateTime        @default(now())
   campaign         campaigns       @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
-  contact          contacts        @relation(fields: [contact_id], references: [id])
+  contact          contacts        @relation(fields: [contact_id], references: [id], onDelete: Cascade)
 
   @@unique([campaign_id, contact_id])
   @@index([campaign_id])
@@ -285,4 +294,18 @@ enum TeamRole {
   owner
   admin
   member
+}
+
+enum PlanType {
+  free
+  starter
+  professional
+  enterprise
+}
+
+enum SubscriptionStatus {
+  active
+  cancelled
+  expired
+  trialing
 }
