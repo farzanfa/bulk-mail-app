@@ -84,11 +84,33 @@ export default function UpgradeSection({ userEmail }: UpgradeSectionProps) {
         return;
       }
 
-      // TODO: Implement Stripe payment integration
-      alert('Payment integration is being set up. Please check back soon.');
-      setUpgradingPlanType(null);
+      // Create Stripe checkout session
+      const response = await fetch('/api/payment/stripe/create-checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          planId: selectedPlan.id,
+          billingCycle: billingPeriod,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to create checkout session');
+      }
+
+      const { checkoutUrl } = await response.json();
+
+      // Redirect to Stripe Checkout
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      } else {
+        throw new Error('No checkout URL received');
+      }
     } catch (error) {
-      console.error('Error creating order:', error);
+      console.error('Error creating checkout:', error);
       alert(error instanceof Error ? error.message : 'Failed to initiate payment. Please try again.');
       setUpgradingPlanType(null);
     }
