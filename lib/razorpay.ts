@@ -159,7 +159,9 @@ export const fetchRazorpaySubscription = async (subscriptionId: string) => {
 };
 
 // Plan pricing configuration
-// Note: Actual prices are stored in the database (plans table)
+// Note: Prices are stored in the database as USD values ($29, $75, $100)
+// When processing with Razorpay, these values are treated as INR amounts
+// This allows displaying USD prices in UI while using INR for payment processing
 // These are just the Razorpay plan IDs for subscription management
 export const RAZORPAY_PLANS = {
   starter: {

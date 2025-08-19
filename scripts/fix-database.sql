@@ -88,7 +88,7 @@ END $$;
 INSERT INTO plans (id, name, type, price_monthly, price_yearly, emails_per_month, contacts_limit, templates_limit, campaigns_limit, team_members, custom_branding, priority_support, api_access, advanced_analytics)
 VALUES 
     ('free_plan_id', 'Free Plan', 'free', 0, 0, 100, 100, 5, 5, 1, false, false, false, false),
-    ('starter_plan_id', 'Starter Plan', 'starter', 29, 290, 5000, 2500, 10, 20, 3, false, false, false, false),
-    ('professional_plan_id', 'Professional Plan', 'professional', 75, 750, 25000, 10000, 50, 100, 10, true, true, false, false),
-    ('enterprise_plan_id', 'Enterprise Plan', 'enterprise', 100, 1000, 100000, 50000, -1, -1, 50, true, true, true, true)
+    ('starter_plan_id', 'Starter Plan', 'starter', 29, 299, 5000, 2500, 10, 20, 3, false, false, false, false),
+    ('professional_plan_id', 'Professional Plan', 'professional', 75, 759, 25000, 10000, 50, 100, 10, true, true, false, false),
+    ('enterprise_plan_id', 'Enterprise Plan', 'enterprise', 100, 999, 100000, 50000, -1, -1, 50, true, true, true, true)
 ON CONFLICT (type) DO NOTHING;
