@@ -7,13 +7,21 @@ declare global {
 
 // Configure Prisma Client with connection pooling and proper timeout settings
 const prismaClientSingleton = () => {
+  // Add connection timeout to the URL if not already present
+  const databaseUrl = process.env.POSTGRES_URL || '';
+  const urlWithTimeout = databaseUrl.includes('connect_timeout') 
+    ? databaseUrl 
+    : `${databaseUrl}${databaseUrl.includes('?') ? '&' : '?'}connect_timeout=30&pool_timeout=30`;
+
   return new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
     datasources: {
       db: {
-        url: process.env.POSTGRES_URL,
+        url: urlWithTimeout,
       },
     },
+    // Add error formatting to get better error messages
+    errorFormat: 'pretty',
   });
 };
 
@@ -33,5 +41,3 @@ if (process.env.NODE_ENV === 'development') {
     await prisma.$disconnect();
   });
 }
-
-
