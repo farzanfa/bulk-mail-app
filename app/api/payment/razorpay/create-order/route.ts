@@ -50,10 +50,10 @@ export async function POST(req: NextRequest) {
       : plan.price_monthly;
 
     // Create Razorpay order
-    // Note: amount is already in rupees from database, createRazorpayOrder will convert to paise
+    // Note: amount is already in dollars from database, createRazorpayOrder will convert to cents
     const order = await createRazorpayOrder(
       amount,
-      'INR',
+      'USD',
       `order_${userId}_${Date.now()}`,
       {
         userId,

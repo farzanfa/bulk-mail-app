@@ -63,14 +63,14 @@ export const verifyWebhookSignature = (
 // Create order helper
 export const createRazorpayOrder = async (
   amount: number,
-  currency: string = 'INR',
+  currency: string = 'USD',
   receipt: string,
   notes?: Record<string, string>
 ) => {
   const razorpay = getRazorpayInstance();
   
   const options = {
-    amount: amount * 100, // Razorpay expects amount in paise
+    amount: amount * 100, // Razorpay expects amount in smallest currency unit (cents for USD, paise for INR)
     currency,
     receipt,
     notes,
