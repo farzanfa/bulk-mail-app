@@ -159,35 +159,31 @@ export const fetchRazorpaySubscription = async (subscriptionId: string) => {
 };
 
 // Plan pricing configuration
+// Note: Actual prices are stored in the database (plans table)
+// These are just the Razorpay plan IDs for subscription management
 export const RAZORPAY_PLANS = {
   starter: {
     monthly: {
       id: process.env.RAZORPAY_PLAN_STARTER_MONTHLY || '',
-      amount: 2900, // ₹29.00
     },
     yearly: {
       id: process.env.RAZORPAY_PLAN_STARTER_YEARLY || '',
-      amount: 29000, // ₹290.00
     },
   },
   professional: {
     monthly: {
       id: process.env.RAZORPAY_PLAN_PROFESSIONAL_MONTHLY || '',
-      amount: 7500, // ₹75.00
     },
     yearly: {
       id: process.env.RAZORPAY_PLAN_PROFESSIONAL_YEARLY || '',
-      amount: 75000, // ₹750.00
     },
   },
   enterprise: {
     monthly: {
       id: process.env.RAZORPAY_PLAN_ENTERPRISE_MONTHLY || '',
-      amount: 10000, // ₹100.00
     },
     yearly: {
       id: process.env.RAZORPAY_PLAN_ENTERPRISE_YEARLY || '',
-      amount: 100000, // ₹1000.00
     },
   },
 };

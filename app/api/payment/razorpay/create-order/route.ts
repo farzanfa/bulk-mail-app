@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
       : plan.price_monthly;
 
     // Create Razorpay order
+    // Note: amount is already in rupees from database, createRazorpayOrder will convert to paise
     const order = await createRazorpayOrder(
       amount,
       'INR',
@@ -98,9 +99,19 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error creating order:', error);
+    console.error('Error creating Razorpay order:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    
+    // Return more specific error message if available
+    const errorMessage = error instanceof Error 
+      ? `Failed to create order: ${error.message}`
+      : 'Failed to create order';
+      
     return NextResponse.json(
-      { error: 'Failed to create order' },
+      { error: errorMessage },
       { status: 500 }
     );
   } finally {
