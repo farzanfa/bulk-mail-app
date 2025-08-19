@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createRazorpayOrder, RAZORPAY_PLANS } from '@/lib/razorpay';
+import { convertUSDtoINR, getFormattedPrices } from '@/lib/currency-converter';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -45,14 +46,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const amount = billingCycle === 'yearly' 
+    // Get USD amount from database
+    const usdAmount = billingCycle === 'yearly' 
       ? plan.price_yearly 
       : plan.price_monthly;
 
+    // Convert USD to INR using live rates
+    const inrAmount = await convertUSDtoINR(usdAmount);
+    console.log(`Converting ${usdAmount} USD to ${inrAmount} INR for ${plan.type} plan`);
+
+    // Get formatted prices for display
+    const formattedPrices = await getFormattedPrices(usdAmount);
+
     // Create Razorpay order
-    // Note: amount is already in rupees from database, createRazorpayOrder will convert to paise
+    // Note: amount is now in INR (converted from USD), createRazorpayOrder will convert to paise
     const order = await createRazorpayOrder(
-      amount,
+      inrAmount,
       'INR',
       `order_${userId}_${Date.now()}`,
       {
@@ -60,6 +69,9 @@ export async function POST(req: NextRequest) {
         planId: plan.id,
         planType: plan.type,
         billingCycle,
+        usdAmount: usdAmount.toString(),
+        inrAmount: inrAmount.toString(),
+        conversionRate: formattedPrices.rate.toString(),
       }
     );
 
@@ -96,6 +108,16 @@ export async function POST(req: NextRequest) {
       },
       theme: {
         color: '#3B82F6',
+      },
+      // Include conversion details for transparency
+      notes: {
+        payment_note: `${formattedPrices.usd} (${formattedPrices.inr} at ${formattedPrices.rate} INR/USD)`,
+      },
+      pricing: {
+        usd: formattedPrices.usd,
+        inr: formattedPrices.inr,
+        rate: formattedPrices.rate,
+        rateSource: formattedPrices.rateSource,
       },
     });
   } catch (error) {

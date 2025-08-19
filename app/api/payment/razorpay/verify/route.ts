@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { verifyPaymentSignature } from '@/lib/razorpay';
+import { convertUSDtoINR } from '@/lib/currency-converter';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -66,9 +67,14 @@ export async function POST(req: NextRequest) {
                       subscription.plan.price_yearly <= subscription.plan.price_monthly * 12);
     
     const billingPeriodDays = isYearly ? 365 : 30;
-    const paymentAmount = isYearly 
+    
+    // Get USD amount and convert to INR
+    const usdAmount = isYearly 
       ? subscription.plan.price_yearly 
       : subscription.plan.price_monthly;
+    
+    const inrAmount = await convertUSDtoINR(usdAmount);
+    console.log(`Payment verification: ${usdAmount} USD = ${inrAmount} INR`);
 
     // Update subscription status to active
     const updatedSubscription = await prisma.user_subscriptions.update({
@@ -89,7 +95,7 @@ export async function POST(req: NextRequest) {
         razorpay_order_id,
         razorpay_payment_id,
         razorpay_signature,
-        amount: paymentAmount,
+        amount: inrAmount,
         currency: 'INR',
         status: 'captured',
         created_at: new Date(),
