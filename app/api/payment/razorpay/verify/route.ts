@@ -3,9 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { verifyPaymentSignature } from '@/lib/razorpay';
 import { convertUSDtoINR } from '@/lib/currency-converter';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
 
 export async function POST(req: NextRequest) {
   try {
@@ -114,6 +112,7 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
+    // Don't disconnect the shared Prisma instance
+    // The global instance manages its own connections
   }
 }

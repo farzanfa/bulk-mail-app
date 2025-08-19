@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import { cancelRazorpaySubscription } from '@/lib/razorpay';
-
-const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
@@ -62,6 +60,7 @@ export async function POST(request: NextRequest) {
     console.error('Error cancelling subscription:', error);
     return NextResponse.json({ error: 'Failed to cancel subscription' }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
+    // Don't disconnect the shared Prisma instance
+    // The global instance manages its own connections
   }
 }
