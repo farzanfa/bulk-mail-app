@@ -92,7 +92,7 @@ model contacts {
   unsubscribed Boolean               @default(false)
   created_at   DateTime              @default(now())
   recipients   campaign_recipients[]
-  upload       uploads?              @relation(fields: [upload_id], references: [id], onDelete: Cascade)
+  upload       uploads?              @relation(fields: [upload_id], references: [id])
   user         users                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, email])
@@ -113,11 +113,11 @@ model campaigns {
   created_at        DateTime              @default(now())
   started_at        DateTime?
   completed_at      DateTime?
-  name              String
+  name              String                @default("")
   recipients        campaign_recipients[]
   google_account    google_accounts       @relation(fields: [google_account_id], references: [id])
   template          templates             @relation(fields: [template_id], references: [id])
-  upload            uploads               @relation(fields: [upload_id], references: [id], onDelete: Cascade)
+  upload            uploads               @relation(fields: [upload_id], references: [id])
   user              users                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
@@ -138,7 +138,7 @@ model campaign_recipients {
   last_attempt_at  DateTime?
   created_at       DateTime        @default(now())
   campaign         campaigns       @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
-  contact          contacts        @relation(fields: [contact_id], references: [id], onDelete: Cascade)
+  contact          contacts        @relation(fields: [contact_id], references: [id])
 
   @@unique([campaign_id, contact_id])
   @@index([campaign_id])
@@ -219,7 +219,7 @@ model team_members {
 model plans {
   id                 String               @id @default(cuid())
   name               String
-  type               PlanType             @unique
+  type               String               @unique
   price_monthly      Float
   price_yearly       Float
   emails_per_month   Int
@@ -232,29 +232,29 @@ model plans {
   api_access         Boolean              @default(false)
   advanced_analytics Boolean              @default(false)
   created_at         DateTime             @default(now())
-  updated_at         DateTime             @updatedAt
+  updated_at         DateTime             @default(now()) @updatedAt
   user_subscriptions user_subscriptions[]
 }
 
 model user_subscriptions {
-  id                       String             @id @default(cuid())
-  user_id                  String             @unique
+  id                       String     @id @default(cuid())
+  user_id                  String     @unique
   plan_id                  String
-  status                   SubscriptionStatus
+  status                   String
   current_period_start     DateTime
   current_period_end       DateTime
-  cancel_at_period_end     Boolean            @default(false)
-  created_at               DateTime           @default(now())
-  updated_at               DateTime           @updatedAt
+  cancel_at_period_end     Boolean    @default(false)
+  created_at               DateTime   @default(now())
+  updated_at               DateTime   @default(now()) @updatedAt
   razorpay_customer_id     String?
-  razorpay_subscription_id String?            @unique
-  payment_gateway          String?            @default("razorpay")
+  razorpay_subscription_id String?    @unique
+  payment_gateway          String?    @default("razorpay")
   payments                 payments[]
-  plan                     plans              @relation(fields: [plan_id], references: [id])
-  user                     users              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  plan                     plans      @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_plan")
+  user                     users      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user")
 
-  @@index([user_id])
-  @@index([plan_id])
+  @@index([plan_id], map: "idx_user_subscriptions_plan_id")
+  @@index([user_id], map: "idx_user_subscriptions_user_id")
 }
 
 model payments {
@@ -268,11 +268,11 @@ model payments {
   status              String
   payment_method      String?
   created_at          DateTime           @default(now())
-  updated_at          DateTime           @updatedAt
-  subscription        user_subscriptions @relation(fields: [subscription_id], references: [id], onDelete: Cascade)
+  updated_at          DateTime           @default(now()) @updatedAt
+  subscription        user_subscriptions @relation(fields: [subscription_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_subscription")
 
-  @@index([subscription_id])
-  @@index([razorpay_order_id])
+  @@index([razorpay_order_id], map: "idx_payments_razorpay_order_id")
+  @@index([subscription_id], map: "idx_payments_subscription_id")
 }
 
 enum CampaignStatus {
