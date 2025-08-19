@@ -32,8 +32,6 @@ interface SubscriptionInfo {
   current_period_end: string;
   cancel_at_period_end: boolean;
   plan: PlanInfo;
-  razorpay_customer_id?: string;
-  razorpay_subscription_id?: string;
   payment_gateway?: string;
 }
 

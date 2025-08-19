@@ -200,9 +200,7 @@ model user_subscriptions {
   cancel_at_period_end     Boolean            @default(false)
   created_at               DateTime           @default(now())
   updated_at               DateTime           @updatedAt
-  razorpay_customer_id     String?            @unique
-  razorpay_subscription_id String?            @unique
-  payment_gateway          String?            @default("razorpay")
+  payment_gateway          String?            @default("stripe")
   payments                 payments[]
   plan                     plans              @relation(fields: [plan_id], references: [id])
   user                     users              @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -260,9 +258,7 @@ model team_members {
 model payments {
   id                  String             @id @default(cuid())
   subscription_id     String
-  razorpay_order_id   String?            @unique
-  razorpay_payment_id String?            @unique
-  razorpay_signature  String?
+  stripe_payment_intent_id String?            @unique
   amount              Float
   currency            String             @default("INR")
   status              String

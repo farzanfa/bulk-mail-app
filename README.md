@@ -16,8 +16,8 @@ MailWeaver is a modern bulk email platform built on Next.js 14 with Google Signâ
 - GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 - CRON_SECRET (protects cron/worker endpoints)
 - ENCRYPTION_KEY (32â€‘byte)
-- RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET (for payment processing)
-- RAZORPAY_WEBHOOK_SECRET (optional, for webhook verification)
+- STRIPE_PUBLISHABLE_KEY, STRIPE_SECRET_KEY (for payment processing)
+- STRIPE_WEBHOOK_SECRET (optional, for webhook verification)
 
 ## Features
 - Google Signâ€‘In with Gmail send (scopes: gmail.send, openid, email, profile)
@@ -28,7 +28,7 @@ MailWeaver is a modern bulk email platform built on Next.js 14 with Google Signâ
 - Daily cron trigger (compatible with Vercel Hobby); tokenâ€‘secured worker endpoints
 - Unsubscribe token and footer
 - Responsive UI; PWA meta for mobile addâ€‘toâ€‘home
-- Razorpay payment integration for subscription plans
+- Stripe payment integration for subscription plans
 
 ## Production
 - Set env vars in Vercel (Production): all above + NEXTAUTH_URL
@@ -39,10 +39,10 @@ MailWeaver is a modern bulk email platform built on Next.js 14 with Google Signâ
 ## Security & Privacy
 - Google tokens are encrypted at rest; HTTPS enforced
 - Google user data usage follows the Google API Services User Data Policy (Limited Use)
-- Payment processing handled securely through Razorpay (PCI-DSS compliant)
+- Payment processing handled securely through Stripe (PCI-DSS compliant)
 
 ## Payment Setup
-See [docs/RAZORPAY_SETUP.md](docs/RAZORPAY_SETUP.md) for detailed Razorpay configuration instructions.
+Payment integration is being set up with Stripe. Configuration instructions will be available soon.
 
 ## Developer
 - Brand: MailWeaver

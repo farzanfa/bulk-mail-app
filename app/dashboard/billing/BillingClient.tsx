@@ -29,7 +29,7 @@ interface Payment {
   currency: string;
   status: string;
   created_at: string;
-  razorpay_payment_id: string | null;
+  stripe_payment_intent_id: string | null;
 }
 
 export default function BillingClient({ userEmail }: BillingClientProps) {
