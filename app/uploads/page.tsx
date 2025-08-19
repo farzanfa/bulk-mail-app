@@ -34,7 +34,7 @@ export default function UploadsPage() {
       setLoading(true);
       const [uploadsRes, meRes] = await Promise.all([
         fetch('/api/uploads', { cache: 'no-store' }),
-        fetch('/api/me', { cache: 'no-store' })
+        fetch('/api/me', { cache: 'no-store', credentials: 'include' })
       ]);
       
       if (!uploadsRes.ok) {

@@ -13,7 +13,7 @@ export default function OnboardingPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/me', { cache: 'no-store' });
+        const res = await fetch('/api/me', { cache: 'no-store', credentials: 'include' });
         const j = await res.json();
         if (j?.user) {
           setForm({
@@ -44,7 +44,8 @@ export default function OnboardingPage() {
       const res = await fetch('/api/me', { 
         method: 'PUT', 
         headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ ...form, onboarding_completed: true }) 
+        body: JSON.stringify({ ...form, onboarding_completed: true }),
+        credentials: 'include'
       });
       if (!res.ok) throw new Error('Save failed');
       
@@ -64,7 +65,8 @@ export default function OnboardingPage() {
       const res = await fetch('/api/me', { 
         method: 'PUT', 
         headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ onboarding_completed: true }) 
+        body: JSON.stringify({ onboarding_completed: true }),
+        credentials: 'include'
       });
       if (!res.ok) throw new Error('Skip failed');
       

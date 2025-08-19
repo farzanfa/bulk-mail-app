@@ -18,7 +18,7 @@ export function CampaignNewModal({ onClose, userPlan }: { onClose: () => void; u
 
   useEffect(() => {
     (async () => {
-      const me = await fetch('/api/me', { cache: 'no-store' }).then(r => r.json());
+      const me = await fetch('/api/me', { cache: 'no-store', credentials: 'include' }).then(r => r.json());
       setGoogle(me.googleAccounts || []);
       if (me.googleAccounts && me.googleAccounts.length > 0) setGoogleId(me.googleAccounts[0].id);
       const t = await fetch('/api/templates', { cache: 'no-store' }).then(r => r.json());
