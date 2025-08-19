@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
         authenticated: !!session,
         user: session?.user?.email || null
       },
-      nextSteps: []
+      nextSteps: [] as string[]
     };
 
     // Add next steps based on what's missing
