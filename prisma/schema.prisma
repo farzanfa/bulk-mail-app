@@ -200,6 +200,8 @@ model user_subscriptions {
   cancel_at_period_end     Boolean            @default(false)
   created_at               DateTime           @default(now())
   updated_at               DateTime           @updatedAt
+  stripe_customer_id       String?            @unique
+  stripe_subscription_id   String?            @unique
   payment_gateway          String?            @default("stripe")
   payments                 payments[]
   plan                     plans              @relation(fields: [plan_id], references: [id])
@@ -256,17 +258,17 @@ model team_members {
 }
 
 model payments {
-  id                  String             @id @default(cuid())
-  subscription_id     String
+  id                       String             @id @default(cuid())
+  subscription_id          String
   stripe_payment_intent_id String?            @unique
-  amount              Float
-  currency            String             @default("INR")
-  status              String
-  payment_method      String?
-  payment_gateway     String
-  created_at          DateTime           @default(now())
-  updated_at          DateTime           @updatedAt
-  subscription        user_subscriptions @relation(fields: [subscription_id], references: [id], onDelete: Cascade)
+  amount                   Float
+  currency                 String             @default("USD")
+  status                   String
+  payment_method           String?
+  payment_gateway          String
+  created_at               DateTime           @default(now())
+  updated_at               DateTime           @updatedAt
+  subscription             user_subscriptions @relation(fields: [subscription_id], references: [id], onDelete: Cascade)
 
   @@index([subscription_id])
 }
