@@ -103,6 +103,30 @@ export default function UpgradeSection({ userEmail }: UpgradeSectionProps) {
 
       const orderData = await response.json();
 
+      // Show conversion info if available
+      if (orderData.pricing) {
+        console.log(`Price conversion: ${orderData.pricing.usd} = ${orderData.pricing.inr} (Rate: ${orderData.pricing.rate} INR/USD from ${orderData.pricing.rateSource})`);
+        
+        // Show conversion info to user
+        const conversionInfo = document.createElement('div');
+        conversionInfo.innerHTML = `
+          <div style="position: fixed; top: 20px; right: 20px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 9999;">
+            <h4 style="margin: 0 0 8px 0; font-weight: 600;">Currency Conversion</h4>
+            <p style="margin: 0; color: #6b7280; font-size: 14px;">
+              ${orderData.pricing.usd} = ${orderData.pricing.inr}<br/>
+              Rate: ₹${orderData.pricing.rate} per USD<br/>
+              <small>Source: ${orderData.pricing.rateSource}</small>
+            </p>
+          </div>
+        `;
+        document.body.appendChild(conversionInfo);
+        
+        // Remove after 10 seconds
+        setTimeout(() => {
+          conversionInfo.remove();
+        }, 10000);
+      }
+
       // Load Razorpay checkout
       const options = {
         ...orderData,
@@ -118,6 +142,7 @@ export default function UpgradeSection({ userEmail }: UpgradeSectionProps) {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
+                billingCycle: billingPeriod,
               }),
             });
 
