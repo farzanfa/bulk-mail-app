@@ -1,260 +1,109 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/db';
-import { createRazorpayOrder, amountToPaise } from '@/lib/razorpay';
-import { checkRateLimit, sanitizeReceipt, validateAmount } from '@/lib/razorpay-security';
-import { z } from 'zod';
-import { SubscriptionStatus } from '@prisma/client';
+import { createRazorpayOrder, RAZORPAY_PLANS } from '@/lib/razorpay';
+import { PrismaClient } from '@prisma/client';
 
-export const dynamic = 'force-dynamic';
+const prisma = new PrismaClient();
 
-const createOrderSchema = z.object({
-  planId: z.string(),
-  billingCycle: z.enum(['monthly', 'yearly']),
-});
-
-export async function POST(request: NextRequest) {
-  console.log('Razorpay create-order endpoint called');
-  console.log('Environment check:', {
-    hasKeyId: !!process.env.RAZORPAY_KEY_ID,
-    hasKeySecret: !!process.env.RAZORPAY_KEY_SECRET,
-    keyIdPrefix: process.env.RAZORPAY_KEY_ID?.substring(0, 8) + '...',
-  });
-  
-  let body: any;
-  let userId: string | undefined;
-  
+export async function POST(req: NextRequest) {
   try {
-    // Check if Razorpay is properly configured
-    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-      console.error('Razorpay environment variables not configured');
-      return NextResponse.json(
-        { error: 'Payment service not configured. Please contact support.' },
-        { status: 503 }
-      );
-    }
-
     const session = await getServerSession(authOptions);
-    console.log('Session check:', { hasSession: !!session, hasUser: !!session?.user });
-    
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    userId = (session as any).user.id;
-    console.log('User ID:', userId);
+    const userId = (session as any).user.id;
     if (!userId) {
       return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
     }
 
-    // Check rate limit
-    if (!checkRateLimit(userId)) {
-      return NextResponse.json(
-        { error: 'Too many payment attempts. Please try again later.' },
-        { status: 429 }
-      );
-    }
+    const { planId, billingCycle } = await req.json();
 
-    body = await request.json();
-    const validation = createOrderSchema.safeParse(body);
-    
-    if (!validation.success) {
+    if (!planId || !billingCycle) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: validation.error.errors },
+        { error: 'Plan ID and billing cycle are required' },
         { status: 400 }
       );
     }
 
-    const { planId, billingCycle } = validation.data;
-
-    // Get the plan details
-    console.log('Fetching plan:', planId);
-    let plan;
-    try {
-      // First try to find by ID
-      plan = await prisma.plans.findUnique({
-        where: { id: planId },
-      });
-      
-      // If not found by ID, try to find by type (for backward compatibility)
-      if (!plan) {
-        plan = await prisma.plans.findFirst({
-          where: { type: planId as any },
-        });
-      }
-      
-      console.log('Plan found:', { planId, found: !!plan, planName: plan?.name, planType: plan?.type });
-    } catch (dbError: any) {
-      console.error('Database error while fetching plan:', {
-        error: dbError,
-        message: dbError?.message,
-        code: dbError?.code,
-      });
-      return NextResponse.json({ error: 'Database connection error' }, { status: 500 });
-    }
+    // Get plan details from database
+    const plan = await prisma.plans.findUnique({
+      where: { id: planId },
+    });
 
     if (!plan) {
       return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
     }
 
-    // Check if plan is free
-    if (plan.type === 'free') {
-      return NextResponse.json({ error: 'Cannot create order for free plan' }, { status: 400 });
+    // Get the plan configuration
+    const planConfig = RAZORPAY_PLANS[plan.type as keyof typeof RAZORPAY_PLANS];
+    if (!planConfig) {
+      return NextResponse.json(
+        { error: 'Plan configuration not found' },
+        { status: 500 }
+      );
     }
 
-    // Get user details
-    console.log('Fetching user:', userId);
-    let user;
-    try {
-      user = await prisma.users.findUnique({
-        where: { id: userId },
-      });
-      console.log('User found:', { userId, found: !!user, email: user?.email });
-    } catch (dbError: any) {
-      console.error('Database error while fetching user:', {
-        error: dbError,
-        message: dbError?.message,
-        code: dbError?.code,
-      });
-      return NextResponse.json({ error: 'Database connection error' }, { status: 500 });
-    }
+    const amount = billingCycle === 'yearly' 
+      ? plan.price_yearly 
+      : plan.price_monthly;
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    // Create Razorpay order
+    const order = await createRazorpayOrder(
+      amount,
+      'INR',
+      `order_${userId}_${Date.now()}`,
+      {
+        userId,
+        planId: plan.id,
+        planType: plan.type,
+        billingCycle,
+      }
+    );
 
-    // Calculate amount based on billing cycle
-    const amount = billingCycle === 'yearly' ? plan.price_yearly : plan.price_monthly;
-    
-    // Validate amount
-    if (!validateAmount(amount)) {
-      return NextResponse.json({ error: 'Invalid amount' }, { status: 400 });
-    }
-    
-    const amountInPaise = amountToPaise(amount);
-
-    // Check if user has an existing subscription
+    // Get or create user subscription record
     const existingSubscription = await prisma.user_subscriptions.findUnique({
       where: { user_id: userId },
     });
 
-    // Create Razorpay order
-    const receipt = sanitizeReceipt(`sub_${userId}_${Date.now()}`);
-    console.log('Creating Razorpay order:', {
-      amount: amountInPaise,
-      currency: 'INR',
-      receipt,
-      planName: plan.name,
-      billingCycle,
-    });
-    
-    const razorpayOrder = await createRazorpayOrder({
-      amount: amountInPaise,
-      currency: 'INR',
-      receipt,
-      notes: {
-        userId,
-        planId,
-        billingCycle,
-        planName: plan.name,
-      },
-    });
-    
-    console.log('Razorpay order created:', { orderId: razorpayOrder.id, status: razorpayOrder.status });
-
-    // Create or update subscription record
-    const subscriptionData = {
-      user_id: userId,
-      plan_id: planId,
-      status: SubscriptionStatus.active, // Will be verified after payment
-      payment_gateway: 'razorpay',
-      updated_at: new Date(),
-    };
-
-    let subscription;
-    if (existingSubscription) {
-      subscription = await prisma.user_subscriptions.update({
-        where: { id: existingSubscription.id },
-        data: subscriptionData,
-      });
-    } else {
-      subscription = await prisma.user_subscriptions.create({
+    if (!existingSubscription) {
+      // Create a new subscription record with pending status
+      await prisma.user_subscriptions.create({
         data: {
-          ...subscriptionData,
+          user_id: userId,
+          plan_id: planId,
+          status: 'trialing', // Will be updated to active after payment
           current_period_start: new Date(),
-          current_period_end: new Date(Date.now() + (billingCycle === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000),
+          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+          payment_gateway: 'razorpay',
         },
       });
     }
 
-    // Create payment record
-    await prisma.payments.create({
-      data: {
-        subscription_id: subscription.id,
-        razorpay_order_id: razorpayOrder.id,
-        amount,
-        currency: 'INR',
-        status: 'pending' as const,
-        payment_gateway: 'razorpay',
-      },
-    });
-
+    // Return order details for frontend
     return NextResponse.json({
-      orderId: razorpayOrder.id,
-      amount: razorpayOrder.amount,
-      currency: razorpayOrder.currency,
       key: process.env.RAZORPAY_KEY_ID,
+      amount: order.amount,
+      currency: order.currency,
       name: 'MailApp',
-      description: `${plan.name} - ${billingCycle} subscription`,
+      description: `${plan.name} - ${billingCycle === 'yearly' ? 'Yearly' : 'Monthly'} Subscription`,
+      order_id: order.id,
       prefill: {
-        name: user.full_name || user.email,
-        email: user.email,
+        name: session.user.name || '',
+        email: session.user.email || '',
       },
       theme: {
         color: '#3B82F6',
       },
     });
-  } catch (error: any) {
-    console.error('Error creating Razorpay order - Full details:', {
-      timestamp: new Date().toISOString(),
-      error,
-      errorType: error?.constructor?.name,
-      message: error?.message,
-      code: error?.code,
-      statusCode: error?.statusCode,
-      description: error?.error?.description,
-      field: error?.error?.field,
-      source: error?.error?.source,
-      step: error?.error?.step,
-      reason: error?.error?.reason,
-      metadata: error?.error?.metadata,
-      stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined,
-      razorpayKeyId: process.env.RAZORPAY_KEY_ID ? 'Set' : 'Not set',
-      razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET ? 'Set' : 'Not set',
-      requestDetails: {
-        planId: body?.planId,
-        billingCycle: body?.billingCycle,
-        userId: userId,
-      },
-    });
-    
-    // Return more specific error message for debugging
-    const errorMessage = error?.message || 'Unknown error';
-    const errorDescription = error?.error?.description || errorMessage;
-    const isEnvError = errorMessage.includes('key_id') || errorMessage.includes('key_secret') || 
-                       errorMessage.includes('Missing Razorpay configuration');
-    
-    // Check for specific Razorpay API errors
-    const isAuthError = error?.statusCode === 401 || error?.error?.code === 'BAD_REQUEST_ERROR';
-    
-    return NextResponse.json({ 
-      error: isEnvError ? 'Payment service not configured. Please contact support.' : 
-             isAuthError ? 'Invalid payment credentials. Please contact support.' :
-             'Failed to create payment order. Please try again.',
-      details: process.env.NODE_ENV === 'development' ? errorDescription : undefined,
-      code: error?.code || error?.error?.code,
-      field: error?.error?.field,
-    }, { status: 500 });
+  } catch (error) {
+    console.error('Error creating order:', error);
+    return NextResponse.json(
+      { error: 'Failed to create order' },
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect();
   }
 }

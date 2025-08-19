@@ -48,9 +48,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: If using Razorpay, also resume the subscription in Razorpay
-    // if (subscription.razorpay_subscription_id && subscription.payment_gateway === 'razorpay') {
-    //   // Implement Razorpay subscription resume logic here
+    // TODO: If using Stripe, also resume the subscription in Stripe
+    // if (subscription.stripe_subscription_id && subscription.payment_gateway === 'stripe') {
+    //   // Implement Stripe subscription resume logic here
     // }
 
     return NextResponse.json({

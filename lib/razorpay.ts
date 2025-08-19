@@ -1,224 +1,193 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
-import { handleRazorpayError } from './razorpay-errors';
 
-// Lazy initialization of Razorpay instance
+// Initialize Razorpay instance
+const initRazorpay = () => {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error('Razorpay credentials not found in environment variables');
+  }
+
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+};
+
+// Singleton instance
 let razorpayInstance: Razorpay | null = null;
 
-function getRazorpayInstance(): Razorpay {
+export const getRazorpayInstance = () => {
   if (!razorpayInstance) {
-    // Validate environment variables
-    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-      console.error('Razorpay environment variables missing:', {
-        hasKeyId: !!process.env.RAZORPAY_KEY_ID,
-        hasKeySecret: !!process.env.RAZORPAY_KEY_SECRET,
-      });
-      throw new Error(
-        'Missing Razorpay configuration. Please ensure RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are set in your environment variables.'
-      );
-    }
-
-    console.log('Initializing Razorpay with key:', process.env.RAZORPAY_KEY_ID?.substring(0, 8) + '...');
-    razorpayInstance = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_KEY_SECRET,
-    });
+    razorpayInstance = initRazorpay();
   }
-  
   return razorpayInstance;
-}
+};
 
-// Export for backward compatibility
-export const razorpay = new Proxy({} as Razorpay, {
-  get(target, prop) {
-    const instance = getRazorpayInstance();
-    return (instance as any)[prop];
+// Verify payment signature
+export const verifyPaymentSignature = (
+  orderId: string,
+  paymentId: string,
+  signature: string
+): boolean => {
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!secret) {
+    throw new Error('Razorpay secret not found');
   }
-});
 
-// Verify Razorpay payment signature
-export function verifyRazorpaySignature({
-  orderId,
-  paymentId,
-  signature,
-}: {
-  orderId: string;
-  paymentId: string;
-  signature: string;
-}): boolean {
-  const body = orderId + '|' + paymentId;
-  const expectedSignature = crypto
-    .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
-    .update(body.toString())
+  const generatedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(`${orderId}|${paymentId}`)
     .digest('hex');
-  
+
+  return generatedSignature === signature;
+};
+
+// Verify webhook signature
+export const verifyWebhookSignature = (
+  body: string,
+  signature: string
+): boolean => {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  if (!secret) {
+    throw new Error('Razorpay webhook secret not found');
+  }
+
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(body)
+    .digest('hex');
+
   return expectedSignature === signature;
-}
+};
 
-// Create a Razorpay order
-export async function createRazorpayOrder({
-  amount,
-  currency = 'INR',
-  receipt,
-  notes = {},
-}: {
-  amount: number; // Amount in paise (100 paise = 1 INR)
-  currency?: string;
-  receipt: string;
-  notes?: Record<string, string>;
-}) {
-  console.log('createRazorpayOrder called with:', { amount, currency, receipt, notes });
+// Create order helper
+export const createRazorpayOrder = async (
+  amount: number,
+  currency: string = 'INR',
+  receipt: string,
+  notes?: Record<string, string>
+) => {
+  const razorpay = getRazorpayInstance();
+  
+  const options = {
+    amount: amount * 100, // Razorpay expects amount in paise
+    currency,
+    receipt,
+    notes,
+  };
+
+  try {
+    const order = await razorpay.orders.create(options);
+    return order;
+  } catch (error) {
+    console.error('Error creating Razorpay order:', error);
+    throw error;
+  }
+};
+
+// Create subscription helper
+export const createRazorpaySubscription = async (
+  planId: string,
+  customerId: string,
+  totalCount: number,
+  notes?: Record<string, string>
+) => {
+  const razorpay = getRazorpayInstance();
+  
+  const options = {
+    plan_id: planId,
+    customer_id: customerId,
+    total_count: totalCount,
+    notes,
+  };
+
+  try {
+    const subscription = await razorpay.subscriptions.create(options);
+    return subscription;
+  } catch (error) {
+    console.error('Error creating Razorpay subscription:', error);
+    throw error;
+  }
+};
+
+// Cancel subscription helper
+export const cancelRazorpaySubscription = async (
+  subscriptionId: string,
+  cancelAtCycleEnd: boolean = true
+) => {
+  const razorpay = getRazorpayInstance();
   
   try {
-    const orderData = {
-      amount,
-      currency,
-      receipt,
-      notes,
-    };
-    console.log('Creating order with Razorpay API:', orderData);
-    
-    const order = await razorpay.orders.create(orderData);
-    console.log('Razorpay order created successfully:', { id: order.id, status: order.status });
-    return order;
-  } catch (error: any) {
-    console.error('Error creating Razorpay order:', {
-      error,
-      message: error?.message,
-      description: error?.error?.description,
-      code: error?.error?.code,
-      statusCode: error?.statusCode,
-    });
-    throw handleRazorpayError(error);
-  }
-}
-
-// Create a Razorpay subscription
-export async function createRazorpaySubscription({
-  planId,
-  customerId,
-  totalCount,
-  notes = {},
-}: {
-  planId: string;
-  customerId?: string;
-  totalCount: number;
-  notes?: Record<string, string>;
-}) {
-  try {
-    const subscriptionData: any = {
-      plan_id: planId,
-      total_count: totalCount,
-      notes,
-    };
-    
-    // Add customer_id only if provided
-    if (customerId) {
-      subscriptionData.customer_id = customerId;
-    }
-    
-    const subscription = await razorpay.subscriptions.create(subscriptionData);
+    const subscription = await razorpay.subscriptions.cancel(
+      subscriptionId,
+      cancelAtCycleEnd
+    );
     return subscription;
-  } catch (error: any) {
-    console.error('Error creating Razorpay subscription:', error);
-    throw handleRazorpayError(error);
-  }
-}
-
-// Create a Razorpay customer
-export async function createRazorpayCustomer({
-  name,
-  email,
-  contact,
-  notes = {},
-}: {
-  name: string;
-  email: string;
-  contact?: string;
-  notes?: Record<string, string>;
-}) {
-  try {
-    const customer = await razorpay.customers.create({
-      name,
-      email,
-      contact,
-      notes,
-    });
-    return customer;
-  } catch (error: any) {
-    console.error('Error creating Razorpay customer:', error);
-    throw handleRazorpayError(error);
-  }
-}
-
-// Create Razorpay plans
-export async function createRazorpayPlan({
-  planId,
-  name,
-  amount,
-  currency = 'INR',
-  period = 'monthly',
-  interval = 1,
-  description,
-  notes = {},
-}: {
-  planId: string;
-  name: string;
-  amount: number; // Amount in paise
-  currency?: string;
-  period?: 'daily' | 'weekly' | 'monthly' | 'yearly';
-  interval?: number;
-  description?: string;
-  notes?: Record<string, string>;
-}) {
-  try {
-    const plan = await razorpay.plans.create({
-      period,
-      interval,
-      item: {
-        id: planId,
-        name,
-        amount,
-        currency,
-        description,
-      },
-      notes,
-    });
-    return plan;
-  } catch (error: any) {
-    console.error('Error creating Razorpay plan:', error);
-    throw handleRazorpayError(error);
-  }
-}
-
-// Cancel a Razorpay subscription
-export async function cancelRazorpaySubscription(subscriptionId: string) {
-  try {
-    const subscription = await razorpay.subscriptions.cancel(subscriptionId);
-    return subscription;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error cancelling Razorpay subscription:', error);
-    throw handleRazorpayError(error);
+    throw error;
   }
-}
+};
 
-// Fetch a Razorpay subscription
-export async function fetchRazorpaySubscription(subscriptionId: string) {
+// Resume subscription helper
+export const resumeRazorpaySubscription = async (subscriptionId: string) => {
+  const razorpay = getRazorpayInstance();
+  
+  try {
+    const subscription = await razorpay.subscriptions.resume(
+      subscriptionId,
+      { resume_at: 'now' }
+    );
+    return subscription;
+  } catch (error) {
+    console.error('Error resuming Razorpay subscription:', error);
+    throw error;
+  }
+};
+
+// Fetch subscription details
+export const fetchRazorpaySubscription = async (subscriptionId: string) => {
+  const razorpay = getRazorpayInstance();
+  
   try {
     const subscription = await razorpay.subscriptions.fetch(subscriptionId);
     return subscription;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching Razorpay subscription:', error);
-    throw handleRazorpayError(error);
+    throw error;
   }
-}
+};
 
-// Helper function to convert amount to paise
-export function amountToPaise(amount: number): number {
-  return Math.round(amount * 100);
-}
-
-// Helper function to convert paise to amount
-export function paiseToAmount(paise: number): number {
-  return paise / 100;
-}
+// Plan pricing configuration
+export const RAZORPAY_PLANS = {
+  starter: {
+    monthly: {
+      id: process.env.RAZORPAY_PLAN_STARTER_MONTHLY || '',
+      amount: 2900, // ₹29.00
+    },
+    yearly: {
+      id: process.env.RAZORPAY_PLAN_STARTER_YEARLY || '',
+      amount: 29000, // ₹290.00
+    },
+  },
+  professional: {
+    monthly: {
+      id: process.env.RAZORPAY_PLAN_PROFESSIONAL_MONTHLY || '',
+      amount: 7500, // ₹75.00
+    },
+    yearly: {
+      id: process.env.RAZORPAY_PLAN_PROFESSIONAL_YEARLY || '',
+      amount: 75000, // ₹750.00
+    },
+  },
+  enterprise: {
+    monthly: {
+      id: process.env.RAZORPAY_PLAN_ENTERPRISE_MONTHLY || '',
+      amount: 10000, // ₹100.00
+    },
+    yearly: {
+      id: process.env.RAZORPAY_PLAN_ENTERPRISE_YEARLY || '',
+      amount: 100000, // ₹1000.00
+    },
+  },
+};

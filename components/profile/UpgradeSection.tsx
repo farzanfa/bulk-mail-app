@@ -103,23 +103,52 @@ export default function UpgradeSection({ userEmail }: UpgradeSectionProps) {
 
       const orderData = await response.json();
 
-      // Check if Razorpay script is already loaded
-      if (typeof (window as any).Razorpay !== 'undefined') {
-        initializePayment(orderData);
-      } else {
+      // Load Razorpay checkout
+      const options = {
+        ...orderData,
+        handler: async function (response: any) {
+          // Verify payment on server
+          try {
+            const verifyResponse = await fetch('/api/payment/razorpay/verify', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+
+            if (verifyResponse.ok) {
+              alert('Payment successful! Your subscription has been upgraded.');
+              window.location.reload();
+            } else {
+              const error = await verifyResponse.json();
+              alert(error.error || 'Payment verification failed');
+            }
+          } catch (error) {
+            alert('Payment verification failed. Please contact support.');
+          }
+          setUpgradingPlanType(null);
+        },
+      };
+
+      // Check if Razorpay is loaded
+      if (typeof (window as any).Razorpay === 'undefined') {
         // Load Razorpay script
         const script = document.createElement('script');
         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
         script.async = true;
-        script.onerror = () => {
-          alert('Failed to load payment gateway. Please check your internet connection and try again.');
-          setUpgradingPlanType(null);
+        script.onload = () => {
+          const razorpay = new (window as any).Razorpay(options);
+          razorpay.open();
         };
         document.body.appendChild(script);
-
-        script.onload = () => {
-          initializePayment(orderData);
-        };
+      } else {
+        const razorpay = new (window as any).Razorpay(options);
+        razorpay.open();
       }
     } catch (error) {
       console.error('Error creating order:', error);
@@ -128,50 +157,7 @@ export default function UpgradeSection({ userEmail }: UpgradeSectionProps) {
     }
   };
 
-  const initializePayment = (orderData: any) => {
-    const options = {
-      ...orderData,
-      handler: async function (response: any) {
-        // Handle successful payment
-        try {
-          const verifyResponse = await fetch('/api/payment/razorpay/verify', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            }),
-          });
 
-          if (verifyResponse.ok) {
-            // Payment successful
-            alert('Payment successful! Your subscription has been upgraded.');
-            window.location.reload();
-          } else {
-            const errorData = await verifyResponse.json().catch(() => ({}));
-            alert(errorData.error || 'Payment verification failed. Please contact support.');
-          }
-        } catch (error) {
-          console.error('Payment verification error:', error);
-          alert('Payment verification failed. Please contact support if you were charged.');
-        } finally {
-          setUpgradingPlanType(null);
-        }
-      },
-      modal: {
-        ondismiss: function() {
-          console.log('Payment cancelled');
-          setUpgradingPlanType(null);
-        }
-      }
-    };
-
-    const razorpay = new (window as any).Razorpay(options);
-    razorpay.open();
-  };
 
   if (isLoading) {
     return (

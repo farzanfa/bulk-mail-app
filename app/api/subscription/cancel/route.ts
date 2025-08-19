@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/db';
+import { PrismaClient } from '@prisma/client';
+import { cancelRazorpaySubscription } from '@/lib/razorpay';
 
-export const dynamic = 'force-dynamic';
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,6 +34,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Cannot cancel free plan' }, { status: 400 });
     }
 
+    // Cancel the subscription in Razorpay if using Razorpay
+    if (subscription.razorpay_subscription_id && subscription.payment_gateway === 'razorpay') {
+      try {
+        await cancelRazorpaySubscription(subscription.razorpay_subscription_id, true);
+      } catch (razorpayError) {
+        console.error('Error cancelling Razorpay subscription:', razorpayError);
+        return NextResponse.json({ error: 'Failed to cancel subscription with payment provider' }, { status: 500 });
+      }
+    }
+
     // Update subscription to cancel at period end
     const updatedSubscription = await prisma.user_subscriptions.update({
       where: { id: subscription.id },
@@ -50,5 +61,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error cancelling subscription:', error);
     return NextResponse.json({ error: 'Failed to cancel subscription' }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
