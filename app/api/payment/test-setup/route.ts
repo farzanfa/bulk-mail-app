@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, plans } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -16,10 +16,10 @@ export async function GET(req: NextRequest) {
     };
 
     // Check database connection and plans
-    let plans = [];
-    let dbError = null;
+    let plansData: plans[] = [];
+    let dbError: string | null = null;
     try {
-      plans = await prisma.plans.findMany({
+      plansData = await prisma.plans.findMany({
         orderBy: { price_monthly: 'asc' }
       });
     } catch (error) {
@@ -39,8 +39,8 @@ export async function GET(req: NextRequest) {
       database: {
         connected: !dbError,
         error: dbError,
-        plansCount: plans.length,
-        plans: plans.map(p => ({
+        plansCount: plansData.length,
+        plans: plansData.map(p => ({
           id: p.id,
           name: p.name,
           type: p.type,
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
     if (dbError) {
       result.nextSteps.push('Fix database connection');
     }
-    if (plans.length === 0) {
+    if (plansData.length === 0) {
       result.nextSteps.push('Run: npx tsx scripts/seed-plans.ts');
     }
 
