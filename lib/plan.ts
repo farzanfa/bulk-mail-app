@@ -158,8 +158,6 @@ export function formatPlanName(plan: Plan): string {
       return 'Beta';
     case 'free':
       return 'Free';
-    default:
-      return plan.charAt(0).toUpperCase() + plan.slice(1);
   }
 }
 
