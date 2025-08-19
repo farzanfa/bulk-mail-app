@@ -269,7 +269,6 @@ model payments {
   subscription        user_subscriptions @relation(fields: [subscription_id], references: [id], onDelete: Cascade)
 
   @@index([subscription_id])
-  @@index([razorpay_order_id])
 }
 
 enum CampaignStatus {
