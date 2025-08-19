@@ -28,14 +28,31 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const userId = (session as any).user.id as string;
+  
+  // Check if user exists before attempting update
+  const userExists = await prisma.users.findUnique({ 
+    where: { id: userId },
+    select: { id: true }
+  });
+  
+  if (!userExists) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+  
   const body = await req.json().catch(() => ({}));
   const data: any = {};
   for (const k of ['full_name','company','website','role','purpose','phone'] as const) {
     if (typeof (body as any)[k] === 'string') (data as any)[k] = (body as any)[k];
   }
   if ((body as any).onboarding_completed === true) (data as any).onboarding_completed_at = new Date();
-  await prisma.users.update({ where: { id: userId }, data });
-  return NextResponse.json({ ok: true });
+  
+  try {
+    await prisma.users.update({ where: { id: userId }, data });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
+  }
 }
 
 
