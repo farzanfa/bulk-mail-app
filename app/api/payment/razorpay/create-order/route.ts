@@ -9,6 +9,18 @@ const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   try {
+    // Check for required environment variables first
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      console.error('❌ Missing Razorpay environment variables');
+      return NextResponse.json(
+        { 
+          error: 'Payment gateway not configured. Please contact support.',
+          details: 'Missing Razorpay credentials'
+        },
+        { status: 503 }
+      );
+    }
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -20,6 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { planId, billingCycle } = await req.json();
+    console.log(`📝 Create order request: planId=${planId}, billingCycle=${billingCycle}, userId=${userId}`);
 
     if (!planId || !billingCycle) {
       return NextResponse.json(
@@ -29,17 +42,22 @@ export async function POST(req: NextRequest) {
     }
 
     // Get plan details from database
+    console.log(`🔍 Looking for plan with ID: ${planId}`);
     const plan = await prisma.plans.findUnique({
       where: { id: planId },
     });
 
     if (!plan) {
+      console.error(`❌ Plan not found: ${planId}`);
       return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
     }
+    console.log(`✅ Found plan: ${plan.name} (${plan.type})`)
 
     // Get the plan configuration
     const planConfig = RAZORPAY_PLANS[plan.type as keyof typeof RAZORPAY_PLANS];
     if (!planConfig) {
+      console.error(`❌ Plan configuration not found for type: ${plan.type}`);
+      console.error('Available plan types:', Object.keys(RAZORPAY_PLANS));
       return NextResponse.json(
         { error: 'Plan configuration not found' },
         { status: 500 }
@@ -121,10 +139,11 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error creating Razorpay order:', error);
+    console.error('❌ Error creating Razorpay order:', error);
     console.error('Error details:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
+      type: error?.constructor?.name || 'Unknown',
     });
     
     // Return more specific error message if available
