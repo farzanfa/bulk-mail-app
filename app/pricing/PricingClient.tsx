@@ -243,7 +243,7 @@ export default function PricingPage() {
                     </div>
                   ) : session?.user ? (
                     <a 
-                      href={isFree ? "/dashboard" : `/dashboard/billing?plan=${plan.type}`}
+                      href={isFree ? "/dashboard" : `/billing?plan=${plan.type}`}
                       className={`w-full px-6 py-3 rounded-lg font-semibold text-center block transition-all duration-200 shadow-lg hover:shadow-xl ${
                         isPro 
                           ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700'
