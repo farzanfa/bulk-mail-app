@@ -42,16 +42,54 @@ export async function POST(req: NextRequest) {
 
     // Get plan details from database with retry logic
     console.log(`🔍 Looking for plan with ID: ${planId}`);
-    const plan = await withRetry(
+    let plan = await withRetry(
       () => prisma.plans.findUnique({
         where: { id: planId },
       }),
       { maxRetries: 3, initialDelay: 200 }
     );
 
+    // If plan not found by ID, try to find by type (for backward compatibility)
+    if (!plan) {
+      console.log(`⚠️ Plan not found by ID, trying to find by type...`);
+      
+      // Extract plan type from the ID if it contains it (e.g., if ID contains "starter", "professional", etc.)
+      const planTypes = ['free', 'starter', 'professional', 'enterprise'];
+      let planType = planTypes.find(type => planId.toLowerCase().includes(type));
+      
+      // If we couldn't extract from ID, check if planId itself is a plan type
+      if (!planType && planTypes.includes(planId.toLowerCase())) {
+        planType = planId.toLowerCase();
+      }
+      
+      if (planType) {
+        console.log(`🔍 Looking for plan with type: ${planType}`);
+        plan = await withRetry(
+          () => prisma.plans.findUnique({
+            where: { type: planType },
+          }),
+          { maxRetries: 3, initialDelay: 200 }
+        );
+        
+        if (plan) {
+          console.log(`✅ Found plan by type: ${plan.name} (${plan.type})`);
+        }
+      }
+    }
+
     if (!plan) {
       console.error(`❌ Plan not found: ${planId}`);
-      return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
+      console.error('Available plans in database:');
+      const availablePlans = await prisma.plans.findMany({
+        select: { id: true, type: true, name: true }
+      });
+      console.error(JSON.stringify(availablePlans, null, 2));
+      
+      return NextResponse.json({ 
+        error: 'Plan not found',
+        message: 'The selected plan does not exist. Please refresh the page and try again.',
+        planId,
+      }, { status: 404 });
     }
     console.log(`✅ Found plan: ${plan.name} (${plan.type})`)
 
