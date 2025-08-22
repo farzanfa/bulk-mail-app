@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://emailuser:emailpass@db:5432/bulk_email_db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=your-secret-key-here-change-in-production
+      - JWT_SECRET_KEY=your-jwt-secret-here-change-in-production
+      - API_KEY=your-api-key-here-change-in-production
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - FROM_EMAIL=${FROM_EMAIL:-noreply@yourdomain.com}
+      - FROM_NAME=${FROM_NAME:-Your Company}
+    depends_on:
+      - db
+      - redis
+    networks:
+      - email-network
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: celery -A celery_app worker --loglevel=info --concurrency=4
+    environment:
+      - DATABASE_URL=postgresql://emailuser:emailpass@db:5432/bulk_email_db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=your-secret-key-here-change-in-production
+      - JWT_SECRET_KEY=your-jwt-secret-here-change-in-production
+      - API_KEY=your-api-key-here-change-in-production
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - FROM_EMAIL=${FROM_EMAIL:-noreply@yourdomain.com}
+      - FROM_NAME=${FROM_NAME:-Your Company}
+    depends_on:
+      - db
+      - redis
+    networks:
+      - email-network
+    restart: unless-stopped
+
+  beat:
+    build: .
+    command: celery -A celery_app beat --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql://emailuser:emailpass@db:5432/bulk_email_db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=your-secret-key-here-change-in-production
+      - JWT_SECRET_KEY=your-jwt-secret-here-change-in-production
+      - API_KEY=your-api-key-here-change-in-production
+    depends_on:
+      - db
+      - redis
+    networks:
+      - email-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_DB=bulk_email_db
+      - POSTGRES_USER=emailuser
+      - POSTGRES_PASSWORD=emailpass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - email-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U emailuser -d bulk_email_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - email-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  email-network:
+    driver: bridge
