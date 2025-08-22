@@ -6,6 +6,9 @@ export function StatusBadge({ value }: { value: string }) {
   if (status === 'draft' || status === 'created') {
     return <Badge variant="default">Draft</Badge>;
   }
+  if (status === 'scheduled') {
+    return <Badge variant="secondary">Scheduled</Badge>;
+  }
   if (status === 'pending' || status === 'queued') {
     return <Badge variant="warning">Queued</Badge>;
   }

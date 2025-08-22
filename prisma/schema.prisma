@@ -114,6 +114,7 @@ model campaigns {
   created_at        DateTime              @default(now())
   started_at        DateTime?
   completed_at      DateTime?
+  scheduled_at      DateTime?
   name              String                @default("")
   recipients        campaign_recipients[]
   google_account    google_accounts       @relation(fields: [google_account_id], references: [id])
@@ -278,6 +279,7 @@ model payments {
 
 enum CampaignStatus {
   draft
+  scheduled
   running
   paused
   completed
