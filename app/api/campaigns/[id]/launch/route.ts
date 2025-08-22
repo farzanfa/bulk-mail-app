@@ -16,6 +16,14 @@ export async function POST(_: Request, { params }: { params: { id: string } }) {
   // Create recipients from upload contacts if not exists
   const existingCount = await prisma.campaign_recipients.count({ where: { campaign_id: campaign.id } });
   if (existingCount === 0) {
+    // If upload was deleted, we can't create new recipients
+    if (!campaign.upload_id) {
+      return NextResponse.json({ 
+        error: 'Cannot launch campaign: associated upload has been deleted. Please create a new campaign with a valid upload.',
+        uploadDeleted: true 
+      }, { status: 400 });
+    }
+    
     // Get all eligible contacts first to check against email quota
     const contacts = await prisma.contacts.findMany({ 
       where: { user_id: userId, upload_id: campaign.upload_id, unsubscribed: false }, 

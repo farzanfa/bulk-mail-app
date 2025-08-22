@@ -22,37 +22,13 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
   const upload = await prisma.uploads.findFirst({ where: { id: params.id, user_id: userId } });
   if (!upload) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   
-  // Start a transaction to ensure all deletions happen together
-  await prisma.$transaction(async (tx) => {
-    // First, delete all campaign_recipients for campaigns using this upload
-    await tx.campaign_recipients.deleteMany({
-      where: {
-        campaign: {
-          upload_id: upload.id
-        }
-      }
-    });
-    
-    // Then delete all campaigns using this upload
-    await tx.campaigns.deleteMany({
-      where: {
-        upload_id: upload.id
-      }
-    });
-    
-    // Delete all contacts associated with this upload
-    await tx.contacts.deleteMany({
-      where: {
-        upload_id: upload.id
-      }
-    });
-    
-    // Finally, delete the upload itself
-    await tx.uploads.delete({
-      where: {
-        id: upload.id
-      }
-    });
+  // Delete the upload - database will handle:
+  // - Cascading delete of contacts (via ON DELETE CASCADE)
+  // - Setting upload_id to NULL in campaigns (via ON DELETE SET NULL)
+  await prisma.uploads.delete({
+    where: {
+      id: upload.id
+    }
   });
   
   return NextResponse.json({ ok: true });
