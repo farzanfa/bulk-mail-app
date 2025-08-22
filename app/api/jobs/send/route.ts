@@ -8,6 +8,7 @@ import { createUnsubscribeToken, appendUnsubscribeFooter } from '@/lib/unsubscri
 import { getBaseUrl } from '@/lib/baseUrl';
 import { incrementEmailUsage } from '@/lib/email-usage';
 import { getPlanLimits } from '@/lib/plan';
+import { convertPlainHtmlToBranded } from '@/lib/email-template';
 
 export const runtime = 'nodejs';
 
@@ -74,6 +75,10 @@ export async function POST(req: Request) {
     const subject = renderTemplateString(template.subject, contact.fields as any);
     let html = renderTemplateString(template.html, contact.fields as any);
     let text = renderTemplateString(template.text, contact.fields as any);
+    
+    // Apply branding to HTML email
+    html = convertPlainHtmlToBranded(html, {}, hasCustomBranding);
+    
     const token = createUnsubscribeToken(campaign.user_id, contact.id);
     const link = `${getBaseUrl(req.url)}/u/${token}`;
     html = appendUnsubscribeFooter(html, link, hasCustomBranding);

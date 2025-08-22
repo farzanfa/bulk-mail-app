@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { renderTemplateString } from '@/lib/render';
 import { z } from 'zod';
 import { ensureUserIdFromSession } from '@/lib/user';
+import { convertPlainHtmlToBranded } from '@/lib/email-template';
+import { getPlanLimits } from '@/lib/plan';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -25,14 +27,24 @@ export async function POST(req: Request) {
     prisma.templates.findFirst({ where: { id: template_id, user_id: userId } })
   ]);
   if (!template) return NextResponse.json({ error: 'Template not found' }, { status: 404 });
+  
+  // Get plan limits to check for custom branding
+  const planLimits = await getPlanLimits(userId);
+  const hasCustomBranding = planLimits.customBranding;
+  
   const contacts = await prisma.contacts.findMany({ where: { user_id: userId, upload_id }, take: limit });
-  const renders = contacts.map((c) => ({
-    contact_id: c.id,
-    email: c.email,
-    subject: renderTemplateString(template.subject, c.fields as any),
-    html: renderTemplateString(template.html, c.fields as any),
-    text: renderTemplateString(template.text || '', c.fields as any)
-  }));
+  const renders = contacts.map((c) => {
+    const html = renderTemplateString(template.html, c.fields as any);
+    const brandedHtml = convertPlainHtmlToBranded(html, {}, hasCustomBranding);
+    
+    return {
+      contact_id: c.id,
+      email: c.email,
+      subject: renderTemplateString(template.subject, c.fields as any),
+      html: brandedHtml,
+      text: renderTemplateString(template.text || '', c.fields as any)
+    };
+  });
   return NextResponse.json({ renders });
 }
 
