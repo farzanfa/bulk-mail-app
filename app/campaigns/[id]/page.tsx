@@ -55,6 +55,9 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
   const [busyPause, setBusyPause] = useState(false);
   const [busyRun, setBusyRun] = useState(false);
   const [busyLaunch, setBusyLaunch] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [newScheduledAt, setNewScheduledAt] = useState('');
+  const [busyUpdateSchedule, setBusyUpdateSchedule] = useState(false);
 
   async function pause() {
     setBusyPause(true);
@@ -104,6 +107,31 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
       toast.error('Failed to launch campaign');
     } finally {
       setBusyLaunch(false);
+    }
+  }
+  
+  async function updateSchedule() {
+    setBusyUpdateSchedule(true);
+    try {
+      const res = await fetch('/api/campaigns', { 
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: id,
+          scheduled_at: newScheduledAt ? new Date(newScheduledAt).toISOString() : null
+        })
+      });
+      if (!res.ok) {
+        throw new Error('Failed to update schedule');
+      }
+      toast.success(newScheduledAt ? 'Schedule updated successfully' : 'Schedule cancelled successfully');
+      setShowScheduleModal(false);
+      await load();
+    } catch (error) {
+      console.error('Failed to update schedule:', error);
+      toast.error('Failed to update schedule');
+    } finally {
+      setBusyUpdateSchedule(false);
     }
   }
 
@@ -214,7 +242,15 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
             <div className="flex items-center gap-4">
               <StatusBadge value={c.status} />
               <div className="text-sm text-gray-600">
-                ID: <span className="font-mono text-gray-700">{id}</span>
+                {c.created_at && `Created ${new Date(c.created_at).toLocaleDateString()}`}
+                {c.scheduled_at && c.status === 'scheduled' && (
+                  <span className="ml-4 text-blue-600 font-medium">
+                    <svg className="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Scheduled for {new Date(c.scheduled_at).toLocaleString()}
+                  </span>
+                )}
               </div>
             </div>
             
@@ -241,7 +277,46 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
                 </button>
               )}
               
-              {c.status !== 'paused' && c.status !== 'draft' && (
+              {c.status === 'scheduled' && (
+                <>
+                  <button
+                    onClick={() => {
+                      setNewScheduledAt(c.scheduled_at ? new Date(c.scheduled_at).toISOString().slice(0, 16) : '');
+                      setShowScheduleModal(true);
+                    }}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                  >
+                    <span className="flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Update Schedule
+                    </span>
+                  </button>
+                  
+                  <button
+                    onClick={launch}
+                    disabled={busyLaunch}
+                    className="px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {busyLaunch ? (
+                      <span className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        Launching...
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Launch Now
+                      </span>
+                    )}
+                  </button>
+                </>
+              )}
+              
+              {c.status !== 'paused' && c.status !== 'draft' && c.status !== 'scheduled' && (
                 <button
                   onClick={pause}
                   disabled={busyPause}
@@ -570,6 +645,53 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
         cancelText="Cancel"
         variant="danger"
       />
+      
+      {/* Schedule Modal */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Update Campaign Schedule</h3>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  New Schedule Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={newScheduledAt}
+                  onChange={(e) => setNewScheduledAt(e.target.value)}
+                  min={new Date().toISOString().slice(0, 16)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              
+              <div className="text-sm text-gray-600">
+                {c.scheduled_at && (
+                  <p>Current schedule: {new Date(c.scheduled_at).toLocaleString()}</p>
+                )}
+                <p className="mt-2">Leave empty to cancel scheduling and keep as draft.</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 justify-end">
+              <Button
+                onClick={() => setShowScheduleModal(false)}
+                className="px-4 py-2"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={updateSchedule}
+                loading={busyUpdateSchedule}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Update Schedule
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

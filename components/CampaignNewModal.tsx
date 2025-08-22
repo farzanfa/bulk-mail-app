@@ -14,6 +14,8 @@ export function CampaignNewModal({ onClose, userPlan }: { onClose: () => void; u
   const [dry, setDry] = useState<any[]>([]);
   const [loadingDryRun, setLoadingDryRun] = useState(false);
   const [loadingLaunch, setLoadingLaunch] = useState(false);
+  const [scheduleForLater, setScheduleForLater] = useState(false);
+  const [scheduledAt, setScheduledAt] = useState('');
   const canDryRun = useMemo(() => Boolean(templateId && uploadId), [templateId, uploadId]);
 
   useEffect(() => {
@@ -47,14 +49,37 @@ export function CampaignNewModal({ onClose, userPlan }: { onClose: () => void; u
     if (!templateId) { alert('Select a template'); return; }
     if (!uploadId) { alert('Select an upload'); return; }
     if (!googleId) { alert('Connect/select a Google account'); return; }
+    if (scheduleForLater && !scheduledAt) { alert('Please select a date and time for scheduling'); return; }
+    
     setLoadingLaunch(true);
     try {
-      const res = await fetch('/api/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, google_account_id: googleId, template_id: templateId, upload_id: uploadId, filters: {} }) });
+      const campaignData: any = {
+        name, 
+        google_account_id: googleId, 
+        template_id: templateId, 
+        upload_id: uploadId, 
+        filters: {}
+      };
+      
+      if (scheduleForLater && scheduledAt) {
+        campaignData.scheduled_at = new Date(scheduledAt).toISOString();
+      }
+      
+      const res = await fetch('/api/campaigns', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify(campaignData) 
+      });
       const json = await res.json();
       if (!res.ok) { alert(json.error || 'Failed'); return; }
       const id = json.campaign.id;
-      const r = await fetch(`/api/campaigns/${id}/launch`, { method: 'POST' });
-      if (!r.ok) { alert('Launch failed'); return; }
+      
+      // Only launch immediately if not scheduled
+      if (!scheduleForLater) {
+        const r = await fetch(`/api/campaigns/${id}/launch`, { method: 'POST' });
+        if (!r.ok) { alert('Launch failed'); return; }
+      }
+      
       window.location.href = `/campaigns/${id}`;
     } finally {
       setLoadingLaunch(false);
@@ -153,6 +178,46 @@ export function CampaignNewModal({ onClose, userPlan }: { onClose: () => void; u
             </div>
           </div>
           </div>
+          
+          {/* Scheduling Options */}
+          <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Scheduling Options
+            </h3>
+            <div className="space-y-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={scheduleForLater}
+                  onChange={(e) => setScheduleForLater(e.target.checked)}
+                  className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-700">Schedule campaign for later</span>
+              </label>
+              
+              {scheduleForLater && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select date and time
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={scheduledAt}
+                    onChange={(e) => setScheduledAt(e.target.value)}
+                    min={new Date().toISOString().slice(0, 16)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <p className="mt-2 text-xs text-gray-500">
+                    Campaign will start automatically at the scheduled time
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+          
           <div className="flex flex-col sm:flex-row gap-3 justify-end">
             <Button 
               disabled={!canDryRun} 
@@ -175,7 +240,7 @@ export function CampaignNewModal({ onClose, userPlan }: { onClose: () => void; u
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              Launch Campaign
+              {scheduleForLater ? 'Schedule Campaign' : 'Launch Campaign'}
             </PrimaryButton>
           </div>
           {dry.length > 0 && (
