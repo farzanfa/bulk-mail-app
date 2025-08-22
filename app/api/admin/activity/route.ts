@@ -35,7 +35,7 @@ export async function GET() {
           name: true,
           status: true,
           created_at: true,
-          user: {
+          users: {
             select: { email: true }
           }
         }
@@ -54,7 +54,7 @@ export async function GET() {
           campaign: {
             select: {
               name: true,
-              user: { select: { email: true } }
+              users: { select: { email: true } }
             }
           }
         }
