@@ -40,6 +40,8 @@ model google_accounts {
   user_id                 String
   google_user_id          String
   email                   String
+  google_name             String?
+  google_picture          String?
   refresh_token_encrypted String
   access_token            String?
   token_expiry            DateTime?
