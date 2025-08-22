@@ -145,7 +145,7 @@ async function diagnoseCampaignDelivery() {
       if (user && user.subscription) {
         console.log('\n\n=== User Plan & Usage ===');
         console.log(`Current Plan: ${user.subscription.plan.name}`);
-        console.log(`Email Limit: ${user.subscription.plan.email_limit === -1 ? 'Unlimited' : user.subscription.plan.email_limit}`);
+        console.log(`Email Limit: ${user.subscription.plan.emails_per_month === -1 ? 'Unlimited' : user.subscription.plan.emails_per_month} per month`);
         console.log(`Plan Status: ${user.subscription.status}`);
         
         // Get email usage for current month
