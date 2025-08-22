@@ -25,14 +25,21 @@ export function appendUnsubscribeFooter(html: string, link: string, customBrandi
     // Custom branding: minimal footer without platform branding
     footer = `<div style="margin-top:24px;font-size:12px;color:#6b7280;text-align:center"><a href="${link}" style="color:#6b7280;text-decoration:underline">Unsubscribe</a></div>`;
   } else {
-    // Default footer with platform branding
+    // Default footer with platform branding - but this will be handled by the email template
     footer = `<div style="margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:12px;color:#6b7280;text-align:center">
-      <p style="margin:0 0 8px 0">Sent with <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://mailweaver.com'}" style="color:#8b5cf6;text-decoration:none;font-weight:500">MailWeaver</a> - Professional Email Campaigns</p>
       <p style="margin:0">If you no longer wish to receive emails, you can <a href="${link}" style="color:#6b7280;text-decoration:underline">unsubscribe here</a>.</p>
     </div>`;
   }
   
-  if (/<\/body>/i.test(html)) return html.replace(/<\/body>/i, `${footer}</body>`);
+  // Try to insert before the main content closing TD tag
+  if (/<\/td>\s*<\/tr>\s*<!--\s*Footer\s*-->/i.test(html)) {
+    return html.replace(/<\/td>(\s*<\/tr>\s*<!--\s*Footer\s*-->)/i, `${footer}</td>$1`);
+  }
+  // Fallback to inserting before </body>
+  else if (/<\/body>/i.test(html)) {
+    return html.replace(/<\/body>/i, `${footer}</body>`);
+  }
+  // If no body tag, just append
   return html + footer;
 }
 
