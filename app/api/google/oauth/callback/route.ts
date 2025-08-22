@@ -26,6 +26,8 @@ export async function GET(req: Request) {
     const me = await oauth2api.userinfo.get();
     const email = me.data.email as string;
     const google_user_id = me.data.id as string;
+    const google_name = me.data.name as string | undefined;
+    const google_picture = me.data.picture as string | undefined;
     // fetched userinfo
 
     // Determine the app user to link: prefer session user; otherwise by email
@@ -66,6 +68,8 @@ export async function GET(req: Request) {
       where: { user_id_google_user_id: { user_id: userId, google_user_id } },
       update: {
         email,
+        google_name: google_name || null,
+        google_picture: google_picture || null,
         refresh_token_encrypted: encrypt(refresh),
         access_token: tokens.access_token || null,
         token_expiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null
@@ -74,6 +78,8 @@ export async function GET(req: Request) {
         user_id: userId,
         email,
         google_user_id,
+        google_name: google_name || null,
+        google_picture: google_picture || null,
         refresh_token_encrypted: encrypt(refresh),
         access_token: tokens.access_token || null,
         token_expiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null

@@ -90,7 +90,7 @@ export async function POST(req: Request) {
         sentId = await sendGmailMessage({
           refreshTokenEncrypted: account.refresh_token_encrypted,
           fromEmail: account.email,
-          fromName: campaign.user.full_name || undefined,
+          fromName: account.google_name || campaign.user.full_name || undefined,
           toEmail: contact.email,
           subject,
           html,
