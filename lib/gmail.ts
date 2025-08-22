@@ -62,6 +62,7 @@ export function buildRawMessage({ to, from, subject, html, text }: { to: string;
 export async function sendGmailMessage(args: {
   refreshTokenEncrypted: string;
   fromEmail: string;
+  fromName?: string;
   toEmail: string;
   subject: string;
   html?: string;
@@ -74,7 +75,19 @@ export async function sendGmailMessage(args: {
   const refreshToken = decrypt(args.refreshTokenEncrypted);
   oauth2Client.setCredentials({ refresh_token: refreshToken });
   const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
-  const raw = buildRawMessage({ to: args.toEmail, from: args.fromEmail, subject: args.subject, html: args.html, text: args.text });
+  
+  // Format the from field with name if provided
+  const fromFormatted = args.fromName 
+    ? `${args.fromName} <${args.fromEmail}>` 
+    : args.fromEmail;
+  
+  const raw = buildRawMessage({ 
+    to: args.toEmail, 
+    from: fromFormatted, 
+    subject: args.subject, 
+    html: args.html, 
+    text: args.text 
+  });
   const res = await gmail.users.messages.send({ userId: 'me', requestBody: { raw } });
   return res.data.id || null;
 }

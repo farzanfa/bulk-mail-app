@@ -20,7 +20,10 @@ export async function POST(req: Request) {
   }
   if (!campaignId) return NextResponse.json({ error: 'campaignId required' }, { status: 400 });
 
-  const campaign = await prisma.campaigns.findUnique({ where: { id: campaignId } });
+  const campaign = await prisma.campaigns.findUnique({ 
+    where: { id: campaignId },
+    include: { user: true }
+  });
   if (!campaign || campaign.status !== 'running') return NextResponse.json({ ok: true });
 
   const template = await prisma.templates.findUnique({ where: { id: campaign.template_id } });
@@ -87,6 +90,7 @@ export async function POST(req: Request) {
         sentId = await sendGmailMessage({
           refreshTokenEncrypted: account.refresh_token_encrypted,
           fromEmail: account.email,
+          fromName: campaign.user.full_name || undefined,
           toEmail: contact.email,
           subject,
           html,
