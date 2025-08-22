@@ -95,7 +95,7 @@ model contacts {
   unsubscribed Boolean               @default(false)
   created_at   DateTime              @default(now())
   recipients   campaign_recipients[]
-  upload       uploads?              @relation(fields: [upload_id], references: [id])
+  upload       uploads?              @relation(fields: [upload_id], references: [id], onDelete: Cascade)
   user         users                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, email])
@@ -108,7 +108,7 @@ model campaigns {
   user_id           String
   google_account_id String
   template_id       String
-  upload_id         String
+  upload_id         String?
   filters           Json
   status            CampaignStatus
   batch_size        Int                   @default(40)
@@ -121,7 +121,7 @@ model campaigns {
   recipients        campaign_recipients[]
   google_account    google_accounts       @relation(fields: [google_account_id], references: [id])
   template          templates             @relation(fields: [template_id], references: [id])
-  upload            uploads               @relation(fields: [upload_id], references: [id])
+  upload            uploads?              @relation(fields: [upload_id], references: [id], onDelete: SetNull)
   user              users                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])

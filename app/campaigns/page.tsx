@@ -478,7 +478,7 @@ export default function CampaignsPage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-gray-600">Upload ID</span>
-                          <span className="font-medium text-gray-900 font-mono text-xs">{current.upload_id}</span>
+                          <span className="font-medium text-gray-900 font-mono text-xs">{current.upload_id || 'N/A'}</span>
                         </div>
                         {Array.isArray(current.recipients) && (
                           <div className="flex items-center justify-between">
