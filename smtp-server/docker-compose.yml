@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  smtp-server:
+    build: .
+    container_name: smtp-server
+    ports:
+      - "25:25"
+      - "587:587"
+      - "465:465"
+      - "8080:8080"
+      - "9090:9090"
+    volumes:
+      - ./config:/app/config:ro
+      - ./logs:/var/log/smtp-server
+      - mail-data:/var/mail/smtp-server
+      - dkim-keys:/etc/dkim/keys
+      - certs:/etc/ssl/certs:ro
+    environment:
+      - DATABASE_URL=postgresql://smtp:smtp123@postgres:5432/smtp_server
+      - REDIS_URL=redis://redis:6379/0
+      - TLS_CERT_PATH=/etc/ssl/certs/mail.crt
+      - TLS_KEY_PATH=/etc/ssl/certs/mail.key
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - smtp-network
+    restart: unless-stopped
+    cap_add:
+      - NET_BIND_SERVICE  # Allow binding to port 25
+
+  postgres:
+    image: postgres:14-alpine
+    container_name: smtp-postgres
+    environment:
+      - POSTGRES_USER=smtp
+      - POSTGRES_PASSWORD=smtp123
+      - POSTGRES_DB=smtp_server
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - smtp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smtp -d smtp_server"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: smtp-redis
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - smtp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Optional: Web management interface
+  smtp-web:
+    build: 
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: smtp-web
+    ports:
+      - "8081:8081"
+    environment:
+      - DATABASE_URL=postgresql://smtp:smtp123@postgres:5432/smtp_server
+      - REDIS_URL=redis://redis:6379/0
+      - API_URL=http://smtp-server:8080
+    depends_on:
+      - smtp-server
+    networks:
+      - smtp-network
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  redis-data:
+  mail-data:
+  dkim-keys:
+  certs:
+
+networks:
+  smtp-network:
+    driver: bridge
