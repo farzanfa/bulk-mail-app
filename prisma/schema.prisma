@@ -93,7 +93,7 @@ model contacts {
   unsubscribed Boolean               @default(false)
   created_at   DateTime              @default(now())
   recipients   campaign_recipients[]
-  upload       uploads?              @relation(fields: [upload_id], references: [id], onDelete: Cascade)
+  upload       uploads?              @relation(fields: [upload_id], references: [id])
   user         users                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, email])
@@ -115,10 +115,11 @@ model campaigns {
   started_at        DateTime?
   completed_at      DateTime?
   name              String                @default("")
+  scheduled_at      DateTime?
   recipients        campaign_recipients[]
   google_account    google_accounts       @relation(fields: [google_account_id], references: [id])
   template          templates             @relation(fields: [template_id], references: [id])
-  upload            uploads               @relation(fields: [upload_id], references: [id], onDelete: Cascade)
+  upload            uploads               @relation(fields: [upload_id], references: [id])
   user              users                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
