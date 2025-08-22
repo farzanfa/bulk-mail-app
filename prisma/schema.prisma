@@ -142,7 +142,7 @@ model campaign_recipients {
   last_attempt_at  DateTime?
   created_at       DateTime        @default(now())
   campaign         campaigns       @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
-  contact          contacts        @relation(fields: [contact_id], references: [id])
+  contact          contacts        @relation(fields: [contact_id], references: [id], onDelete: Cascade)
 
   @@unique([campaign_id, contact_id])
   @@index([campaign_id])
