@@ -40,13 +40,13 @@ model google_accounts {
   user_id                 String
   google_user_id          String
   email                   String
-  google_name             String?
-  google_picture          String?
   refresh_token_encrypted String
   access_token            String?
   token_expiry            DateTime?
   created_at              DateTime    @default(now())
   updated_at              DateTime    @updatedAt
+  google_name             String?
+  google_picture          String?
   campaigns               campaigns[]
   user                    users       @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
@@ -121,7 +121,7 @@ model campaigns {
   recipients        campaign_recipients[]
   google_account    google_accounts       @relation(fields: [google_account_id], references: [id])
   template          templates             @relation(fields: [template_id], references: [id])
-  upload            uploads?              @relation(fields: [upload_id], references: [id], onDelete: SetNull)
+  upload            uploads?              @relation(fields: [upload_id], references: [id])
   user              users                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
