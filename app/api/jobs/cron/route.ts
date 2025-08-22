@@ -15,6 +15,29 @@ export async function GET(req: Request) {
   ) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  
+  // Check for scheduled campaigns that should be started
+  const now = new Date();
+  const scheduledToStart = await prisma.campaigns.findMany({
+    where: {
+      status: 'scheduled',
+      scheduled_at: {
+        lte: now
+      }
+    }
+  });
+  
+  // Start scheduled campaigns
+  for (const campaign of scheduledToStart) {
+    await prisma.campaigns.update({
+      where: { id: campaign.id },
+      data: {
+        status: 'running',
+        started_at: now
+      }
+    });
+  }
+  
   // Find running campaigns and trigger background send
   const running = await prisma.campaigns.findMany({ where: { status: 'running' } });
   // In Vercel, we would enqueue background functions here; simplified: call worker route per campaign
@@ -25,7 +48,11 @@ export async function GET(req: Request) {
     })
   );
   const ok = calls.filter(c => c.status === 'fulfilled').length;
-  return NextResponse.json({ ok, total: running.length });
+  return NextResponse.json({ 
+    ok, 
+    total: running.length,
+    scheduled_started: scheduledToStart.length 
+  });
 }
 
 

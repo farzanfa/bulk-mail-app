@@ -358,6 +358,22 @@ export default function CampaignsPage() {
                           <span>{new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                         </div>
                         
+                        {c.scheduled_at && c.status === 'scheduled' && (
+                          <div className="flex items-center gap-3 text-gray-600">
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <span>Scheduled for {new Date(c.scheduled_at).toLocaleString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric', 
+                              hour: 'numeric', 
+                              minute: '2-digit'
+                            })}</span>
+                          </div>
+                        )}
+                        
                         {c.started_at && (
                           <div className="flex items-center gap-3 text-gray-600">
                             <div className="p-2 bg-green-100 rounded-lg">
