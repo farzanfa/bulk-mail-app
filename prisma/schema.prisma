@@ -115,6 +115,7 @@ model campaigns {
   started_at        DateTime?
   completed_at      DateTime?
   name              String                @default("")
+  scheduled_at      DateTime?
   recipients        campaign_recipients[]
   google_account    google_accounts       @relation(fields: [google_account_id], references: [id])
   template          templates             @relation(fields: [template_id], references: [id])
