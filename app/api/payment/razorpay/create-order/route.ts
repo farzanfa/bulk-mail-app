@@ -171,21 +171,36 @@ export async function POST(req: NextRequest) {
       console.log(`✅ Created Razorpay order: ${order.id}`);
     } catch (razorpayError) {
       console.error('❌ Razorpay order creation failed:', razorpayError);
-      
-      // Check if it's a credentials issue
-      if (razorpayError instanceof Error && 
-          (razorpayError.message.includes('key_id') || 
-           razorpayError.message.includes('key_secret') ||
-           razorpayError.message.includes('Invalid key'))) {
+      const message = razorpayError instanceof Error ? razorpayError.message : 'Unknown error';
+      const statusFromErr = (razorpayError as any)?.statusCode;
+
+      // Credentials issue
+      if (message.includes('key_id') || message.includes('key_secret') || message.includes('Invalid key')) {
         return NextResponse.json(
           { 
             error: 'Payment gateway configuration error. Please check Razorpay credentials.',
-            details: 'Invalid Razorpay API credentials'
+            details: message
           },
           { status: 503 }
         );
       }
-      
+
+      // Amount/currency validation or upstream rejection
+      if (message.includes('amount') || message.includes('currency') || statusFromErr === 400) {
+        return NextResponse.json(
+          { error: `Payment provider rejected request: ${message}` },
+          { status: 400 }
+        );
+      }
+
+      // Network/gateway errors
+      if (statusFromErr === 502 || statusFromErr === 503 || statusFromErr === 504) {
+        return NextResponse.json(
+          { error: `Payment provider unavailable. Please try again.` },
+          { status: 503 }
+        );
+      }
+
       throw razorpayError;
     }
 
