@@ -90,29 +90,7 @@ export default function AdminPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pageSize = 20;
 
-  useEffect(() => {
-    loadAdminData();
-  }, [currentPage, sortBy, sortDir]);
-
-  // Auto-refresh functionality
-  useEffect(() => {
-    if (autoRefresh) {
-      const interval = setInterval(() => {
-        loadAdminData();
-      }, 30000); // Refresh every 30 seconds
-      setRefreshInterval(interval);
-    } else if (refreshInterval) {
-      clearInterval(refreshInterval);
-      setRefreshInterval(null);
-    }
-    return () => {
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-      }
-    };
-  }, [autoRefresh]);
-
-  async function loadAdminData() {
+  const loadAdminData = useCallback(async () => {
     try {
       setLoading(true);
       const [usersRes, statsRes, activityRes, campaignsRes] = await Promise.all([
@@ -164,7 +142,29 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [currentPage, sortBy, sortDir, searchTerm]);
+
+  useEffect(() => {
+    loadAdminData();
+  }, [loadAdminData]);
+
+  // Auto-refresh functionality
+  useEffect(() => {
+    if (autoRefresh) {
+      const interval = setInterval(() => {
+        loadAdminData();
+      }, 30000); // Refresh every 30 seconds
+      setRefreshInterval(interval);
+    } else if (refreshInterval) {
+      clearInterval(refreshInterval);
+      setRefreshInterval(null);
+    }
+    return () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    };
+  }, [autoRefresh, loadAdminData, refreshInterval]);
 
   const handleSearch = () => {
     setCurrentPage(1);

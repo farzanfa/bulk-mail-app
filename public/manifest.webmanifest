@@ -1,82 +1,68 @@
 {
-  "name": "MailWeaver - Email Marketing Platform",
+  "name": "MailWeaver",
   "short_name": "MailWeaver",
-  "description": "Powerful, user-friendly bulk email marketing platform",
-  "start_url": "/",
-  "display": "standalone",
-  "orientation": "portrait-primary",
-  "theme_color": "#ffe01b",
-  "background_color": "#ffffff",
-  "scope": "/",
+  "description": "Modern bulk mailing platform",
+  "dir": "auto",
   "lang": "en-US",
-  "dir": "ltr",
+  "display": "standalone",
+  "orientation": "any",
+  "start_url": "/?homescreen=1",
+  "background_color": "#ffffff",
+  "theme_color": "#ffe01b",
   "icons": [
     {
-      "src": "/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "/android-chrome-36x36.png",
+      "sizes": "36x36",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/icon-192x192.png",
+      "src": "/android-chrome-48x48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512x512.png",
-      "sizes": "512x512",
+      "src": "/android-chrome-256x256.png",
+      "sizes": "256x256",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-maskable-192x192.png",
-      "sizes": "192x192",
+      "src": "/android-chrome-384x384.png",
+      "sizes": "384x384",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any"
     },
     {
-      "src": "/icon-maskable-512x512.png",
+      "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any"
     }
-  ],
-  "categories": ["business", "productivity", "utilities"],
-  "screenshots": [
-    {
-      "src": "/screenshot-desktop.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "MailWeaver Dashboard"
-    },
-    {
-      "src": "/screenshot-mobile.png",
-      "sizes": "360x640",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "MailWeaver Mobile View"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Create Campaign",
-      "short_name": "New Campaign",
-      "description": "Create a new email campaign",
-      "url": "/campaigns/new",
-      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Templates",
-      "short_name": "Templates",
-      "description": "Browse email templates",
-      "url": "/templates",
-      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
-    }
-  ],
-  "prefer_related_applications": false,
-  "related_applications": []
+  ]
 }
-
-

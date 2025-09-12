@@ -29,8 +29,8 @@ export default function NotFound() {
             </h1>
             
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              The page you're looking for doesn't exist or may have been moved. 
-              Don't worry, we'll help you get back on track!
+              The page you&apos;re looking for doesn&apos;t exist or may have been moved. 
+              Don&apos;t worry, we&apos;ll help you get back on track!
             </p>
           </div>
 

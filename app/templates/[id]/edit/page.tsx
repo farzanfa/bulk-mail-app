@@ -168,7 +168,7 @@ export default function EditTemplatePage({ params }: { params: { id: string } })
               </svg>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-2">Template Not Found</h3>
-            <p className="text-gray-600 mb-6">The template you're looking for doesn't exist or has been deleted.</p>
+            <p className="text-gray-600 mb-6">The template you&apos;re looking for doesn&apos;t exist or has been deleted.</p>
             <a href="/templates" className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
               Back to Templates
             </a>

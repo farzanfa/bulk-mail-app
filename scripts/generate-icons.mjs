@@ -17,10 +17,12 @@ try {
 } catch {}
 
 try {
-  const svg = readFileSync(svgPath, 'utf8');
+  // Read as Buffer so we can pass Buffer to favicons API
+  const svgBuffer = readFileSync(svgPath);
+  const svgString = svgBuffer.toString('utf8');
   
-  // Validate SVG content
-  if (!svg.trim() || !svg.includes('<svg')) {
+  // Validate SVG content (using string for validation only)
+  if (!svgString.trim() || !svgString.includes('<svg')) {
     throw new Error('Invalid SVG content');
   }
   
@@ -41,7 +43,8 @@ try {
     }
   };
   
-  const { images, files } = await favicons(svg, configuration);
+  // Pass Buffer to favicons so it doesn't treat the string as a file path
+  const { images, files } = await favicons(svgBuffer, configuration);
   
   for (const img of images) {
     writeFileSync(resolve(publicDir, img.name), img.contents);
