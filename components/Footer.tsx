@@ -36,7 +36,7 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="inline-flex items-center gap-2 group mb-4">
               <div className="relative">
-                <Image src="/icon.svg?v=2" alt="MailWeaver" width={32} height={32} className="h-8 w-8 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
+                <Image src="/icon.svg" alt="MailWeaver" width={32} height={32} priority className="h-8 w-8 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
                 <div className="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               <span className="text-xl font-bold text-gradient">MailWeaver</span>

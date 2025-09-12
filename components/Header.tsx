@@ -80,7 +80,7 @@ export default function Header({ isAdmin }: HeaderProps) {
             {/* Logo */}
             <Link href="/" aria-label="MailWeaver home" className="font-bold inline-flex items-center gap-2 group flex-shrink-0">
               <div className="relative">
-                <Image src="/icon.svg?v=2" alt="MailWeaver" width={28} height={28} className="h-6 w-6 sm:h-7 sm:w-7 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
+                <Image src="/icon.svg" alt="MailWeaver" width={28} height={28} priority className="h-6 w-6 sm:h-7 sm:w-7 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
                 <div className="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               <span className="hidden sm:inline text-base sm:text-lg font-display text-gradient">MailWeaver</span>
