@@ -71,8 +71,16 @@ export const createRazorpayOrder = async (
 ) => {
   const razorpay = getRazorpayInstance();
   
+  if (!Number.isFinite(amount) || amount <= 0) {
+    console.error('Invalid amount for Razorpay order', { amount, currency, receipt });
+    throw new Error('Invalid amount for order');
+  }
+
+  // Razorpay expects amount in smallest currency unit (paise)
+  const amountInPaise = Math.round(amount * 100);
+
   const options = {
-    amount: amount * 100, // Razorpay expects amount in smallest currency unit (cents for USD, paise for INR)
+    amount: amountInPaise,
     currency,
     receipt,
     notes,
@@ -80,10 +88,21 @@ export const createRazorpayOrder = async (
 
   try {
     const order = await razorpay.orders.create(options);
+    // Basic sanity check on returned order
+    if (!order?.id || order.amount !== amountInPaise) {
+      console.warn('Unexpected order response from Razorpay', { returnedAmount: order?.amount, expected: amountInPaise });
+    }
     return order;
   } catch (error) {
-    console.error('Error creating Razorpay order:', error);
-    throw error;
+    // Normalize Razorpay error to preserve useful description and statusCode
+    const anyErr: any = error as any;
+    const description = anyErr?.error?.description || anyErr?.message || 'Razorpay order creation failed';
+    const statusCode = anyErr?.statusCode || 502;
+    console.error('Error creating Razorpay order:', { description, statusCode, error: anyErr });
+    const normalized = new Error(description);
+    // @ts-expect-error augment for upstream handler
+    normalized.statusCode = statusCode;
+    throw normalized;
   }
 };
 
