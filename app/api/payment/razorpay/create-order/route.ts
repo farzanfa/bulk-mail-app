@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { createRazorpayOrder, RAZORPAY_PLANS } from '@/lib/razorpay';
+import { createRazorpayOrder } from '@/lib/razorpay';
 import { convertUSDtoINR, getFormattedPrices } from '@/lib/currency-converter';
 import { prisma } from '@/lib/db';
 import { withRetry } from '@/lib/prisma-retry';
@@ -93,14 +93,15 @@ export async function POST(req: NextRequest) {
     }
     console.log(`✅ Found plan: ${plan.name} (${plan.type})`)
 
-    // Get the plan configuration
-    const planConfig = RAZORPAY_PLANS[plan.type as keyof typeof RAZORPAY_PLANS];
-    if (!planConfig) {
-      console.error(`❌ Plan configuration not found for type: ${plan.type}`);
-      console.error('Available plan types:', Object.keys(RAZORPAY_PLANS));
+    // Disallow payment attempts for the free plan
+    if (plan.type === 'free' || ((plan.price_monthly || 0) === 0 && (plan.price_yearly || 0) === 0)) {
+      console.warn(`⚠️ Payment requested for free plan (${plan.id}/${plan.type}). Blocking order creation.`);
       return NextResponse.json(
-        { error: 'Plan configuration not found' },
-        { status: 500 }
+        { 
+          error: 'Free plan does not require payment',
+          action: 'downgrade'
+        },
+        { status: 400 }
       );
     }
 
