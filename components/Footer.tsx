@@ -77,12 +77,12 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.product.map((link) => (
                 <li key={link.href}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-gray-600 hover:text-primary transition-colors duration-200 text-sm"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -95,12 +95,12 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-gray-600 hover:text-primary transition-colors duration-200 text-sm inline-flex items-center gap-1"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -113,12 +113,12 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.href}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-gray-600 hover:text-primary transition-colors duration-200 text-sm"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -134,15 +134,15 @@ export default function Footer() {
             </div>
             
             <div className="flex items-center gap-6 text-sm">
-              <a href="/privacy" className="text-gray-600 hover:text-primary transition-colors duration-200">
+              <Link href="/privacy" className="text-gray-600 hover:text-primary transition-colors duration-200">
                 Privacy
-              </a>
-              <a href="/terms" className="text-gray-600 hover:text-primary transition-colors duration-200">
+              </Link>
+              <Link href="/terms" className="text-gray-600 hover:text-primary transition-colors duration-200">
                 Terms
-              </a>
-              <a href="/about" className="text-gray-600 hover:text-primary transition-colors duration-200">
+              </Link>
+              <Link href="/about" className="text-gray-600 hover:text-primary transition-colors duration-200">
                 Contact
-              </a>
+              </Link>
             </div>
           </div>
         </div>
