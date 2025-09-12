@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -8,6 +9,7 @@ import { CampaignNewModal } from '@/components/CampaignNewModal';
 import { PlanUsageCard } from '@/components/PlanUsageCard';
 import { Suspense } from 'react';
 import { getUserPlan } from '@/lib/plan';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -97,7 +99,7 @@ export default async function DashboardPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <a 
+              <Link 
                 href="/campaigns" 
                 className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
               >
@@ -105,8 +107,8 @@ export default async function DashboardPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
                 View Campaigns
-              </a>
-              <a 
+              </Link>
+              <Link 
                 href="/uploads" 
                 className="inline-flex items-center gap-2 px-5 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:border-purple-300 hover:bg-purple-50 hover:-translate-y-0.5 transition-all duration-200 shadow-sm hover:shadow-lg"
               >
@@ -114,8 +116,8 @@ export default async function DashboardPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
                 Uploads
-              </a>
-              <a 
+              </Link>
+              <Link 
                 href="/templates" 
                 className="inline-flex items-center gap-2 px-5 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:border-purple-300 hover:bg-purple-50 hover:-translate-y-0.5 transition-all duration-200 shadow-sm hover:shadow-lg"
               >
@@ -123,7 +125,7 @@ export default async function DashboardPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                 </svg>
                 Templates
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -140,9 +142,9 @@ export default async function DashboardPage() {
               {googleCount > 0 ? (
                 <Badge variant="success">Connected</Badge>
               ) : (
-                <a href="/api/google/oauth/url?redirect=1" className="text-purple-600 text-sm font-semibold hover:text-purple-700 transition-colors">
+                <Link href="/api/google/oauth/url?redirect=1" className="text-purple-600 text-sm font-semibold hover:text-purple-700 transition-colors">
                   Connect →
-                </a>
+                </Link>
               )}
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-1">{googleCount}</div>
@@ -325,12 +327,12 @@ export default async function DashboardPage() {
         <Section 
           title="Recent Campaigns" 
           actions={
-            <a href="/campaigns" className="text-sm text-purple-600 hover:text-purple-700 font-semibold transition-colors inline-flex items-center gap-1">
+            <Link href="/campaigns" className="text-sm text-purple-600 hover:text-purple-700 font-semibold transition-colors inline-flex items-center gap-1">
               View all 
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-            </a>
+            </Link>
           }
         >
           {recentCampaigns.length === 0 ? (
@@ -343,7 +345,7 @@ export default async function DashboardPage() {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">No campaigns yet</h3>
               <p className="text-gray-600 mb-8 max-w-md mx-auto">Create your first campaign to get started with email marketing and reach your audience effectively.</p>
-              <a 
+              <Link 
                 href="/campaigns/new" 
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
               >
@@ -351,12 +353,12 @@ export default async function DashboardPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
                 Create Your First Campaign
-              </a>
+              </Link>
             </Card>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {recentCampaigns.map((c: any) => (
-                <a key={c.id} href={`/campaigns/${c.id}`} className="block group">
+                <Link key={c.id} href={`/campaigns/${c.id}`} className="block group">
                   <Card className="p-6 h-full bg-white hover:shadow-lg group-hover:border-purple-200 border-2 border-transparent transition-all duration-300">
                     <div className="flex items-start justify-between gap-3 mb-4">
                       <div className="flex-1 min-w-0">
@@ -386,7 +388,7 @@ export default async function DashboardPage() {
                       </div>
                     </div>
                   </Card>
-                </a>
+                </Link>
               ))}
             </div>
           )}
@@ -399,7 +401,7 @@ export default async function DashboardPage() {
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">Quick actions to help you manage your email campaigns effectively and reach your audience.</p>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a 
+            <Link 
               href="/campaigns/new" 
               className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 text-lg"
             >
@@ -407,8 +409,8 @@ export default async function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
               New Campaign
-            </a>
-            <a 
+            </Link>
+            <Link 
               href="/uploads" 
               className="inline-flex items-center gap-3 px-8 py-4 bg-white text-gray-700 rounded-xl font-semibold border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 hover:-translate-y-0.5 transition-all duration-200 shadow-sm hover:shadow-lg text-lg"
             >
@@ -416,8 +418,8 @@ export default async function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
               Upload Contacts
-            </a>
-            <a 
+            </Link>
+            <Link 
               href="/templates" 
               className="inline-flex items-center gap-3 px-8 py-4 bg-white text-gray-700 rounded-xl font-semibold border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 hover:-translate-y-0.5 transition-all duration-200 shadow-sm hover:shadow-lg text-lg"
             >
@@ -425,7 +427,7 @@ export default async function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
               </svg>
               Browse Templates
-            </a>
+            </Link>
           </div>
         </Card>
       </div>
