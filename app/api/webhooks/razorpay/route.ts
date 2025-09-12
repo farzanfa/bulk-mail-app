@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyWebhookSignature } from '@/lib/razorpay';
 import { prisma } from '@/lib/db';
+import { kv } from '@/lib/kv';
+import crypto from 'node:crypto';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.text();
     const signature = req.headers.get('x-razorpay-signature');
+    const eventHeaderId = req.headers.get('x-razorpay-event-id');
 
     if (!signature) {
       return NextResponse.json(
@@ -23,39 +26,96 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const event = JSON.parse(body);
-    const { event: eventType, payload } = event;
-
-    switch (eventType) {
-      case 'payment.captured':
-        await handlePaymentCaptured(payload.payment.entity);
-        break;
-
-      case 'payment.failed':
-        await handlePaymentFailed(payload.payment.entity);
-        break;
-
-      case 'subscription.activated':
-        await handleSubscriptionActivated(payload.subscription.entity);
-        break;
-
-      case 'subscription.completed':
-        await handleSubscriptionCompleted(payload.subscription.entity);
-        break;
-
-      case 'subscription.cancelled':
-        await handleSubscriptionCancelled(payload.subscription.entity);
-        break;
-
-      case 'subscription.halted':
-        await handleSubscriptionHalted(payload.subscription.entity);
-        break;
-
-      default:
-        console.log(`Unhandled event type: ${eventType}`);
+    // Parse payload
+    let event: any;
+    try {
+      event = JSON.parse(body);
+    } catch (e: any) {
+      console.error('Webhook JSON parse error:', e?.message || e);
+      return NextResponse.json(
+        { error: 'Invalid JSON payload' },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ received: true });
+    // Idempotency: avoid processing the same event twice
+    const computedId = crypto.createHash('sha256').update(body).digest('hex');
+    const eventId = event?.id || eventHeaderId || computedId;
+    const dedupeKey = `rzp:webhook:${eventId}`;
+    try {
+      const already = await kv.get(dedupeKey);
+      if (already) {
+        console.log('Duplicate webhook received, skipping', { eventId, eventType: event?.event });
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+      await kv.set(dedupeKey, true, { ex: 60 * 60 * 24 }); // 24h
+    } catch (e) {
+      console.warn('KV not available for idempotency; continuing anyway');
+    }
+
+    const { event: eventType, payload } = event;
+    if (!eventType || !payload) {
+      console.error('Webhook missing required fields', { hasEvent: !!eventType, hasPayload: !!payload });
+      return NextResponse.json(
+        { error: 'Malformed webhook: missing event or payload' },
+        { status: 400 }
+      );
+    }
+
+    try {
+      switch (eventType) {
+        case 'payment.captured':
+          if (!payload?.payment?.entity) {
+            return NextResponse.json({ error: 'Missing payment entity' }, { status: 400 });
+          }
+          await handlePaymentCaptured(payload.payment.entity);
+          break;
+
+        case 'payment.failed':
+          if (!payload?.payment?.entity) {
+            return NextResponse.json({ error: 'Missing payment entity' }, { status: 400 });
+          }
+          await handlePaymentFailed(payload.payment.entity);
+          break;
+
+        case 'subscription.activated':
+          if (!payload?.subscription?.entity) {
+            return NextResponse.json({ error: 'Missing subscription entity' }, { status: 400 });
+          }
+          await handleSubscriptionActivated(payload.subscription.entity);
+          break;
+
+        case 'subscription.completed':
+          if (!payload?.subscription?.entity) {
+            return NextResponse.json({ error: 'Missing subscription entity' }, { status: 400 });
+          }
+          await handleSubscriptionCompleted(payload.subscription.entity);
+          break;
+
+        case 'subscription.cancelled':
+          if (!payload?.subscription?.entity) {
+            return NextResponse.json({ error: 'Missing subscription entity' }, { status: 400 });
+          }
+          await handleSubscriptionCancelled(payload.subscription.entity);
+          break;
+
+        case 'subscription.halted':
+          if (!payload?.subscription?.entity) {
+            return NextResponse.json({ error: 'Missing subscription entity' }, { status: 400 });
+          }
+          await handleSubscriptionHalted(payload.subscription.entity);
+          break;
+
+        default:
+          console.log(`Unhandled event type: ${eventType}`);
+          return NextResponse.json({ received: true, unhandled: eventType }, { status: 202 });
+      }
+    } catch (handlerError: any) {
+      console.error('Webhook handler error:', handlerError?.message || handlerError, { eventType });
+      return NextResponse.json({ error: 'Webhook handler failed', eventType }, { status: 500 });
+    }
+
+    return NextResponse.json({ received: true, eventId, eventType });
   } catch (error) {
     console.error('Webhook error:', error);
     return NextResponse.json(
@@ -87,6 +147,8 @@ async function handlePaymentCaptured(payment: any) {
         payment_method: method,
       },
     });
+  } else {
+    console.warn('Payment.captured received but no existing payment found', { id, order_id });
   }
 }
 
@@ -106,6 +168,8 @@ async function handlePaymentFailed(payment: any) {
         status: 'failed',
       },
     });
+  } else {
+    console.warn('Payment.failed received but no existing payment found', { id, order_id, error_description });
   }
 }
 
@@ -127,6 +191,8 @@ async function handleSubscriptionActivated(subscription: any) {
         razorpay_customer_id: customer_id,
       },
     });
+  } else {
+    console.warn('Subscription.activated received but subscription not found', { id, customer_id, status });
   }
 }
 
@@ -144,6 +210,8 @@ async function handleSubscriptionCompleted(subscription: any) {
         status: 'expired',
       },
     });
+  } else {
+    console.warn('Subscription.completed received but subscription not found', { id });
   }
 }
 
@@ -162,6 +230,8 @@ async function handleSubscriptionCancelled(subscription: any) {
         cancel_at_period_end: true,
       },
     });
+  } else {
+    console.warn('Subscription.cancelled received but subscription not found', { id });
   }
 }
 
@@ -179,5 +249,7 @@ async function handleSubscriptionHalted(subscription: any) {
         status: 'expired',
       },
     });
+  } else {
+    console.warn('Subscription.halted received but subscription not found', { id });
   }
 }

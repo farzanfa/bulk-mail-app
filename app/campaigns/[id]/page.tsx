@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Section, Button, Input, Select } from '@/components/ui';
 import { ConfirmButton } from '@/components/confirm';
 import { StatusBadge } from '@/components/status';
@@ -171,13 +172,13 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
               </svg>
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">Campaign Not Found</h3>
-            <p className="text-gray-600 mb-4">The campaign you're looking for doesn't exist or has been deleted.</p>
-            <a href="/campaigns" className="inline-flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-lg transition-all duration-200">
+            <p className="text-gray-600 mb-4">The campaign you&apos;re looking for doesn&apos;t exist or has been deleted.</p>
+            <Link href="/campaigns" className="inline-flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-lg transition-all duration-200">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               Back to Campaigns
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -190,7 +191,7 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-12">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4 mb-4">
-            <a
+            <Link
               href="/campaigns"
               className="inline-flex items-center gap-2 px-4 py-2 text-white/90 hover:text-white bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg transition-all duration-200"
             >
@@ -198,7 +199,7 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               Back to Campaigns
-            </a>
+            </Link>
           </div>
           <h1 className="text-4xl font-bold text-white mb-2">
             {c.name || `Campaign ${id}`}
