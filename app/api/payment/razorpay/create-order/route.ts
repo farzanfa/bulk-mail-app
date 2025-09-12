@@ -154,10 +154,15 @@ export async function POST(req: NextRequest) {
     let order;
     try {
       // Note: amount is now in INR (converted from USD), createRazorpayOrder will convert to paise
+      // Razorpay receipt must be <= 40 chars. Use compact unique format and enforce cap.
+      const compactUser = userId.replace(/[^a-zA-Z0-9]/g, '').slice(-10);
+      const baseReceipt = `o_${Date.now().toString(36)}_${compactUser}`;
+      const receipt = baseReceipt.slice(0, 40);
+
       order = await createRazorpayOrder(
         inrAmount,
         'INR',
-        `order_${userId}_${Date.now()}`,
+        receipt,
         {
           userId,
           planId: plan.id,
