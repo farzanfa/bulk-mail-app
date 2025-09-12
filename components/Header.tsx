@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { IconButton } from './ui';
@@ -76,13 +78,13 @@ export default function Header({ isAdmin }: HeaderProps) {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
-            <a href="/" aria-label="MailWeaver home" className="font-bold inline-flex items-center gap-2 group flex-shrink-0">
+            <Link href="/" aria-label="MailWeaver home" className="font-bold inline-flex items-center gap-2 group flex-shrink-0">
               <div className="relative">
-                <img src="/icon.svg?v=2" alt="MailWeaver" className="h-6 w-6 sm:h-7 sm:w-7 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12"/>
+                <Image src="/icon.svg?v=2" alt="MailWeaver" width={28} height={28} className="h-6 w-6 sm:h-7 sm:w-7 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
                 <div className="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               <span className="hidden sm:inline text-base sm:text-lg font-display text-gradient">MailWeaver</span>
-            </a>
+            </Link>
             
             {/* Desktop Navigation - Hidden on smaller screens */}
             <nav className="hidden lg:flex items-center gap-1 text-sm flex-1 justify-center px-4">
