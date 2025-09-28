@@ -13,7 +13,7 @@ interface RateLimitConfig {
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 export class RateLimiter {
-  private config: {
+  private _config: {
     windowMs: number;
     maxRequests: number;
     message: string;
@@ -22,7 +22,7 @@ export class RateLimiter {
   };
 
   constructor(config: RateLimitConfig) {
-    this.config = {
+    this._config = {
       windowMs: config.windowMs ?? 15 * 60 * 1000, // 15 minutes default
       maxRequests: config.maxRequests ?? 100,
       message: config.message ?? 'Too many requests, please try again later.',
@@ -31,9 +31,14 @@ export class RateLimiter {
     };
   }
 
+  // Public getter to access configuration
+  get config() {
+    return this._config;
+  }
+
   check(identifier: string): { allowed: boolean; remaining: number; resetTime: number } {
     const now = Date.now();
-    const windowStart = now - this.config.windowMs;
+    const windowStart = now - this._config.windowMs;
     
     // Clean up expired entries
     for (const [key, value] of rateLimitStore.entries()) {
@@ -42,19 +47,19 @@ export class RateLimiter {
       }
     }
 
-    const current = rateLimitStore.get(identifier) || { count: 0, resetTime: now + this.config.windowMs };
+    const current = rateLimitStore.get(identifier) || { count: 0, resetTime: now + this._config.windowMs };
     
     if (current.resetTime < now) {
       current.count = 0;
-      current.resetTime = now + this.config.windowMs;
+      current.resetTime = now + this._config.windowMs;
     }
 
     current.count++;
     rateLimitStore.set(identifier, current);
 
     return {
-      allowed: current.count <= this.config.maxRequests,
-      remaining: Math.max(0, this.config.maxRequests - current.count),
+      allowed: current.count <= this._config.maxRequests,
+      remaining: Math.max(0, this._config.maxRequests - current.count),
       resetTime: current.resetTime
     };
   }
