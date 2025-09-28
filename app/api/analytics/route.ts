@@ -4,33 +4,36 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { getPlanLimits } from '@/lib/plan';
 import { ensureUserIdFromSession } from '@/lib/user';
+import { optimizedQueries, queryCache } from '@/lib/query-cache';
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
   const userId = await ensureUserIdFromSession(session).catch(() => '');
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   
-  // Get user's plan to determine analytics level
-  const planLimits = await getPlanLimits(userId);
+  // Get user's plan to determine analytics level (with caching)
+  const cacheKey = queryCache.planLimits(userId);
+  let planLimits = queryCache.get(cacheKey);
+  if (!planLimits) {
+    planLimits = await getPlanLimits(userId);
+    queryCache.set(cacheKey, planLimits, 10 * 60 * 1000); // 10 minutes
+  }
   const hasAdvancedAnalytics = planLimits.advancedAnalytics;
   
-  // Basic analytics (available to all)
+  // Basic analytics (available to all) - use optimized queries
+  const userStats = await optimizedQueries.getUserStatsWithCache(userId);
   const [
-    totalCampaigns,
-    totalContacts,
     totalSent,
     totalFailed
   ] = await Promise.all([
-    prisma.campaigns.count({ where: { user_id: userId } }),
-    prisma.contacts.count({ where: { user_id: userId } }),
     prisma.campaign_recipients.count({ where: { status: 'sent', campaign: { user_id: userId } } }),
     prisma.campaign_recipients.count({ where: { status: 'failed', campaign: { user_id: userId } } })
   ]);
   
   const basicAnalytics = {
     overview: {
-      totalCampaigns,
-      totalContacts,
+      totalCampaigns: userStats.totalCampaigns,
+      totalContacts: userStats.totalContacts,
       totalSent,
       totalFailed,
       successRate: totalSent > 0 ? ((totalSent / (totalSent + totalFailed)) * 100).toFixed(2) : 0

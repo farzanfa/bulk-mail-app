@@ -11,7 +11,7 @@ const prismaClientSingleton = () => {
   const databaseUrl = process.env.POSTGRES_URL || '';
   const urlWithTimeout = databaseUrl.includes('connect_timeout') 
     ? databaseUrl 
-    : `${databaseUrl}${databaseUrl.includes('?') ? '&' : '?'}connect_timeout=30&pool_timeout=30`;
+    : `${databaseUrl}${databaseUrl.includes('?') ? '&' : '?'}connect_timeout=30&pool_timeout=30&statement_timeout=30000&idle_in_transaction_session_timeout=60000`;
 
   return new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
@@ -22,6 +22,11 @@ const prismaClientSingleton = () => {
     },
     // Add error formatting to get better error messages
     errorFormat: 'pretty',
+    // Performance optimizations
+    transactionOptions: {
+      maxWait: 10000, // 10 seconds
+      timeout: 30000, // 30 seconds
+    },
   });
 };
 
