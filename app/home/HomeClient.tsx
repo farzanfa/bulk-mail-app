@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState, memo, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { Card } from '@/components/ui';
 
@@ -20,23 +20,20 @@ export default function HomeClient() {
     return () => clearInterval(id);
   }, [taglines.length]);
 
-  const fetchStats = useCallback(async () => {
-    try {
-      const r = await fetch('/api/public/stats', { cache: 'no-store' });
-      const j = await r.json();
-      if (!r.ok) return;
-      targets.current = { campaigns: Number(j.campaigns || 0), contacts: Number(j.contacts || 0), deliverability: Number(j.deliverability || 98) };
-    } catch {}
-  }, []);
-
   useEffect(() => {
     let active = true;
-    let raf = 0;
-    
-    const animate = (start: number) => {
+    (async () => {
+      try {
+        const r = await fetch('/api/public/stats', { cache: 'no-store' });
+        const j = await r.json();
+        if (!r.ok) return;
+        targets.current = { campaigns: Number(j.campaigns || 0), contacts: Number(j.contacts || 0), deliverability: Number(j.deliverability || 98) };
+      } catch {}
+      let raf = 0;
+      const start = performance.now();
       const duration = 2000;
       const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
-      const animateFrame = (t: number) => {
+      const animate = (t: number) => {
         if (!active) return;
         const p = Math.min(1, (t - start) / duration);
         const easedP = easeOut(p);
@@ -45,22 +42,13 @@ export default function HomeClient() {
           contacts: Math.round(targets.current.contacts * easedP),
           deliverability: Math.round(targets.current.deliverability * easedP),
         });
-        if (p < 1) raf = requestAnimationFrame(animateFrame);
+        if (p < 1) raf = requestAnimationFrame(animate);
       };
-      raf = requestAnimationFrame(animateFrame);
-    };
-
-    fetchStats().then(() => {
-      if (active) {
-        animate(performance.now());
-      }
-    });
-
-    return () => { 
-      active = false; 
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [fetchStats]);
+      raf = requestAnimationFrame(animate);
+      return () => cancelAnimationFrame(raf);
+    })();
+    return () => { active = false; };
+  }, []);
 
   const testimonials = useMemo(() => [
     { name: 'Growth Lead, DTC brand', quote: 'We reached 25k subscribers in under an hour. Zero deliverability issues.' },

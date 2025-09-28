@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Section, Button, Input, Select } from '@/components/ui';
 import { ConfirmButton } from '@/components/confirm';
@@ -23,7 +23,7 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
   const [deleteMessage, setDeleteMessage] = useState('');
   const pageSize = 50;
 
-  const load = useCallback(async () => {
+  async function load() {
     try {
       setLoading(true);
       const [cRes, rRes] = await Promise.all([
@@ -47,11 +47,11 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false);
     }
-  }, [id, page, searchTerm, statusFilter, sortBy, sortDir]);
+  }
 
   useEffect(() => { 
     load(); 
-  }, [load]);
+  }, [id, page, searchTerm, statusFilter, sortBy, sortDir]);
 
   const [busyPause, setBusyPause] = useState(false);
   const [busyRun, setBusyRun] = useState(false);

@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     

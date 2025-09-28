@@ -1,23 +1,29 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { verifyWebhookSignature } from '@/lib/razorpay';
 import { prisma } from '@/lib/db';
 import { kv } from '@/lib/kv';
-// Webhook verification is handled by razorpay.ts which uses Web Crypto API
+import crypto from 'node:crypto';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.text();
     const signature = req.headers.get('x-razorpay-signature');
     const eventHeaderId = req.headers.get('x-razorpay-event-id');
 
     if (!signature) {
-      return Response.json({ error: 'No signature provided' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'No signature provided' },
+        { status: 401 }
+      );
     }
 
     // Verify webhook signature
-    const isValid = await verifyWebhookSignature(body, signature);
+    const isValid = verifyWebhookSignature(body, signature);
     if (!isValid) {
-      return Response.json({ error: 'Invalid signature' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      );
     }
 
     // Parse payload
@@ -26,23 +32,21 @@ export async function POST(req: Request) {
       event = JSON.parse(body);
     } catch (e: any) {
       console.error('Webhook JSON parse error:', e?.message || e);
-      return Response.json({ error: 'Invalid JSON payload' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid JSON payload' },
+        { status: 400 }
+      );
     }
 
     // Idempotency: avoid processing the same event twice
-    const encoder = new TextEncoder();
-    const data = encoder.encode(body);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const computedId = Array.from(new Uint8Array(hashBuffer))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
+    const computedId = crypto.createHash('sha256').update(body).digest('hex');
     const eventId = event?.id || eventHeaderId || computedId;
     const dedupeKey = `rzp:webhook:${eventId}`;
     try {
       const already = await kv.get(dedupeKey);
       if (already) {
         console.log('Duplicate webhook received, skipping', { eventId, eventType: event?.event });
-        return Response.json({ received: true, duplicate: true });
+        return NextResponse.json({ received: true, duplicate: true });
       }
       await kv.set(dedupeKey, true, { ex: 60 * 60 * 24 }); // 24h
     } catch (e) {
@@ -52,66 +56,72 @@ export async function POST(req: Request) {
     const { event: eventType, payload } = event;
     if (!eventType || !payload) {
       console.error('Webhook missing required fields', { hasEvent: !!eventType, hasPayload: !!payload });
-      return Response.json({ error: 'Malformed webhook: missing event or payload' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Malformed webhook: missing event or payload' },
+        { status: 400 }
+      );
     }
 
     try {
       switch (eventType) {
         case 'payment.captured':
           if (!payload?.payment?.entity) {
-            return Response.json({ error: 'Missing payment entity' }, { status: 400 });
+            return NextResponse.json({ error: 'Missing payment entity' }, { status: 400 });
           }
           await handlePaymentCaptured(payload.payment.entity);
           break;
 
         case 'payment.failed':
           if (!payload?.payment?.entity) {
-            return Response.json({ error: 'Missing payment entity' }, { status: 400 });
+            return NextResponse.json({ error: 'Missing payment entity' }, { status: 400 });
           }
           await handlePaymentFailed(payload.payment.entity);
           break;
 
         case 'subscription.activated':
           if (!payload?.subscription?.entity) {
-            return Response.json({ error: 'Missing subscription entity' }, { status: 400 });
+            return NextResponse.json({ error: 'Missing subscription entity' }, { status: 400 });
           }
           await handleSubscriptionActivated(payload.subscription.entity);
           break;
 
         case 'subscription.completed':
           if (!payload?.subscription?.entity) {
-            return Response.json({ error: 'Missing subscription entity' }, { status: 400 });
+            return NextResponse.json({ error: 'Missing subscription entity' }, { status: 400 });
           }
           await handleSubscriptionCompleted(payload.subscription.entity);
           break;
 
         case 'subscription.cancelled':
           if (!payload?.subscription?.entity) {
-            return Response.json({ error: 'Missing subscription entity' }, { status: 400 });
+            return NextResponse.json({ error: 'Missing subscription entity' }, { status: 400 });
           }
           await handleSubscriptionCancelled(payload.subscription.entity);
           break;
 
         case 'subscription.halted':
           if (!payload?.subscription?.entity) {
-            return Response.json({ error: 'Missing subscription entity' }, { status: 400 });
+            return NextResponse.json({ error: 'Missing subscription entity' }, { status: 400 });
           }
           await handleSubscriptionHalted(payload.subscription.entity);
           break;
 
         default:
           console.log(`Unhandled event type: ${eventType}`);
-          return Response.json({ received: true, unhandled: eventType }, { status: 202 });
+          return NextResponse.json({ received: true, unhandled: eventType }, { status: 202 });
       }
     } catch (handlerError: any) {
       console.error('Webhook handler error:', handlerError?.message || handlerError, { eventType });
-      return Response.json({ error: 'Webhook handler failed', eventType }, { status: 500 });
+      return NextResponse.json({ error: 'Webhook handler failed', eventType }, { status: 500 });
     }
 
-    return Response.json({ received: true, eventId, eventType });
+    return NextResponse.json({ received: true, eventId, eventType });
   } catch (error) {
     console.error('Webhook error:', error);
-    return Response.json({ error: 'Webhook processing failed' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Webhook processing failed' },
+      { status: 500 }
+    );
   } finally {
     // Don't disconnect the shared Prisma instance
     // The global instance manages its own connections

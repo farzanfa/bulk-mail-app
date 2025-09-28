@@ -5,7 +5,7 @@ import { verifyPaymentSignature } from '@/lib/razorpay';
 import { convertUSDtoINR } from '@/lib/currency-converter';
 import { prisma } from '@/lib/db';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

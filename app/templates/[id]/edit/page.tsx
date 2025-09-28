@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Section, Card, Input, PrimaryButton, Button } from '@/components/ui';
@@ -29,7 +29,11 @@ export default function EditTemplatePage({ params }: { params: { id: string } })
   // Extract variables from template content
   const vars = extractVars(subject + ' ' + html);
 
-  const loadTemplate = useCallback(async () => {
+  useEffect(() => {
+    loadTemplate();
+  }, [templateId]);
+
+  async function loadTemplate() {
     try {
       setLoading(true);
       const res = await fetch(`/api/templates/${templateId}`, { cache: 'no-store' });
@@ -55,11 +59,7 @@ export default function EditTemplatePage({ params }: { params: { id: string } })
     } finally {
       setLoading(false);
     }
-  }, [templateId, router]);
-
-  useEffect(() => {
-    loadTemplate();
-  }, [loadTemplate]);
+  }
 
   async function onUpdateTemplate(e: React.FormEvent) {
     e.preventDefault();

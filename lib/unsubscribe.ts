@@ -1,43 +1,20 @@
+import crypto from 'node:crypto';
+
 const HMAC_KEY = process.env.NEXTAUTH_SECRET || process.env.ENCRYPTION_KEY || 'changeme';
 
-// Helper function to create HMAC using Web Crypto API
-async function createHMAC(data: string, key: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const keyData = encoder.encode(key);
-  const messageData = encoder.encode(data);
-
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw',
-    keyData,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-
-  const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
-  const hashArray = Array.from(new Uint8Array(signature));
-  return btoa(String.fromCharCode(...hashArray));
-}
-
-// Helper function to verify HMAC using Web Crypto API
-async function verifyHMAC(data: string, key: string, signature: string): Promise<boolean> {
-  const expectedSignature = await createHMAC(data, key);
-  return signature === expectedSignature;
-}
-
-export async function createUnsubscribeToken(userId: string, contactId: string): Promise<string> {
+export function createUnsubscribeToken(userId: string, contactId: string): string {
   const base = `${userId}:${contactId}`;
-  const sig = await createHMAC(base, HMAC_KEY);
+  const sig = crypto.createHmac('sha256', HMAC_KEY).update(base).digest('base64url');
   return `${base}:${sig}`;
 }
 
-export async function verifyUnsubscribeToken(token: string): Promise<{ userId: string; contactId: string } | null> {
+export function verifyUnsubscribeToken(token: string): { userId: string; contactId: string } | null {
   const parts = token.split(':');
   if (parts.length !== 3) return null;
   const [userId, contactId, sig] = parts;
   const base = `${userId}:${contactId}`;
-  const isValid = await verifyHMAC(base, HMAC_KEY, sig);
-  if (!isValid) return null;
+  const expected = crypto.createHmac('sha256', HMAC_KEY).update(base).digest('base64url');
+  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
   return { userId, contactId };
 }
 

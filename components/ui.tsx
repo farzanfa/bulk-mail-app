@@ -1,18 +1,17 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, HTMLAttributes } from 'react';
-import { memo } from 'react';
 
-const Spinner = memo(function Spinner({ className = '' }: { className?: string }) {
+function Spinner({ className = '' }: { className?: string }) {
   return (
     <svg className={`animate-spin h-4 w-4 ${className}`} viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
     </svg>
   );
-});
+}
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { loading?: boolean };
 
-export const Button = memo(function Button({ className = '', loading = false, children, disabled, ...props }: BtnProps) {
+export function Button({ className = '', loading = false, children, disabled, ...props }: BtnProps) {
   const isDisabled = disabled || loading;
   return (
     <button
@@ -31,9 +30,9 @@ export const Button = memo(function Button({ className = '', loading = false, ch
       <span>{children}</span>
     </button>
   );
-});
+}
 
-export const PrimaryButton = memo(function PrimaryButton({ className = '', loading = false, children, disabled, ...props }: BtnProps) {
+export function PrimaryButton({ className = '', loading = false, children, disabled, ...props }: BtnProps) {
   const isDisabled = disabled || loading;
   return (
     <button
@@ -52,7 +51,7 @@ export const PrimaryButton = memo(function PrimaryButton({ className = '', loadi
       <span>{children}</span>
     </button>
   );
-});
+}
 
 export function SecondaryButton({ className = '', loading = false, children, disabled, ...props }: BtnProps) {
   const isDisabled = disabled || loading;
@@ -128,7 +127,7 @@ export function Select({ className = '', children, ...props }: React.SelectHTMLA
   );
 }
 
-export const Card = memo(function Card({ className = '', children, ...props }: HTMLAttributes<HTMLDivElement>) {
+export function Card({ className = '', children, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div {...props} className={`bg-white rounded-xl shadow-card border border-gray-100 
       hover:shadow-card-hover transition-all duration-base animate-fadeInUp 
@@ -136,7 +135,7 @@ export const Card = memo(function Card({ className = '', children, ...props }: H
       {children}
     </div>
   );
-});
+}
 
 export function Section({ title, actions, children }: { title: string; actions?: ReactNode; children?: ReactNode }) {
   return (

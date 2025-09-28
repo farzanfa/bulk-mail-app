@@ -4,7 +4,7 @@ import { validateApiKey } from '@/lib/api-auth';
 import { z } from 'zod';
 
 // GET /api/v1/campaigns - List campaigns
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const validation = await validateApiKey(req);
   
   if (!validation.valid) {
@@ -53,7 +53,7 @@ const createCampaignSchema = z.object({
   filters: z.any().default({})
 });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const validation = await validateApiKey(req);
   
   if (!validation.valid) {

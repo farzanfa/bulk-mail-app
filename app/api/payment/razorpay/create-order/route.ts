@@ -6,7 +6,7 @@ import { convertUSDtoINR, getFormattedPrices } from '@/lib/currency-converter';
 import { prisma } from '@/lib/db';
 import { withRetry } from '@/lib/prisma-retry';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     // Check for required environment variables first
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {

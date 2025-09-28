@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getPlanLimits } from '@/lib/plan';
+import crypto from 'crypto';
 
 export async function validateApiKey(req: NextRequest): Promise<{ valid: boolean; userId?: string; error?: string }> {
   const authHeader = req.headers.get('authorization');
@@ -11,13 +12,8 @@ export async function validateApiKey(req: NextRequest): Promise<{ valid: boolean
   
   const apiKey = authHeader.substring(7);
   
-  // Hash the API key using Web Crypto API
-  const encoder = new TextEncoder();
-  const data = encoder.encode(apiKey);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const keyHash = Array.from(new Uint8Array(hashBuffer))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
+  // Hash the API key to compare with stored hash
+  const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex');
   
   // Find the API key
   const apiKeyRecord = await prisma.api_keys.findUnique({

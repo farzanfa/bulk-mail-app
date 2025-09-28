@@ -127,10 +127,8 @@ export async function POST(req: Request) {
     }, { status: 400 });
   }
   
-  // Create team member invitation using Web Crypto API
-  const inviteBytes = new Uint8Array(32);
-  crypto.getRandomValues(inviteBytes);
-  const inviteToken = Buffer.from(inviteBytes).toString('base64url');
+  // Create team member invitation
+  const inviteToken = crypto.randomBytes(32).toString('base64url');
   const teamMember = await prisma.team_members.create({
     data: {
       team_owner_id: userId,
