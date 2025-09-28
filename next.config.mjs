@@ -5,14 +5,6 @@ const nextConfig = {
       bodySizeLimit: '2mb'
     },
     optimizePackageImports: ['@prisma/client', 'next-auth', 'react', 'react-dom'],
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
   },
   redirects: async () => ([
     {
@@ -64,11 +56,7 @@ const nextConfig = {
       };
     }
 
-    // Optimize SVG handling
-    config.module.rules.push({
-      test: /\.svg$/,
-      use: ['@svgr/webpack'],
-    });
+    // Note: SVG optimization can be added later if needed with @svgr/webpack
 
     return config;
   },
