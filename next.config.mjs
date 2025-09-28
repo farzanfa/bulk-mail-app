@@ -9,10 +9,10 @@ const nextConfig = {
   
   // Vercel-specific optimizations
   output: 'standalone',
-  
+
   // Enable compression
   compress: true,
-  
+
   // Optimize for Vercel
   poweredByHeader: false,
   redirects: async () => ([
@@ -32,15 +32,11 @@ const nextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   swcMinify: true,
-  compress: true,
-  poweredByHeader: false,
   reactStrictMode: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
     styledComponents: true,
   },
-  // Output standalone for better deployment performance
-  output: 'standalone',
   // Bundle optimization
   webpack: (config, { dev, isServer }) => {
     // Optimize bundle size

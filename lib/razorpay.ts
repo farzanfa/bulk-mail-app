@@ -1,65 +1,96 @@
-import Razorpay from 'razorpay';
-import crypto from 'crypto';
-
-// Initialize Razorpay instance
-const initRazorpay = () => {
+// Initialize Razorpay instance with dynamic import for Edge Runtime compatibility
+const initRazorpay = async () => {
   if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
     console.error('❌ Razorpay credentials not found in environment variables');
     console.error('Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your .env file');
     throw new Error('Razorpay credentials not found. Please check your .env file.');
   }
 
-  return new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-  });
+  try {
+    const { default: Razorpay } = await import('razorpay');
+    return new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+  } catch (error) {
+    console.error('Failed to import Razorpay:', error);
+    throw new Error('Razorpay SDK not available');
+  }
 };
 
 // Singleton instance
-let razorpayInstance: Razorpay | null = null;
+let razorpayInstance: any = null;
 
-export const getRazorpayInstance = () => {
+export const getRazorpayInstance = async () => {
   if (!razorpayInstance) {
-    razorpayInstance = initRazorpay();
+    razorpayInstance = await initRazorpay();
   }
   return razorpayInstance;
 };
 
-// Verify payment signature
-export const verifyPaymentSignature = (
+// Verify payment signature using Web Crypto API
+export const verifyPaymentSignature = async (
   orderId: string,
   paymentId: string,
   signature: string
-): boolean => {
+): Promise<boolean> => {
   const secret = process.env.RAZORPAY_KEY_SECRET;
   if (!secret) {
     throw new Error('Razorpay secret not found');
   }
 
-  const generatedSignature = crypto
-    .createHmac('sha256', secret)
-    .update(`${orderId}|${paymentId}`)
-    .digest('hex');
+  try {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(`${orderId}|${paymentId}`);
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const signatureBuffer = await crypto.subtle.sign('HMAC', key, data);
+    const generatedSignature = Array.from(new Uint8Array(signatureBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
 
-  return generatedSignature === signature;
+    return generatedSignature === signature;
+  } catch (error) {
+    console.error('Error verifying payment signature:', error);
+    return false;
+  }
 };
 
-// Verify webhook signature
-export const verifyWebhookSignature = (
+// Verify webhook signature using Web Crypto API
+export const verifyWebhookSignature = async (
   body: string,
   signature: string
-): boolean => {
+): Promise<boolean> => {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
   if (!secret) {
     throw new Error('Razorpay webhook secret not found');
   }
 
-  const expectedSignature = crypto
-    .createHmac('sha256', secret)
-    .update(body)
-    .digest('hex');
+  try {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(body);
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const signatureBuffer = await crypto.subtle.sign('HMAC', key, data);
+    const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
 
-  return expectedSignature === signature;
+    return expectedSignature === signature;
+  } catch (error) {
+    console.error('Error verifying webhook signature:', error);
+    return false;
+  }
 };
 
 // Create order helper
@@ -69,7 +100,7 @@ export const createRazorpayOrder = async (
   receipt: string,
   notes?: Record<string, string>
 ) => {
-  const razorpay = getRazorpayInstance();
+  const razorpay = await getRazorpayInstance();
   
   if (!Number.isFinite(amount) || amount <= 0) {
     console.error('Invalid amount for Razorpay order', { amount, currency, receipt });
@@ -113,7 +144,7 @@ export const createRazorpaySubscription = async (
   totalCount: number,
   notes?: Record<string, string>
 ) => {
-  const razorpay = getRazorpayInstance();
+  const razorpay = await getRazorpayInstance();
   
   const options = {
     plan_id: planId,
@@ -136,7 +167,7 @@ export const cancelRazorpaySubscription = async (
   subscriptionId: string,
   cancelAtCycleEnd: boolean = true
 ) => {
-  const razorpay = getRazorpayInstance();
+  const razorpay = await getRazorpayInstance();
   
   try {
     const subscription = await razorpay.subscriptions.cancel(
@@ -152,7 +183,7 @@ export const cancelRazorpaySubscription = async (
 
 // Resume subscription helper
 export const resumeRazorpaySubscription = async (subscriptionId: string) => {
-  const razorpay = getRazorpayInstance();
+  const razorpay = await getRazorpayInstance();
   
   try {
     const subscription = await razorpay.subscriptions.resume(
@@ -168,7 +199,7 @@ export const resumeRazorpaySubscription = async (subscriptionId: string) => {
 
 // Fetch subscription details
 export const fetchRazorpaySubscription = async (subscriptionId: string) => {
-  const razorpay = getRazorpayInstance();
+  const razorpay = await getRazorpayInstance();
   
   try {
     const subscription = await razorpay.subscriptions.fetch(subscriptionId);

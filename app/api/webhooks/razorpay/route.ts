@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { verifyWebhookSignature } from '@/lib/razorpay';
 import { prisma } from '@/lib/db';
 import { kv } from '@/lib/kv';
-import crypto from 'node:crypto';
+// Webhook verification is handled by razorpay.ts which uses Web Crypto API
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,19 +12,13 @@ export async function POST(req: NextRequest) {
     const eventHeaderId = req.headers.get('x-razorpay-event-id');
 
     if (!signature) {
-      return NextResponse.json(
-        { error: 'No signature provided' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No signature provided' }, { status: 401 });
     }
 
     // Verify webhook signature
-    const isValid = verifyWebhookSignature(body, signature);
+    const isValid = await verifyWebhookSignature(body, signature);
     if (!isValid) {
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
     // Parse payload
@@ -32,14 +27,16 @@ export async function POST(req: NextRequest) {
       event = JSON.parse(body);
     } catch (e: any) {
       console.error('Webhook JSON parse error:', e?.message || e);
-      return NextResponse.json(
-        { error: 'Invalid JSON payload' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
     }
 
     // Idempotency: avoid processing the same event twice
-    const computedId = crypto.createHash('sha256').update(body).digest('hex');
+    const encoder = new TextEncoder();
+    const data = encoder.encode(body);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const computedId = Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
     const eventId = event?.id || eventHeaderId || computedId;
     const dedupeKey = `rzp:webhook:${eventId}`;
     try {
@@ -56,10 +53,7 @@ export async function POST(req: NextRequest) {
     const { event: eventType, payload } = event;
     if (!eventType || !payload) {
       console.error('Webhook missing required fields', { hasEvent: !!eventType, hasPayload: !!payload });
-      return NextResponse.json(
-        { error: 'Malformed webhook: missing event or payload' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Malformed webhook: missing event or payload' }, { status: 400 });
     }
 
     try {
@@ -118,10 +112,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true, eventId, eventType });
   } catch (error) {
     console.error('Webhook error:', error);
-    return NextResponse.json(
-      { error: 'Webhook processing failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
   } finally {
     // Don't disconnect the shared Prisma instance
     // The global instance manages its own connections

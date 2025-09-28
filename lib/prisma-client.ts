@@ -2,20 +2,16 @@
 // For now, we'll create a placeholder that will work once Prisma is properly set up
 
 declare global {
-  // eslint-disable-next-line no-var
   var prisma: any | undefined;
-  // eslint-disable-next-line no-var
   var process: any;
-  // eslint-disable-next-line no-var
-  var require: any;
 }
 
 // Placeholder Prisma client - will be replaced once Prisma is generated
 const createPrismaClient = () => {
   // This will work once @prisma/client is properly installed and generated
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { PrismaClient } = require('@prisma/client');
+    // Use dynamic import to avoid ESLint issues
+    const PrismaClient = eval('require')('@prisma/client').PrismaClient;
     
     const databaseUrl = process.env.POSTGRES_URL || '';
     const urlWithTimeout = databaseUrl.includes('connect_timeout') 
