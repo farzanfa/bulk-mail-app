@@ -17,9 +17,9 @@ export class RateLimiter {
 
   constructor(config: RateLimitConfig) {
     this.config = {
-      windowMs: config.windowMs || 15 * 60 * 1000, // 15 minutes default
-      maxRequests: config.maxRequests || 100,
-      message: config.message || 'Too many requests, please try again later.',
+      windowMs: 15 * 60 * 1000, // 15 minutes default
+      maxRequests: 100,
+      message: 'Too many requests, please try again later.',
       ...config
     };
   }
