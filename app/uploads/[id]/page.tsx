@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Section, Input, Button, Card } from '@/components/ui';
@@ -24,7 +24,7 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
   const [deleteMessage, setDeleteMessage] = useState('');
   const pageSize = 50;
 
-  async function load() {
+  const load = useCallback(async () => {
     try {
       setLoading(true);
       const u = await fetch(`/api/uploads/${id}`, { cache: 'no-store' }).then(r => r.json());
@@ -38,9 +38,9 @@ export default function UploadDetail({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [id, search, page]);
 
-  useEffect(() => { load(); }, [id, page, search]);
+  useEffect(() => { load(); }, [load]);
 
   const handleSearch = () => {
     setPage(1);

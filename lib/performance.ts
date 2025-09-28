@@ -132,7 +132,7 @@ export const getBundleSize = () => {
       domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
       loadComplete: navigation.loadEventEnd - navigation.loadEventStart,
       firstByte: navigation.responseStart - navigation.requestStart,
-      domInteractive: navigation.domInteractive - navigation.navigationStart,
+      domInteractive: navigation.domInteractive - navigation.fetchStart,
     };
   }
   return null;
