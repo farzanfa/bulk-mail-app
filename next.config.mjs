@@ -56,7 +56,14 @@ const nextConfig = {
       };
     }
 
-    // Note: Prisma handling is done through schema configuration
+    // Prisma binary handling for Vercel
+    if (isServer) {
+      config.resolve = config.resolve || {};
+      config.resolve.fallback = config.resolve.fallback || {};
+      config.resolve.fallback.fs = false;
+      config.resolve.fallback.net = false;
+      config.resolve.fallback.tls = false;
+    }
 
     // Note: SVG optimization can be added later if needed with @svgr/webpack
 
