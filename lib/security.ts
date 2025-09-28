@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server';
-import crypto from 'crypto';
 
 // Rate limiting configuration
 interface RateLimitConfig {
@@ -130,12 +129,21 @@ export const sanitizeInput = {
 
 // CSRF protection
 export const generateCSRFToken = (): string => {
-  return crypto.randomBytes(32).toString('hex');
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 };
 
 export const validateCSRFToken = (token: string, sessionToken: string): boolean => {
   if (!token || !sessionToken) return false;
-  return crypto.timingSafeEqual(Buffer.from(token), Buffer.from(sessionToken));
+  if (token.length !== sessionToken.length) return false;
+  
+  // Simple timing-safe comparison for Edge Runtime
+  let result = 0;
+  for (let i = 0; i < token.length; i++) {
+    result |= token.charCodeAt(i) ^ sessionToken.charCodeAt(i);
+  }
+  return result === 0;
 };
 
 // Content Security Policy
@@ -223,42 +231,72 @@ export const validateRequest = {
   }
 };
 
-// Encryption utilities
+// Encryption utilities (Edge Runtime compatible)
 export const encryption = {
-  // Encrypt sensitive data
-  encrypt(text: string, key: string = process.env.ENCRYPTION_KEY!): string {
-    const algorithm = 'aes-256-gcm';
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipher(algorithm, key);
+  // Encrypt sensitive data using Web Crypto API
+  async encrypt(text: string, key: string = process.env.ENCRYPTION_KEY!): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
     
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
+    // Generate a random IV
+    const iv = crypto.getRandomValues(new Uint8Array(12));
     
-    const authTag = cipher.getAuthTag();
+    // Import the key
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(key.slice(0, 32)), // Ensure key is 32 bytes
+      'AES-GCM',
+      false,
+      ['encrypt']
+    );
     
-    return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted;
+    // Encrypt the data
+    const encrypted = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: iv },
+      cryptoKey,
+      data
+    );
+    
+    // Combine IV and encrypted data
+    const result = new Uint8Array(iv.length + encrypted.byteLength);
+    result.set(iv);
+    result.set(new Uint8Array(encrypted), iv.length);
+    
+    // Convert to hex string
+    return Array.from(result, byte => byte.toString(16).padStart(2, '0')).join('');
   },
 
-  // Decrypt sensitive data
-  decrypt(encryptedData: string, key: string = process.env.ENCRYPTION_KEY!): string {
-    const algorithm = 'aes-256-gcm';
-    const parts = encryptedData.split(':');
+  // Decrypt sensitive data using Web Crypto API
+  async decrypt(encryptedData: string, key: string = process.env.ENCRYPTION_KEY!): Promise<string> {
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
     
-    if (parts.length !== 3) {
-      throw new Error('Invalid encrypted data format');
-    }
+    // Convert hex string back to bytes
+    const data = new Uint8Array(
+      encryptedData.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16))
+    );
     
-    const iv = Buffer.from(parts[0], 'hex');
-    const authTag = Buffer.from(parts[1], 'hex');
-    const encrypted = parts[2];
+    // Extract IV (first 12 bytes) and encrypted data
+    const iv = data.slice(0, 12);
+    const encrypted = data.slice(12);
     
-    const decipher = crypto.createDecipher(algorithm, key);
-    decipher.setAuthTag(authTag);
+    // Import the key
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(key.slice(0, 32)), // Ensure key is 32 bytes
+      'AES-GCM',
+      false,
+      ['decrypt']
+    );
     
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
+    // Decrypt the data
+    const decrypted = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: iv },
+      cryptoKey,
+      encrypted
+    );
     
-    return decrypted;
+    return decoder.decode(decrypted);
   }
 };
 
