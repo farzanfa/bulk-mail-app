@@ -6,6 +6,15 @@ const nextConfig = {
     },
     optimizePackageImports: ['@prisma/client', 'next-auth', 'react', 'react-dom'],
   },
+  
+  // Vercel-specific optimizations
+  output: 'standalone',
+  
+  // Enable compression
+  compress: true,
+  
+  // Optimize for Vercel
+  poweredByHeader: false,
   redirects: async () => ([
     {
       source: '/contacts',

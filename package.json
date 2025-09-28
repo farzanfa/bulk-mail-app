@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/generate-icons.mjs",
-    "build": "npx prisma generate && npx prisma migrate deploy && next build",
+    "prebuild": "node scripts/generate-icons.mjs && npx prisma generate",
+    "build": "npx prisma migrate deploy && next build",
     "vercel-build": "npx prisma generate && npx prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
@@ -13,6 +13,7 @@
     "migrate:dev": "npx prisma migrate dev",
     "prisma:generate": "npx prisma generate",
     "postinstall": "npx prisma generate",
+    "setup": "./scripts/setup.sh",
     "seed": "tsx prisma/seed.ts",
     "seed:plans": "tsx scripts/seed-plans.ts",
     "test": "vitest run",

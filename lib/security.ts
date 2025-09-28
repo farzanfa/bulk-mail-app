@@ -1,4 +1,5 @@
-import { NextRequest } from 'next/server';
+// Note: NextRequest is used in middleware, but this file is for utilities
+// import { NextRequest } from 'next/server';
 
 // Rate limiting configuration
 interface RateLimitConfig {
@@ -176,7 +177,7 @@ export const getSecurityHeaders = () => {
 // Request validation
 export const validateRequest = {
   // Validate API request
-  api(req: NextRequest): { valid: boolean; error?: string } {
+  api(req: any): { valid: boolean; error?: string } {
     const contentType = req.headers.get('content-type');
     const userAgent = req.headers.get('user-agent');
     
