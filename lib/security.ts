@@ -3,8 +3,8 @@ import crypto from 'crypto';
 
 // Rate limiting configuration
 interface RateLimitConfig {
-  windowMs: number;
-  maxRequests: number;
+  windowMs?: number;
+  maxRequests?: number;
   message?: string;
   skipSuccessfulRequests?: boolean;
   skipFailedRequests?: boolean;
@@ -13,14 +13,21 @@ interface RateLimitConfig {
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 export class RateLimiter {
-  private config: RateLimitConfig;
+  private config: {
+    windowMs: number;
+    maxRequests: number;
+    message: string;
+    skipSuccessfulRequests?: boolean;
+    skipFailedRequests?: boolean;
+  };
 
   constructor(config: RateLimitConfig) {
     this.config = {
-      windowMs: 15 * 60 * 1000, // 15 minutes default
-      maxRequests: 100,
-      message: 'Too many requests, please try again later.',
-      ...config
+      windowMs: config.windowMs ?? 15 * 60 * 1000, // 15 minutes default
+      maxRequests: config.maxRequests ?? 100,
+      message: config.message ?? 'Too many requests, please try again later.',
+      skipSuccessfulRequests: config.skipSuccessfulRequests,
+      skipFailedRequests: config.skipFailedRequests
     };
   }
 
