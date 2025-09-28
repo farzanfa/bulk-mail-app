@@ -13,8 +13,7 @@
       "maxDuration": 30
     }
   },
-  "buildCommand": "prisma generate && prisma migrate deploy && npm run build",
-  "installCommand": "npm install && prisma generate",
+  "buildCommand": "npx prisma generate --force && npx prisma migrate deploy && npm run build",
   "env": {
     "PRISMA_QUERY_ENGINE_LIBRARY": "1"
   }
