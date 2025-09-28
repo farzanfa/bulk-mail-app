@@ -28,6 +28,11 @@ export default withAuth(
       }
     }
 
+    // Allow public API routes without authentication
+    if (pathname.startsWith('/api/public/')) {
+      return response;
+    }
+
     // If user is on onboarding page and has already completed onboarding, redirect to dashboard
     if (pathname.startsWith('/onboarding') && token?.user) {
       // We'll check this in the onboarding page itself since we can't access the database here
@@ -44,7 +49,14 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token
+      authorized: ({ token, req }) => {
+        // Allow public API routes without authentication
+        if (req.nextUrl.pathname.startsWith('/api/public/')) {
+          return true;
+        }
+        // Require authentication for all other routes
+        return !!token;
+      }
     }
   }
 );
@@ -58,6 +70,25 @@ export const config = {
     '/campaigns/:path*',
     '/admin/:path*',
     '/onboarding/:path*',
-    '/profile/:path*'
+    '/profile/:path*',
+    '/api/me/:path*',
+    '/api/campaigns/:path*',
+    '/api/templates/:path*',
+    '/api/uploads/:path*',
+    '/api/admin/:path*',
+    '/api/profile/:path*',
+    '/api/subscription/:path*',
+    '/api/team/:path*',
+    '/api/payment/:path*',
+    '/api/payments/:path*',
+    '/api/plans/:path*',
+    '/api/jobs/:path*',
+    '/api/webhooks/:path*',
+    '/api/test/:path*',
+    '/api/analytics/:path*',
+    '/api/contacts/:path*',
+    '/api/unsubscribe/:path*',
+    '/api/auth/:path*',
+    '/api/google/:path*'
   ]
 };
