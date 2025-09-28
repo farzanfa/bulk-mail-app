@@ -14,9 +14,7 @@
     }
   },
   "buildCommand": "npx prisma generate && npx prisma migrate deploy && npm run build",
-  "env": {
-    "PRISMA_QUERY_ENGINE_LIBRARY": "1"
-  }
+  "installCommand": "npm install"
 }
 
 
