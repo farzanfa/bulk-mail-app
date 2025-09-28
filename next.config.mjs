@@ -56,6 +56,15 @@ const nextConfig = {
       };
     }
 
+    // Prisma binary handling for Vercel deployment
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        'prisma': 'commonjs prisma',
+        '@prisma/client': 'commonjs @prisma/client'
+      });
+    }
+
     // Note: SVG optimization can be added later if needed with @svgr/webpack
 
     return config;

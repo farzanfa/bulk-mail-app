@@ -27,6 +27,12 @@ const prismaClientSingleton = () => {
       maxWait: 10000, // 10 seconds
       timeout: 30000, // 30 seconds
     },
+    // Use library engine for better Vercel compatibility
+    __internal: {
+      engine: {
+        binaryTargets: ['native', 'rhel-openssl-1.0.x', 'rhel-openssl-3.0.x']
+      }
+    }
   });
 };
 
