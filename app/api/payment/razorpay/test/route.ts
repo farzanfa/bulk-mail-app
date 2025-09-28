@@ -5,7 +5,7 @@ import { convertUSDtoINR, getUSDtoINRRate } from '@/lib/currency-converter';
 import { getRazorpayInstance } from '@/lib/razorpay';
 import { prisma } from '@/lib/db';
 
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     

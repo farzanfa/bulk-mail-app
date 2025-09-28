@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { isAdminEmail } from '@/lib/admin';
 import { prisma } from '@/lib/db';
+
+// Force Node.js runtime for authentication
+export const runtime = 'nodejs';
 
 // Force dynamic rendering for admin routes
 export const dynamic = 'force-dynamic';
@@ -12,7 +14,7 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email || !isAdminEmail(session.user.email)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get recent activities from various sources
@@ -65,7 +67,7 @@ export async function GET() {
     // Transform data into activity format
     const activities = [
       // User signups
-      ...recentUsers.map(user => ({
+      ...recentUsers.map((user: any) => ({
         id: `user_${user.id}`,
         type: 'user_signup' as const,
         description: `New user signed up: ${user.email}`,
@@ -75,7 +77,7 @@ export async function GET() {
         userEmail: user.email
       })),
       // Campaign launches
-      ...recentCampaigns.map(campaign => ({
+      ...recentCampaigns.map((campaign: any) => ({
         id: `campaign_${campaign.id}`,
         type: 'campaign_launch' as const,
         description: `Campaign "${campaign.name}" ${campaign.status} by ${campaign.user.email}`,
@@ -85,7 +87,7 @@ export async function GET() {
         userEmail: campaign.user.email
       })),
       // Email activities
-      ...recentEmails.map(email => ({
+      ...recentEmails.map((email: any) => ({
         id: `email_${email.id}`,
         type: 'email_sent' as const,
         description: `Email ${email.status} for campaign "${email.campaign.name}"`,
@@ -101,9 +103,9 @@ export async function GET() {
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 30);
 
-    return NextResponse.json({ activities: sortedActivities });
+    return Response.json({ activities: sortedActivities });
   } catch (error) {
     console.error('Failed to fetch admin activity:', error);
-    return NextResponse.json({ error: 'Failed to fetch activity data' }, { status: 500 });
+    return Response.json({ error: 'Failed to fetch activity data' }, { status: 500 });
   }
 }

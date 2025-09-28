@@ -4,6 +4,9 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { SubscriptionStatus } from '@prisma/client';
 
+// Force Node.js runtime for authentication
+export const runtime = 'nodejs';
+
 // Mark route as dynamic since it uses authentication
 export const dynamic = 'force-dynamic';
 
