@@ -11,6 +11,7 @@
     "migrate": "prisma migrate deploy",
     "migrate:dev": "prisma migrate dev",
     "prisma:generate": "prisma generate",
+    "postinstall": "prisma generate",
     "seed": "tsx prisma/seed.ts",
     "seed:plans": "tsx scripts/seed-plans.ts",
     "test": "vitest run",
